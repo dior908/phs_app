@@ -228,7 +228,7 @@ def main():
     init_db()
     
     # ВАЖНО: Замените на токен вашего бота от @BotFather
-    TOKEN = 'YOUR_BOT_TOKEN_HERE'
+    TOKEN = '8046331797:AAHq48Wbyu3ihFkoM8HiFflbnpbN0-couGU'
     
     if TOKEN == 'YOUR_BOT_TOKEN_HERE':
         print("❌ ОШИБКА: Укажите токен бота!")
