@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация</title>
+    <title>Система управления визитами</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -106,6 +106,10 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
+        input.error-input {
+            border-color: #e53e3e;
+        }
+
         input::placeholder {
             color: #a0aec0;
         }
@@ -147,6 +151,14 @@
             font-size: 13px;
             margin-top: 5px;
             display: none;
+            background: #fff5f5;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 3px solid #e53e3e;
+        }
+
+        .error.show {
+            display: block;
         }
 
         .hidden {
@@ -175,28 +187,6 @@
             border-color: #667eea;
             background: white;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            margin-bottom: 15px;
-            animation: scaleIn 0.5s ease;
-        }
-
-        @keyframes scaleIn {
-            from {
-                transform: scale(0);
-            }
-            to {
-                transform: scale(1);
-            }
         }
 
         .menu-grid {
@@ -237,19 +227,93 @@
             text-align: center;
         }
 
-        .info-text {
-            color: #718096;
-            font-size: 14px;
-            line-height: 1.6;
-            margin: 15px 0;
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Стили для игры в теннис */
+        #gameCanvas {
+            width: 100%;
+            max-width: 400px;
+            height: 500px;
+            background: #1a202c;
+            border-radius: 15px;
+            display: block;
+        }
+
+        .game-container {
+            position: relative;
+        }
+
+        .dev-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            opacity: 0.5;
+            text-align: center;
+            pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .back-btn {
+            margin-top: 15px;
+            background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card">
-            <!-- Экран 1: Регистрация -->
-            <div id="registrationForm">
+            <!-- Загрузка -->
+            <div id="loadingScreen" class="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px; color: #718096;">Загрузка...</p>
+            </div>
+
+            <!-- Экран входа по PIN -->
+            <div id="pinLoginScreen" class="hidden">
+                <div class="logo">
+                    <div class="logo-icon">🔐</div>
+                </div>
+                <h1>Вход в систему</h1>
+                <p class="subtitle">Введите ваш PIN-код</p>
+
+                <div class="pin-input-container">
+                    <input type="password" maxlength="1" class="pin-digit" id="loginPin1" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-digit" id="loginPin2" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-digit" id="loginPin3" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-digit" id="loginPin4" inputmode="numeric">
+                </div>
+
+                <div class="error" id="loginPinError">Неверный PIN-код. Попробуйте снова.</div>
+
+                <button class="btn" id="loginBtn">
+                    Войти
+                </button>
+            </div>
+
+            <!-- Экран регистрации -->
+            <div id="registrationForm" class="hidden">
                 <div class="logo">
                     <div class="logo-icon">📋</div>
                 </div>
@@ -260,19 +324,19 @@
                     <div class="form-group">
                         <label for="name">Полное имя</label>
                         <input type="text" id="name" placeholder="Иван Иванов" required>
-                        <div class="error" id="nameError">Введите ваше имя</div>
+                        <div class="error" id="nameError">Введите ваше имя (минимум 2 символа)</div>
                     </div>
 
                     <div class="form-group">
                         <label for="phone">Номер телефона</label>
                         <input type="tel" id="phone" placeholder="+998 90 123 45 67" required>
-                        <div class="error" id="phoneError">Введите корректный номер</div>
+                        <div class="error" id="phoneError">Введите корректный номер телефона</div>
                     </div>
 
                     <div class="form-group">
                         <label for="email">Email адрес</label>
                         <input type="email" id="email" placeholder="example@mail.com" required>
-                        <div class="error" id="emailError">Введите корректный email</div>
+                        <div class="error" id="emailError">Введите корректный email адрес</div>
                     </div>
 
                     <div class="form-group">
@@ -303,7 +367,7 @@
                 </form>
             </div>
 
-            <!-- Экран 2: Установка PIN -->
+            <!-- Экран установки PIN -->
             <div id="pinSetupScreen" class="hidden">
                 <div class="logo">
                     <div class="logo-icon">🔐</div>
@@ -318,14 +382,14 @@
                     <input type="password" maxlength="1" class="pin-digit" id="pin4" inputmode="numeric">
                 </div>
 
-                <div class="error center-text" id="pinError">PIN должен состоять из 4 цифр</div>
+                <div class="error" id="pinError">PIN должен состоять из 4 цифр</div>
 
                 <button class="btn" id="setPinBtn">
                     Установить PIN
                 </button>
             </div>
 
-            <!-- Экран 3: Подтверждение PIN -->
+            <!-- Экран подтверждения PIN -->
             <div id="pinConfirmScreen" class="hidden">
                 <div class="logo">
                     <div class="logo-icon">✅</div>
@@ -340,14 +404,14 @@
                     <input type="password" maxlength="1" class="pin-digit" id="confirmPin4" inputmode="numeric">
                 </div>
 
-                <div class="error center-text" id="confirmPinError">PIN-коды не совпадают</div>
+                <div class="error" id="confirmPinError">PIN-коды не совпадают. Попробуйте снова.</div>
 
                 <button class="btn" id="confirmPinBtn">
                     Подтвердить
                 </button>
             </div>
 
-            <!-- Экран 4: Главное меню -->
+            <!-- Главное меню -->
             <div id="mainMenu" class="hidden">
                 <div class="logo">
                     <div class="logo-icon">🏠</div>
@@ -356,31 +420,49 @@
                 <p class="subtitle">Выберите действие</p>
 
                 <div class="menu-grid">
-                    <div class="menu-button" onclick="openVisitRegistration()">
+                    <div class="menu-button" onclick="openSection('visit')">
                         <div class="menu-icon">📝</div>
                         <div class="menu-text">Регистрация визита</div>
                     </div>
-                    <div class="menu-button" onclick="openReports()">
+                    <div class="menu-button" onclick="openSection('reports')">
                         <div class="menu-icon">📊</div>
                         <div class="menu-text">Сформировать отчеты</div>
                     </div>
-                    <div class="menu-button" onclick="openTourPlan()">
+                    <div class="menu-button" onclick="openSection('tour')">
                         <div class="menu-icon">🗺️</div>
                         <div class="menu-text">Тур план</div>
                     </div>
-                    <div class="menu-button" onclick="openMaterials()">
+                    <div class="menu-button" onclick="openSection('materials')">
                         <div class="menu-icon">📚</div>
                         <div class="menu-text">Материалы</div>
                     </div>
-                    <div class="menu-button" onclick="openProjectPlan()">
+                    <div class="menu-button" onclick="openSection('project')">
                         <div class="menu-icon">📋</div>
                         <div class="menu-text">План-проект</div>
                     </div>
-                    <div class="menu-button" onclick="openHelp()">
+                    <div class="menu-button" onclick="openSection('help')">
                         <div class="menu-icon">❓</div>
                         <div class="menu-text">Помощь</div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Игра в теннис -->
+            <div id="gameScreen" class="hidden">
+                <div class="logo">
+                    <div class="logo-icon">🎮</div>
+                </div>
+                <h1>В разработке</h1>
+                <p class="subtitle">Пока что поиграйте в теннис!</p>
+                
+                <div class="game-container">
+                    <canvas id="gameCanvas" width="400" height="500"></canvas>
+                    <div class="dev-message">Идет разработка<br>приложения</div>
+                </div>
+
+                <button class="btn back-btn" onclick="backToMenu()">
+                    Вернуться в меню
+                </button>
             </div>
         </div>
     </div>
@@ -392,6 +474,49 @@
 
         let userData = {};
         let userPin = '';
+        let isRegistered = false;
+
+        function showScreen(screenId) {
+            ['loadingScreen', 'pinLoginScreen', 'registrationForm', 'pinSetupScreen', 
+             'pinConfirmScreen', 'mainMenu', 'gameScreen'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function showError(fieldId, message) {
+            const errorEl = document.getElementById(fieldId + 'Error');
+            if (message) {
+                errorEl.textContent = message;
+                errorEl.classList.add('show');
+                document.getElementById(fieldId)?.classList.add('error-input');
+            } else {
+                errorEl.classList.remove('show');
+                document.getElementById(fieldId)?.classList.remove('error-input');
+            }
+        }
+
+        function hideAllErrors() {
+            document.querySelectorAll('.error').forEach(el => el.classList.remove('show'));
+            document.querySelectorAll('.error-input').forEach(el => el.classList.remove('error-input'));
+        }
+
+        // Проверка регистрации при загрузке
+        async function checkRegistration() {
+            const userId = tg.initDataUnsafe?.user?.id;
+            
+            // Проверяем локальное хранилище
+            const savedUser = localStorage.getItem('user_' + userId);
+            
+            if (savedUser) {
+                isRegistered = true;
+                showScreen('pinLoginScreen');
+                document.getElementById('loginPin1').focus();
+            } else {
+                isRegistered = false;
+                showScreen('registrationForm');
+            }
+        }
 
         // Валидация
         function isValidEmail(email) {
@@ -402,85 +527,13 @@
             return /^[\d\s\+\-\(\)]+$/.test(phone) && phone.replace(/\D/g, '').length >= 9;
         }
 
-        function showError(fieldId, show) {
-            document.getElementById(fieldId + 'Error').style.display = show ? 'block' : 'none';
-        }
-
-        function showScreen(screenId) {
-            ['registrationForm', 'pinSetupScreen', 'pinConfirmScreen', 'mainMenu'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-            document.getElementById(screenId).classList.remove('hidden');
-        }
-
-        // Регистрация
-        document.getElementById('regForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const name = document.getElementById('name').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const region = document.getElementById('region').value;
-
-            let isValid = true;
-
-            if (name.length < 2) {
-                showError('name', true);
-                isValid = false;
-            } else {
-                showError('name', false);
-            }
-
-            if (!isValidPhone(phone)) {
-                showError('phone', true);
-                isValid = false;
-            } else {
-                showError('phone', false);
-            }
-
-            if (!isValidEmail(email)) {
-                showError('email', true);
-                isValid = false;
-            } else {
-                showError('email', false);
-            }
-
-            if (!region) {
-                showError('region', true);
-                isValid = false;
-            } else {
-                showError('region', false);
-            }
-
-            if (isValid) {
-                userData = {
-                    name,
-                    phone,
-                    email,
-                    region,
-                    telegramId: tg.initDataUnsafe?.user?.id || 'unknown',
-                    username: tg.initDataUnsafe?.user?.username || 'unknown'
-                };
-
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.notificationOccurred('success');
-                }
-
-                showScreen('pinSetupScreen');
-                document.getElementById('pin1').focus();
-            } else {
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.notificationOccurred('error');
-                }
-            }
-        });
-
-        // PIN навигация
+        // Вход по PIN
         function setupPinNavigation(prefix) {
             for (let i = 1; i <= 4; i++) {
                 const input = document.getElementById(prefix + i);
                 
                 input.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/\D/g, '');
                     if (e.target.value && i < 4) {
                         document.getElementById(prefix + (i + 1)).focus();
                     }
@@ -494,49 +547,112 @@
             }
         }
 
+        setupPinNavigation('loginPin');
         setupPinNavigation('pin');
         setupPinNavigation('confirmPin');
 
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            const pin = ['loginPin1', 'loginPin2', 'loginPin3', 'loginPin4']
+                .map(id => document.getElementById(id).value).join('');
+            
+            const userId = tg.initDataUnsafe?.user?.id;
+            const savedData = JSON.parse(localStorage.getItem('user_' + userId) || '{}');
+            
+            if (pin === savedData.pin) {
+                hideAllErrors();
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                showScreen('mainMenu');
+            } else {
+                showError('loginPin', 'Неверный PIN-код. Попробуйте снова.');
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+                ['loginPin1', 'loginPin2', 'loginPin3', 'loginPin4'].forEach(id => {
+                    document.getElementById(id).value = '';
+                });
+                document.getElementById('loginPin1').focus();
+            }
+        });
+
+        // Регистрация
+        document.getElementById('regForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            hideAllErrors();
+
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const region = document.getElementById('region').value;
+
+            let isValid = true;
+
+            if (name.length < 2) {
+                showError('name', 'Введите ваше имя (минимум 2 символа)');
+                isValid = false;
+            }
+
+            if (!isValidPhone(phone)) {
+                showError('phone', 'Введите корректный номер телефона');
+                isValid = false;
+            }
+
+            if (!isValidEmail(email)) {
+                showError('email', 'Введите корректный email адрес');
+                isValid = false;
+            }
+
+            if (!region) {
+                showError('region', 'Выберите область');
+                isValid = false;
+            }
+
+            if (isValid) {
+                userData = {
+                    name,
+                    phone,
+                    email,
+                    region,
+                    telegramId: tg.initDataUnsafe?.user?.id || 'unknown',
+                    username: tg.initDataUnsafe?.user?.username || 'unknown'
+                };
+
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                showScreen('pinSetupScreen');
+                document.getElementById('pin1').focus();
+            } else {
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+            }
+        });
+
         // Установка PIN
         document.getElementById('setPinBtn').addEventListener('click', () => {
-            const pin1 = document.getElementById('pin1').value;
-            const pin2 = document.getElementById('pin2').value;
-            const pin3 = document.getElementById('pin3').value;
-            const pin4 = document.getElementById('pin4').value;
+            const pin = ['pin1', 'pin2', 'pin3', 'pin4']
+                .map(id => document.getElementById(id).value).join('');
 
-            if (pin1 && pin2 && pin3 && pin4) {
-                userPin = pin1 + pin2 + pin3 + pin4;
-                showError('pin', false);
-                
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.notificationOccurred('success');
-                }
-
+            if (pin.length === 4 && /^\d+$/.test(pin)) {
+                userPin = pin;
+                hideAllErrors();
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
                 showScreen('pinConfirmScreen');
                 document.getElementById('confirmPin1').focus();
             } else {
-                showError('pin', true);
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.notificationOccurred('error');
-                }
+                showError('pin', 'PIN должен состоять из 4 цифр');
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
             }
         });
 
         // Подтверждение PIN
         document.getElementById('confirmPinBtn').addEventListener('click', () => {
-            const confirmPin1 = document.getElementById('confirmPin1').value;
-            const confirmPin2 = document.getElementById('confirmPin2').value;
-            const confirmPin3 = document.getElementById('confirmPin3').value;
-            const confirmPin4 = document.getElementById('confirmPin4').value;
-            const confirmPin = confirmPin1 + confirmPin2 + confirmPin3 + confirmPin4;
+            const confirmPin = ['confirmPin1', 'confirmPin2', 'confirmPin3', 'confirmPin4']
+                .map(id => document.getElementById(id).value).join('');
 
             if (confirmPin === userPin) {
                 userData.pin = userPin;
-                showError('confirmPin', false);
+                hideAllErrors();
+                
+                // Сохраняем локально
+                const userId = tg.initDataUnsafe?.user?.id;
+                localStorage.setItem('user_' + userId, JSON.stringify(userData));
 
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.notificationOccurred('success');
-                }
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
 
                 // Отправка данных боту
                 tg.sendData(JSON.stringify({
@@ -546,43 +662,145 @@
 
                 showScreen('mainMenu');
             } else {
-                showError('confirmPin', true);
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.notificationOccurred('error');
-                }
+                showError('confirmPin', 'PIN-коды не совпадают. Попробуйте снова.');
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+                ['confirmPin1', 'confirmPin2', 'confirmPin3', 'confirmPin4'].forEach(id => {
+                    document.getElementById(id).value = '';
+                });
+                document.getElementById('confirmPin1').focus();
             }
         });
 
-        // Функции меню (заглушки)
-        function openVisitRegistration() {
-            alert('Регистрация визита - в разработке');
+        // Игра в теннис
+        let game = null;
+
+        function openSection(section) {
+            showScreen('gameScreen');
+            startGame();
         }
 
-        function openReports() {
-            alert('Отчеты - в разработке');
+        function backToMenu() {
+            if (game) {
+                game.stop();
+                game = null;
+            }
+            showScreen('mainMenu');
         }
 
-        function openTourPlan() {
-            alert('Тур план - в разработке');
-        }
+        function startGame() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const ball = {
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                dx: 3,
+                dy: -3,
+                radius: 8
+            };
 
-        function openMaterials() {
-            alert('Материалы - в разработке');
-        }
+            const paddle = {
+                x: canvas.width / 2 - 40,
+                y: canvas.height - 30,
+                width: 80,
+                height: 10
+            };
 
-        function openProjectPlan() {
-            alert('План-проект - в разработке');
-        }
+            let score = 0;
+            let animationId;
 
-        function openHelp() {
-            alert('Помощь - в разработке');
+            canvas.addEventListener('touchmove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const touchX = e.touches[0].clientX - rect.left;
+                paddle.x = touchX - paddle.width / 2;
+                
+                if (paddle.x < 0) paddle.x = 0;
+                if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                paddle.x = e.clientX - rect.left - paddle.width / 2;
+                
+                if (paddle.x < 0) paddle.x = 0;
+                if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+            });
+
+            function draw() {
+                ctx.fillStyle = '#1a202c';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Мяч
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#667eea';
+                ctx.fill();
+                ctx.closePath();
+
+                // Ракетка
+                ctx.fillStyle = '#48bb78';
+                ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+
+                // Счет
+                ctx.fillStyle = 'white';
+                ctx.font = '20px Arial';
+                ctx.fillText('Счет: ' + score, 10, 30);
+
+                // Движение мяча
+                ball.x += ball.dx;
+                ball.y += ball.dy;
+
+                // Отскок от стен
+                if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
+                    ball.dx = -ball.dx;
+                }
+
+                if (ball.y - ball.radius < 0) {
+                    ball.dy = -ball.dy;
+                }
+
+                // Отскок от ракетки
+                if (ball.y + ball.radius > paddle.y && 
+                    ball.x > paddle.x && 
+                    ball.x < paddle.x + paddle.width) {
+                    ball.dy = -ball.dy;
+                    score++;
+                }
+
+                // Проигрыш
+                if (ball.y + ball.radius > canvas.height) {
+                    ball.x = canvas.width / 2;
+                    ball.y = canvas.height / 2;
+                    ball.dx = 3;
+                    ball.dy = -3;
+                    score = 0;
+                }
+
+                animationId = requestAnimationFrame(draw);
+            }
+
+            draw();
+
+            game = {
+                stop: () => {
+                    if (animationId) {
+                        cancelAnimationFrame(animationId);
+                    }
+                }
+            };
         }
 
         // Убрать ошибки при вводе
         ['name', 'phone', 'email', 'region'].forEach(field => {
-            document.getElementById(field).addEventListener('input', () => {
-                showError(field, false);
-            });
+            const el = document.getElementById(field);
+            if (el) {
+                el.addEventListener('input', () => showError(field, null));
+            }
+        });
+
+        // Запуск
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(checkRegistration, 500);
         });
     </script>
 </body>
