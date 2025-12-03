@@ -48,37 +48,37 @@
 
         .logo {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .logo-icon {
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 20px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
-            margin-bottom: 15px;
+            font-size: 35px;
+            margin-bottom: 10px;
         }
 
         h1 {
             color: #2d3748;
-            font-size: 28px;
+            font-size: 24px;
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .subtitle {
             text-align: center;
             color: #718096;
-            font-size: 14px;
-            margin-bottom: 30px;
+            font-size: 13px;
+            margin-bottom: 25px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         label {
@@ -89,9 +89,9 @@
             margin-bottom: 8px;
         }
 
-        input {
+        input, select {
             width: 100%;
-            padding: 15px;
+            padding: 14px;
             border: 2px solid #e2e8f0;
             border-radius: 12px;
             font-size: 16px;
@@ -99,7 +99,7 @@
             background: #f7fafc;
         }
 
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: #667eea;
             background: white;
@@ -110,9 +110,13 @@
             color: #a0aec0;
         }
 
+        select {
+            cursor: pointer;
+        }
+
         .btn {
             width: 100%;
-            padding: 16px;
+            padding: 15px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
@@ -138,21 +142,51 @@
             cursor: not-allowed;
         }
 
-        .success-screen {
+        .error {
+            color: #e53e3e;
+            font-size: 13px;
+            margin-top: 5px;
             display: none;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .pin-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .pin-digit {
+            width: 60px;
+            height: 60px;
             text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            border: 3px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f7fafc;
+        }
+
+        .pin-digit:focus {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .success-icon {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 50px;
-            margin-bottom: 20px;
+            font-size: 40px;
+            margin-bottom: 15px;
             animation: scaleIn 0.5s ease;
         }
 
@@ -165,102 +199,74 @@
             }
         }
 
-        .success-title {
-            color: #2d3748;
-            font-size: 24px;
-            margin-bottom: 10px;
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
         }
 
-        .success-text {
-            color: #718096;
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .profile-info {
-            background: #f7fafc;
-            border-radius: 12px;
+        .menu-button {
             padding: 20px;
-            margin: 20px 0;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .info-row:last-child {
-            border-bottom: none;
-        }
-
-        .info-label {
-            color: #718096;
-            font-size: 14px;
-        }
-
-        .info-value {
-            color: #2d3748;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .error {
-            color: #e53e3e;
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .loading {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
             text-align: center;
-            padding: 20px;
         }
 
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
+        .menu-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .menu-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .menu-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .center-text {
+            text-align: center;
+        }
+
+        .info-text {
+            color: #718096;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 15px 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card">
-            <!-- Registration Form -->
+            <!-- Экран 1: Регистрация -->
             <div id="registrationForm">
                 <div class="logo">
-                    <div class="logo-icon">🚀</div>
+                    <div class="logo-icon">📋</div>
                 </div>
-                <h1>Добро пожаловать!</h1>
-                <p class="subtitle">Пожалуйста, заполните форму регистрации</p>
+                <h1>Регистрация</h1>
+                <p class="subtitle">Заполните данные для создания аккаунта</p>
 
                 <form id="regForm">
                     <div class="form-group">
                         <label for="name">Полное имя</label>
                         <input type="text" id="name" placeholder="Иван Иванов" required>
-                        <div class="error" id="nameError">Пожалуйста, введите ваше имя</div>
+                        <div class="error" id="nameError">Введите ваше имя</div>
                     </div>
 
                     <div class="form-group">
                         <label for="phone">Номер телефона</label>
                         <input type="tel" id="phone" placeholder="+998 90 123 45 67" required>
-                        <div class="error" id="phoneError">Введите корректный номер телефона</div>
+                        <div class="error" id="phoneError">Введите корректный номер</div>
                     </div>
 
                     <div class="form-group">
@@ -269,30 +275,110 @@
                         <div class="error" id="emailError">Введите корректный email</div>
                     </div>
 
+                    <div class="form-group">
+                        <label for="region">Область</label>
+                        <select id="region" required>
+                            <option value="">Выберите область</option>
+                            <option value="tashkent_city">г. Ташкент</option>
+                            <option value="andijan">Андижанская область</option>
+                            <option value="bukhara">Бухарская область</option>
+                            <option value="jizzakh">Джизакская область</option>
+                            <option value="kashkadarya">Кашкадарьинская область</option>
+                            <option value="navoi">Навоийская область</option>
+                            <option value="namangan">Наманганская область</option>
+                            <option value="samarkand">Самаркандская область</option>
+                            <option value="surkhandarya">Сурхандарьинская область</option>
+                            <option value="sirdarya">Сырдарьинская область</option>
+                            <option value="tashkent">Ташкентская область</option>
+                            <option value="fergana">Ферганская область</option>
+                            <option value="khorezm">Хорезмская область</option>
+                            <option value="karakalpakstan">Республика Каракалпакстан</option>
+                        </select>
+                        <div class="error" id="regionError">Выберите область</div>
+                    </div>
+
                     <button type="submit" class="btn" id="submitBtn">
-                        Зарегистрироваться
+                        Продолжить
                     </button>
                 </form>
             </div>
 
-            <!-- Success Screen -->
-            <div id="successScreen" class="success-screen">
-                <div class="success-icon">✓</div>
-                <h2 class="success-title">Регистрация завершена!</h2>
-                <p class="success-text">Данные отправлены боту. Закройте это окно.</p>
-                
-                <div class="profile-info" id="profileInfo">
-                    <div class="info-row">
-                        <span class="info-label">Имя:</span>
-                        <span class="info-value" id="displayName"></span>
+            <!-- Экран 2: Установка PIN -->
+            <div id="pinSetupScreen" class="hidden">
+                <div class="logo">
+                    <div class="logo-icon">🔐</div>
+                </div>
+                <h1>Установите PIN-код</h1>
+                <p class="subtitle">Введите 4-значный PIN для защиты аккаунта</p>
+
+                <div class="pin-input-container">
+                    <input type="password" maxlength="1" class="pin-digit" id="pin1" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-digit" id="pin2" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-digit" id="pin3" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-digit" id="pin4" inputmode="numeric">
+                </div>
+
+                <div class="error center-text" id="pinError">PIN должен состоять из 4 цифр</div>
+
+                <button class="btn" id="setPinBtn">
+                    Установить PIN
+                </button>
+            </div>
+
+            <!-- Экран 3: Подтверждение PIN -->
+            <div id="pinConfirmScreen" class="hidden">
+                <div class="logo">
+                    <div class="logo-icon">✅</div>
+                </div>
+                <h1>Подтвердите PIN-код</h1>
+                <p class="subtitle">Введите PIN ещё раз для подтверждения</p>
+
+                <div class="pin-input-container">
+                    <input type="password" maxlength="1" class="pin-digit" id="confirmPin1" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-digit" id="confirmPin2" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-digit" id="confirmPin3" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-digit" id="confirmPin4" inputmode="numeric">
+                </div>
+
+                <div class="error center-text" id="confirmPinError">PIN-коды не совпадают</div>
+
+                <button class="btn" id="confirmPinBtn">
+                    Подтвердить
+                </button>
+            </div>
+
+            <!-- Экран 4: Главное меню -->
+            <div id="mainMenu" class="hidden">
+                <div class="logo">
+                    <div class="logo-icon">🏠</div>
+                </div>
+                <h1>Главное меню</h1>
+                <p class="subtitle">Выберите действие</p>
+
+                <div class="menu-grid">
+                    <div class="menu-button" onclick="openVisitRegistration()">
+                        <div class="menu-icon">📝</div>
+                        <div class="menu-text">Регистрация визита</div>
                     </div>
-                    <div class="info-row">
-                        <span class="info-label">Телефон:</span>
-                        <span class="info-value" id="displayPhone"></span>
+                    <div class="menu-button" onclick="openReports()">
+                        <div class="menu-icon">📊</div>
+                        <div class="menu-text">Сформировать отчеты</div>
                     </div>
-                    <div class="info-row">
-                        <span class="info-label">Email:</span>
-                        <span class="info-value" id="displayEmail"></span>
+                    <div class="menu-button" onclick="openTourPlan()">
+                        <div class="menu-icon">🗺️</div>
+                        <div class="menu-text">Тур план</div>
+                    </div>
+                    <div class="menu-button" onclick="openMaterials()">
+                        <div class="menu-icon">📚</div>
+                        <div class="menu-text">Материалы</div>
+                    </div>
+                    <div class="menu-button" onclick="openProjectPlan()">
+                        <div class="menu-icon">📋</div>
+                        <div class="menu-text">План-проект</div>
+                    </div>
+                    <div class="menu-button" onclick="openHelp()">
+                        <div class="menu-icon">❓</div>
+                        <div class="menu-text">Помощь</div>
                     </div>
                 </div>
             </div>
@@ -300,63 +386,44 @@
     </div>
 
     <script>
-        // Инициализация Telegram WebApp
         let tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
 
-        // Валидация email
+        let userData = {};
+        let userPin = '';
+
+        // Валидация
         function isValidEmail(email) {
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
-        // Валидация телефона
         function isValidPhone(phone) {
             return /^[\d\s\+\-\(\)]+$/.test(phone) && phone.replace(/\D/g, '').length >= 9;
         }
 
-        // Показать ошибку
         function showError(fieldId, show) {
             document.getElementById(fieldId + 'Error').style.display = show ? 'block' : 'none';
         }
 
-        // Показать экран успеха
-        function showSuccessScreen(data) {
-            document.getElementById('registrationForm').classList.add('hidden');
-            document.getElementById('successScreen').style.display = 'block';
-            
-            document.getElementById('displayName').textContent = data.name;
-            document.getElementById('displayPhone').textContent = data.phone;
-            document.getElementById('displayEmail').textContent = data.email;
-
-            // ВАЖНО: Отправка данных боту
-            tg.sendData(JSON.stringify({
-                action: 'registration',
-                data: data
-            }));
-
-            // Вибрация успеха
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.notificationOccurred('success');
-            }
-
-            // Автоматически закрыть через 3 секунды
-            setTimeout(() => {
-                tg.close();
-            }, 3000);
+        function showScreen(screenId) {
+            ['registrationForm', 'pinSetupScreen', 'pinConfirmScreen', 'mainMenu'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
         }
 
-        // Обработка формы
-        document.getElementById('regForm').addEventListener('submit', (e) => {
+        // Регистрация
+        document.getElementById('regForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const name = document.getElementById('name').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const email = document.getElementById('email').value.trim();
+            const region = document.getElementById('region').value;
 
             let isValid = true;
 
-            // Валидация имени
             if (name.length < 2) {
                 showError('name', true);
                 isValid = false;
@@ -364,7 +431,6 @@
                 showError('name', false);
             }
 
-            // Валидация телефона
             if (!isValidPhone(phone)) {
                 showError('phone', true);
                 isValid = false;
@@ -372,7 +438,6 @@
                 showError('phone', false);
             }
 
-            // Валидация email
             if (!isValidEmail(email)) {
                 showError('email', true);
                 isValid = false;
@@ -380,28 +445,141 @@
                 showError('email', false);
             }
 
+            if (!region) {
+                showError('region', true);
+                isValid = false;
+            } else {
+                showError('region', false);
+            }
+
             if (isValid) {
-                const userData = {
-                    name: name,
-                    phone: phone,
-                    email: email,
+                userData = {
+                    name,
+                    phone,
+                    email,
+                    region,
                     telegramId: tg.initDataUnsafe?.user?.id || 'unknown',
-                    username: tg.initDataUnsafe?.user?.username || 'unknown',
-                    registrationDate: new Date().toISOString()
+                    username: tg.initDataUnsafe?.user?.username || 'unknown'
                 };
 
-                // Показать экран успеха и отправить данные
-                showSuccessScreen(userData);
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+
+                showScreen('pinSetupScreen');
+                document.getElementById('pin1').focus();
             } else {
-                // Вибрация ошибки
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('error');
                 }
             }
         });
 
+        // PIN навигация
+        function setupPinNavigation(prefix) {
+            for (let i = 1; i <= 4; i++) {
+                const input = document.getElementById(prefix + i);
+                
+                input.addEventListener('input', (e) => {
+                    if (e.target.value && i < 4) {
+                        document.getElementById(prefix + (i + 1)).focus();
+                    }
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !e.target.value && i > 1) {
+                        document.getElementById(prefix + (i - 1)).focus();
+                    }
+                });
+            }
+        }
+
+        setupPinNavigation('pin');
+        setupPinNavigation('confirmPin');
+
+        // Установка PIN
+        document.getElementById('setPinBtn').addEventListener('click', () => {
+            const pin1 = document.getElementById('pin1').value;
+            const pin2 = document.getElementById('pin2').value;
+            const pin3 = document.getElementById('pin3').value;
+            const pin4 = document.getElementById('pin4').value;
+
+            if (pin1 && pin2 && pin3 && pin4) {
+                userPin = pin1 + pin2 + pin3 + pin4;
+                showError('pin', false);
+                
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+
+                showScreen('pinConfirmScreen');
+                document.getElementById('confirmPin1').focus();
+            } else {
+                showError('pin', true);
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('error');
+                }
+            }
+        });
+
+        // Подтверждение PIN
+        document.getElementById('confirmPinBtn').addEventListener('click', () => {
+            const confirmPin1 = document.getElementById('confirmPin1').value;
+            const confirmPin2 = document.getElementById('confirmPin2').value;
+            const confirmPin3 = document.getElementById('confirmPin3').value;
+            const confirmPin4 = document.getElementById('confirmPin4').value;
+            const confirmPin = confirmPin1 + confirmPin2 + confirmPin3 + confirmPin4;
+
+            if (confirmPin === userPin) {
+                userData.pin = userPin;
+                showError('confirmPin', false);
+
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+
+                // Отправка данных боту
+                tg.sendData(JSON.stringify({
+                    action: 'registration',
+                    data: userData
+                }));
+
+                showScreen('mainMenu');
+            } else {
+                showError('confirmPin', true);
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('error');
+                }
+            }
+        });
+
+        // Функции меню (заглушки)
+        function openVisitRegistration() {
+            alert('Регистрация визита - в разработке');
+        }
+
+        function openReports() {
+            alert('Отчеты - в разработке');
+        }
+
+        function openTourPlan() {
+            alert('Тур план - в разработке');
+        }
+
+        function openMaterials() {
+            alert('Материалы - в разработке');
+        }
+
+        function openProjectPlan() {
+            alert('План-проект - в разработке');
+        }
+
+        function openHelp() {
+            alert('Помощь - в разработке');
+        }
+
         // Убрать ошибки при вводе
-        ['name', 'phone', 'email'].forEach(field => {
+        ['name', 'phone', 'email', 'region'].forEach(field => {
             document.getElementById(field).addEventListener('input', () => {
                 showError(field, false);
             });
