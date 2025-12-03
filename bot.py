@@ -79,33 +79,47 @@ def save_user(user_id, username, name, phone, email):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     
-    # Создаём кнопку для открытия Web App
-    keyboard = [
-        [KeyboardButton(
-            text="📝 Открыть регистрацию",
-            web_app=WebAppInfo(url=WEB_APP_URL)
-        )]
-    ]
-    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-    
     if is_registered(user.id):
+        # Пользователь уже зарегистрирован - НЕ показываем кнопку регистрации
         user_data = get_user_data(user.id)
+        
+        # Создаём кнопки для зарегистрированных пользователей
+        keyboard = [
+            [KeyboardButton(text="👤 Мой профиль")],
+            [KeyboardButton(text="❓ Помощь")]
+        ]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        
         await update.message.reply_text(
             f"👋 С возвращением, {user_data[2]}!\n\n"
-            "Вы уже зарегистрированы в системе.\n\n"
-            "Команды:\n"
-            "/profile - Посмотреть профиль\n"
-            "/help - Помощь",
+            "✅ Вы уже зарегистрированы в системе.\n\n"
+            f"📝 Имя: {user_data[2]}\n"
+            f"📱 Телефон: {user_data[3]}\n"
+            f"📧 Email: {user_data[4]}\n\n"
+            "Доступные команды:\n"
+            "/profile - Посмотреть полный профиль\n"
+            "/help - Справка",
             reply_markup=reply_markup
         )
+        logger.info(f"Зарегистрированный пользователь {user.id} ({user_data[2]}) вернулся")
     else:
+        # Новый пользователь - показываем кнопку регистрации
+        keyboard = [
+            [KeyboardButton(
+                text="📝 Зарегистрироваться",
+                web_app=WebAppInfo(url=WEB_APP_URL)
+            )]
+        ]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        
         await update.message.reply_text(
             f"👋 Привет, {user.first_name}!\n\n"
-            "Добро пожаловать в наш бот!\n\n"
-            "Для начала работы нажмите кнопку ниже, "
-            "чтобы пройти регистрацию 👇",
+            "Добро пожаловать в наш бот! 🎉\n\n"
+            "⚠️ Для использования бота необходимо пройти регистрацию.\n\n"
+            "Нажмите кнопку ниже, чтобы заполнить форму 👇",
             reply_markup=reply_markup
         )
+        logger.info(f"Новый пользователь {user.id} ({user.first_name}) начал регистрацию")
 
 # Обработка данных из Web App
 async def web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -198,7 +212,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Команда /stats (для администратора)
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Здесь добавьте ID вашего Telegram аккаунта
-    ADMIN_ID = 123456789  # Замените на ваш ID
+    ADMIN_ID = 7774588164  # Замените на ваш ID
     
     user = update.effective_user
     
@@ -217,11 +231,36 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"👥 Всего пользователей: {total_users}"
     )
 
-# Обработка обычных сообщений
+# Обработка обычных сообщений (включая кнопки)
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "Используйте /help для просмотра доступных команд"
-    )
+    text = update.message.text
+    user = update.effective_user
+    
+    # Обработка кнопок
+    if text == "👤 Мой профиль":
+        await profile(update, context)
+    elif text == "❓ Помощь":
+        await help_command(update, context)
+    else:
+        # Проверка регистрации для всех остальных сообщений
+        if not is_registered(user.id):
+            keyboard = [
+                [KeyboardButton(
+                    text="📝 Зарегистрироваться",
+                    web_app=WebAppInfo(url=WEB_APP_URL)
+                )]
+            ]
+            reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+            
+            await update.message.reply_text(
+                "⚠️ Для использования бота необходимо зарегистрироваться!\n\n"
+                "Нажмите кнопку ниже 👇",
+                reply_markup=reply_markup
+            )
+        else:
+            await update.message.reply_text(
+                "Я вас не понял. Используйте /help для просмотра доступных команд."
+            )
 
 def main():
     # Инициализация базы данных
