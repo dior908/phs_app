@@ -18,6 +18,12 @@
             touch-action: pan-y;
             -webkit-user-select: none;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        * {
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
         }
         * {
             margin: 0;
@@ -28,16 +34,28 @@
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%);
-            min-height: 100vh;
+            height: 100vh;
+            height: -webkit-fill-available;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
-            padding: 20px;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
         }
 
         .container {
             width: 100%;
             max-width: 400px;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .card {
@@ -48,6 +66,24 @@
                 8px 8px 16px rgba(0, 0, 0, 0.2),
                 -8px -8px 16px rgba(255, 255, 255, 0.5);
             animation: slideUp 0.5s ease;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .card::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .card::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .card::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
         }
 
         @keyframes slideUp {
@@ -323,7 +359,7 @@
         }
 
         .admin-icon {
-            position: absolute;
+            position: fixed;
             top: 20px;
             right: 20px;
             width: 40px;
@@ -338,6 +374,46 @@
             box-shadow: 
                 3px 3px 6px rgba(0, 0, 0, 0.2),
                 -3px -3px 6px rgba(255, 255, 255, 0.3);
+            z-index: 1000;
+        }
+
+        .lang-flags {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .flag-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            box-shadow: 
+                3px 3px 6px rgba(0, 0, 0, 0.2),
+                -3px -3px 6px rgba(255, 255, 255, 0.3);
+            background: linear-gradient(145deg, #e6e9ed, #cfd8dc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .flag-btn:active {
+            box-shadow: 
+                inset 2px 2px 4px rgba(0, 0, 0, 0.2),
+                inset -2px -2px 4px rgba(255, 255, 255, 0.2);
+        }
+
+        .flag-btn.active {
+            box-shadow: 
+                inset 3px 3px 6px rgba(0, 0, 0, 0.2),
+                inset -3px -3px 6px rgba(255, 255, 255, 0.3);
+            transform: scale(0.95);
         }
 
         .admin-icon:active {
@@ -359,8 +435,14 @@
     </style>
 </head>
 <body>
+    <!-- Флаги смены языка -->
+    <div class="lang-flags" id="langFlags" style="display: none;">
+        <button class="flag-btn" id="flagRu" onclick="switchLanguage('ru')" title="Русский">🇷🇺</button>
+        <button class="flag-btn" id="flagUz" onclick="switchLanguage('uz')" title="O'zbekcha">🇺🇿</button>
+    </div>
+
     <div class="container" style="position: relative;">
-        <div class="admin-icon" onclick="openAdminPanel()" title="Админ-панель">⚙️</div>
+        <div class="admin-icon" id="adminIcon" onclick="openAdminPanel()" title="Админ-панель" style="display: none;">⚙️</div>
         
         <div class="card">
             <!-- Загрузка -->
@@ -648,6 +730,82 @@
 
                 <button class="btn btn-secondary" onclick="backToMainMenu()">Вернуться в меню</button>
             </div>
+
+            <!-- Помощь -->
+            <div id="helpScreen" class="hidden">
+                <div class="logo">
+                    <div class="logo-icon">❓</div>
+                </div>
+                <h1 id="helpTitle">Помощь</h1>
+                <p class="subtitle" id="helpSubtitle">Дополнительные функции</p>
+
+                <div class="menu-grid" style="grid-template-columns: 1fr;">
+                    <div class="menu-button" onclick="openEditProfile()">
+                        <div class="menu-icon">✏️</div>
+                        <div class="menu-text" id="helpEditData">Изменить данные</div>
+                    </div>
+                    <div class="menu-button" onclick="showInstructions()">
+                        <div class="menu-icon">📖</div>
+                        <div class="menu-text" id="helpInstructions">Инструкция</div>
+                    </div>
+                </div>
+
+                <button class="btn btn-secondary" onclick="backToMainMenu()" style="margin-top: 20px;" id="helpBackBtn">Вернуться в меню</button>
+            </div>
+
+            <!-- Редактирование профиля -->
+            <div id="editProfileScreen" class="hidden">
+                <div class="logo">
+                    <div class="logo-icon">✏️</div>
+                </div>
+                <h1 id="editProfileTitle">Изменить данные</h1>
+                <p class="subtitle" id="editProfileSubtitle">Обновите вашу информацию</p>
+
+                <form id="editProfileForm">
+                    <div class="form-group">
+                        <label for="editName" id="editNameLabel">Полное имя <span class="required">*</span></label>
+                        <input type="text" id="editName" required>
+                        <div class="error" id="editNameError">Введите имя</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editPhone" id="editPhoneLabel">Номер телефона <span class="required">*</span></label>
+                        <input type="tel" id="editPhone" required>
+                        <div class="error" id="editPhoneError">Введите корректный номер</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editEmail" id="editEmailLabel">Email адрес <span class="required">*</span></label>
+                        <input type="email" id="editEmail" required>
+                        <div class="error" id="editEmailError">Введите корректный email</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editRegion" id="editRegionLabel">Область <span class="required">*</span></label>
+                        <select id="editRegion" required>
+                            <option value="">Выберите область</option>
+                            <option value="tashkent_city">г. Ташкент</option>
+                            <option value="andijan">Андижанская область</option>
+                            <option value="bukhara">Бухарская область</option>
+                            <option value="jizzakh">Джизакская область</option>
+                            <option value="kashkadarya">Кашкадарьинская область</option>
+                            <option value="navoi">Навоийская область</option>
+                            <option value="namangan">Наманганская область</option>
+                            <option value="samarkand">Самаркандская область</option>
+                            <option value="surkhandarya">Сурхандарьинская область</option>
+                            <option value="sirdarya">Сырдарьинская область</option>
+                            <option value="tashkent">Ташкентская область</option>
+                            <option value="fergana">Ферганская область</option>
+                            <option value="khorezm">Хорезмская область</option>
+                            <option value="karakalpakstan">Республика Каракалпакстан</option>
+                        </select>
+                        <div class="error" id="editRegionError">Выберите область</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success" id="saveProfileBtn">Сохранить изменения</button>
+                    <button type="button" class="btn btn-secondary" onclick="cancelEditProfile()" id="cancelEditBtn">Отмена</button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -701,7 +859,20 @@
                 visitResultLabel: 'Результат визита',
                 locationBtn: '📍 Поделиться геолокацией',
                 submitVisitBtn: 'Сохранить визит',
-                backToVisitBtn: 'Назад'
+                backToVisitBtn: 'Назад',
+                helpTitle: 'Помощь',
+                helpSubtitle: 'Дополнительные функции',
+                helpEditData: 'Изменить данные',
+                helpInstructions: 'Инструкция',
+                helpBackBtn: 'Вернуться в меню',
+                editProfileTitle: 'Изменить данные',
+                editProfileSubtitle: 'Обновите вашу информацию',
+                editNameLabel: 'Полное имя',
+                editPhoneLabel: 'Номер телефона',
+                editEmailLabel: 'Email адрес',
+                editRegionLabel: 'Область',
+                saveProfileBtn: 'Сохранить изменения',
+                cancelEditBtn: 'Отмена'
             },
             uz: {
                 loginTitle: 'Tizimga kirish',
@@ -740,7 +911,20 @@
                 visitResultLabel: 'Tashrif natijasi',
                 locationBtn: '📍 Joylashuvni ulashish',
                 submitVisitBtn: 'Tashrifni saqlash',
-                backToVisitBtn: 'Ortga'
+                backToVisitBtn: 'Ortga',
+                helpTitle: 'Yordam',
+                helpSubtitle: 'Qo\'shimcha funksiyalar',
+                helpEditData: 'Ma\'lumotlarni o\'zgartirish',
+                helpInstructions: 'Yo\'riqnoma',
+                helpBackBtn: 'Menyuga qaytish',
+                editProfileTitle: 'Ma\'lumotlarni o\'zgartirish',
+                editProfileSubtitle: 'Ma\'lumotlaringizni yangilang',
+                editNameLabel: 'To\'liq ism',
+                editPhoneLabel: 'Telefon raqami',
+                editEmailLabel: 'Email manzil',
+                editRegionLabel: 'Viloyat',
+                saveProfileBtn: 'O\'zgarishlarni saqlash',
+                cancelEditBtn: 'Bekor qilish'
             }
         };
 
@@ -748,6 +932,15 @@
             currentLanguage = lang;
             localStorage.setItem('appLanguage', lang);
             updateLanguage();
+            
+            // Отправляем данные боту ПОСЛЕ выбора языка
+            if (userData && userData.pin) {
+                tg.sendData(JSON.stringify({
+                    action: 'registration',
+                    data: userData
+                }));
+            }
+            
             showScreen('mainMenu');
         }
 
@@ -772,7 +965,49 @@
             
             document.querySelectorAll('.card > div').forEach(el => el.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
+            
+            // Показать/скрыть флаги и админку в зависимости от экрана
+            const langFlags = document.getElementById('langFlags');
+            const adminIcon = document.getElementById('adminIcon');
+            
+            if (screenId === 'mainMenu' || screenId === 'visitTypeMenu' || screenId === 'doctorVisitForm' || 
+                screenId === 'helpScreen' || screenId === 'editProfileScreen') {
+                langFlags.style.display = 'flex';
+                adminIcon.style.display = 'flex';
+            } else {
+                langFlags.style.display = 'none';
+                adminIcon.style.display = 'none';
+            }
+            
+            // Обновить активный флаг
+            document.getElementById('flagRu').classList.remove('active');
+            document.getElementById('flagUz').classList.remove('active');
+            if (currentLanguage === 'ru') {
+                document.getElementById('flagRu').classList.add('active');
+            } else {
+                document.getElementById('flagUz').classList.add('active');
+            }
+            
             updateLanguage();
+            
+            // Прокрутить карточку наверх
+            document.querySelector('.card').scrollTop = 0;
+        }
+
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('appLanguage', lang);
+            
+            document.getElementById('flagRu').classList.remove('active');
+            document.getElementById('flagUz').classList.remove('active');
+            if (lang === 'ru') {
+                document.getElementById('flagRu').classList.add('active');
+            } else {
+                document.getElementById('flagUz').classList.add('active');
+            }
+            
+            updateLanguage();
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
         function showError(fieldId, message) {
@@ -953,12 +1188,11 @@
 
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
 
-                tg.sendData(JSON.stringify({
-                    action: 'registration',
-                    data: userData
-                }));
-
+                // ВАЖНО: Сначала показываем экран выбора языка
                 showScreen('languageScreen');
+
+                // Только после выбора языка отправляем данные боту
+                // Данные отправятся при выборе языка
             } else {
                 showError('confirmPin', 'PIN-коды не совпадают');
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
@@ -1147,11 +1381,107 @@
 
         // Остальные разделы
         function openSection(section) {
-            alert(currentLanguage === 'ru' ? 'В разработке' : 'Ishlab chiqilmoqda');
+            if (section === 'help') {
+                showScreen('helpScreen');
+            } else {
+                alert(currentLanguage === 'ru' ? 'В разработке' : 'Ishlab chiqilmoqda');
+            }
         }
 
+        // Помощь - изменить данные
+        function openEditProfile() {
+            const userId = tg.initDataUnsafe?.user?.id;
+            const savedUser = JSON.parse(localStorage.getItem('user_' + userId) || '{}');
+            
+            document.getElementById('editName').value = savedUser.name || '';
+            document.getElementById('editPhone').value = savedUser.phone || '';
+            document.getElementById('editEmail').value = savedUser.email || '';
+            document.getElementById('editRegion').value = savedUser.region || '';
+            
+            showScreen('editProfileScreen');
+        }
+
+        function cancelEditProfile() {
+            showScreen('helpScreen');
+        }
+
+        function showInstructions() {
+            const instructions = currentLanguage === 'ru' 
+                ? '📖 Инструкция по использованию:\n\n' +
+                  '1. Регистрация визита - для регистрации посещений\n' +
+                  '2. Карта визитов - просмотр всех визитов на карте\n' +
+                  '3. Отчеты - формирование отчетов\n' +
+                  '4. Изменить данные - обновление личной информации'
+                : '📖 Foydalanish bo\'yicha yo\'riqnoma:\n\n' +
+                  '1. Tashrif ro\'yxati - tashriflarni ro\'yxatdan o\'tkazish uchun\n' +
+                  '2. Tashriflar xaritasi - barcha tashriflarni xaritada ko\'rish\n' +
+                  '3. Hisobotlar - hisobotlar shakllantirish\n' +
+                  '4. Ma\'lumotlarni o\'zgartirish - shaxsiy ma\'lumotlarni yangilash';
+            
+            alert(instructions);
+        }
+
+        // Сохранение изменений профиля
+        document.getElementById('editProfileForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            hideAllErrors();
+
+            const name = document.getElementById('editName').value.trim();
+            const phone = document.getElementById('editPhone').value.trim();
+            const email = document.getElementById('editEmail').value.trim();
+            const region = document.getElementById('editRegion').value;
+
+            let isValid = true;
+
+            if (name.length < 2) {
+                showError('editName', 'Введите имя');
+                isValid = false;
+            }
+
+            if (!isValidPhone(phone)) {
+                showError('editPhone', 'Введите корректный номер');
+                isValid = false;
+            }
+
+            if (!isValidEmail(email)) {
+                showError('editEmail', 'Введите корректный email');
+                isValid = false;
+            }
+
+            if (!region) {
+                showError('editRegion', 'Выберите область');
+                isValid = false;
+            }
+
+            if (isValid) {
+                const userId = tg.initDataUnsafe?.user?.id;
+                const savedUser = JSON.parse(localStorage.getItem('user_' + userId) || '{}');
+                
+                savedUser.name = name;
+                savedUser.phone = phone;
+                savedUser.email = email;
+                savedUser.region = region;
+                
+                localStorage.setItem('user_' + userId, JSON.stringify(savedUser));
+
+                // Отправка обновленных данных боту
+                tg.sendData(JSON.stringify({
+                    action: 'update_profile',
+                    data: savedUser
+                }));
+
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                
+                alert(currentLanguage === 'ru' ? 'Данные успешно обновлены!' : 'Ma\'lumotlar muvaffaqiyatli yangilandi!');
+                showScreen('helpScreen');
+            } else {
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+            }
+        });
+
         // Убрать ошибки при вводе
-        ['name', 'phone', 'email', 'region', 'doctorName', 'organization', 'specialty', 'visitTopic'].forEach(field => {
+        ['name', 'phone', 'email', 'region', 'doctorName', 'organization', 'specialty', 'visitTopic',
+         'editName', 'editPhone', 'editEmail', 'editRegion'].forEach(field => {
             const el = document.getElementById(field);
             if (el) {
                 el.addEventListener('input', () => showError(field, null));
