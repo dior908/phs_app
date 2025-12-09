@@ -3,279 +3,215 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <meta name="theme-color" content="#0f172a"/>
-  <title>Phs App — Игровой WebApp</title>
+  <title>PHS — регистрация</title>
   <style>
-    :root{
-      --bg-a: #081226;
-      --bg-b: #0b2740;
-      --card: rgba(255,255,255,0.06);
+    :root {
+      --bg: linear-gradient(160deg, #081226 0%, #0b2740 100%);
+      --card: rgba(255,255,255,0.03);
       --accent: #6ee7b7;
-      --accent-2: #60a5fa;
       --muted: rgba(255,255,255,0.65);
-      --glass-border: rgba(255,255,255,0.06);
-      --radius: 16px;
-      --gap: 14px;
+      --radius: 12px;
     }
-    html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(160deg,var(--bg-a) 0%,var(--bg-b) 100%);color:#e6eef6;overflow:hidden;}
-    .app{height:100vh;display:flex;flex-direction:column;gap:var(--gap);padding:calc(env(safe-area-inset-top,20px)+20px) 18px 24px;box-sizing:border-box;align-items:center;justify-content:flex-start;}
-    .header{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;}
-    .brand{display:flex;gap:12px;align-items:center;}
-    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 6px 20px rgba(96,165,250,0.18);user-select:none;}
-    .brand-title{font-weight:700;font-size:18px;}
-    .brand-sub{font-size:12px;color:var(--muted);margin-top:-4px;}
-    .hdr-actions{display:flex;gap:10px;align-items:center;}
-    .hdr-stats{display:flex;gap:10px;align-items:center;padding:8px 12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);font-size:13px;}
-    .profile-card{width:100%;max-width:980px;margin-top:8px;padding:14px;border-radius:var(--radius);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid var(--glass-border);box-shadow:0 8px 30px rgba(2,6,23,0.6);display:flex;align-items:center;gap:14px;box-sizing:border-box;}
-    .avatar{width:72px;height:72px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:24px;color:white;}
-    .profile-info{flex:1;min-width:0;}
-    .profile-name{font-weight:700;font-size:16px;}
-    .profile-sub{color:var(--muted);font-size:13px;margin-top:4px;}
-    .progress-bar{height:12px;background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));border-radius:10px;overflow:hidden;margin-top:10px;}
-    .progress-fill{height:100%;width:35%;background:linear-gradient(90deg,var(--accent),var(--accent-2));box-shadow:0 6px 20px rgba(96,165,250,0.18);}
-    .menu{width:100%;max-width:980px;display:grid;grid-template-columns: repeat(4, minmax(0,1fr));gap:14px;margin-top:16px;}
-    .menu-item{position:relative;padding:18px;border-radius:16px;min-height:120px;display:flex;flex-direction:column;gap:10px;justify-content:center;align-items:flex-start;cursor:pointer;overflow:hidden;border:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));transition:transform .16s cubic-bezier(.2,.9,.2,1),box-shadow .16s;background-size:200% 200%;}
-    .menu-item:hover{transform:translateY(-6px) scale(1.01);box-shadow:0 18px 40px rgba(2,6,23,0.55);}
-    .menu-icon{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);}
-    .menu-title{font-weight:700;font-size:15px;}
-    .menu-desc{font-size:12px;color:var(--muted);margin-top:4px;}
-    .ripple{position:absolute;border-radius:999px;transform:scale(0);animation:ripple .6s linear;background:rgba(255,255,255,0.08);pointer-events:none;}
-    @keyframes ripple{to{transform:scale(4);opacity:0;}}
-    .footer{width:100%;max-width:980px;margin-top:auto;display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:13px;padding:18px;box-sizing:border-box;}
-    .hidden{display:none !important;}
-    .btn{display:inline-flex;gap:8px;align-items:center;justify-content:center;padding:10px 14px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#022633;font-weight:700;border:none;cursor:pointer;box-shadow:0 10px 26px rgba(6,182,212,0.12);}
-    input[type="text"], input[type="tel"], input[type="number"]{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:inherit;width:160px}
-    .code-box{display:flex;gap:8px;align-items:center}
+    html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:#e6eef6;display:flex;align-items:center;justify-content:center}
+    .wrap{width:98%;max-width:760px;padding:18px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 12px 40px rgba(0,0,0,0.6)}
+    /* header removed per request */
+    .stats-row{display:flex;gap:20px;align-items:center;justify-content:center;margin-bottom:18px}
+    .stat {text-align:center;padding:10px 18px;border-radius:10px;background:var(--card);min-width:120px}
+    .stat .num {font-size:28px;font-weight:800}
+    .stat .label {font-size:13px;color:var(--muted);margin-top:6px}
+    /* form */
+    .form {display:flex;flex-direction:column;gap:12px}
+    label{font-size:13px;color:var(--muted)}
+    input[type="text"],input[type="tel"],input[type="date"],select{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;font-size:14px}
+    .row{display:flex;gap:10px}
+    .btn{background:linear-gradient(90deg,var(--accent),#60a5fa);border:none;padding:10px 12px;border-radius:10px;color:#022633;font-weight:700;cursor:pointer}
+    .secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+    .center{display:flex;justify-content:center}
+    .big-overlay{position:fixed;inset:0;background:rgba(2,6,23,0.7);display:flex;align-items:center;justify-content:center;z-index:9999}
+    .card{background:#071226;padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);width:100%}
+    .spinner {display:flex;align-items:center;gap:10px}
+    .region-list{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+    .region-pill{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.02);font-size:13px}
   </style>
 </head>
 <body>
-  <div class="app" id="app">
-    <div class="header">
-      <div class="brand">
-        <div class="logo">P</div>
+  <div class="wrap">
+    <!-- stats simplified & centered -->
+    <div class="stats-row" id="statsRow">
+      <div class="stat">
+        <div class="num" id="xpNum">0</div>
+        <div class="label">XP</div>
+      </div>
+      <div class="stat">
+        <div class="num" id="coinsNum">0</div>
+        <div class="label">Coins</div>
+      </div>
+    </div>
+
+    <!-- registration form -->
+    <div class="card">
+      <h2 style="margin:0 0 8px 0">Регистрация</h2>
+      <div style="color:var(--muted);font-size:13px;margin-bottom:12px">Новая регистрация: введите ФИО, телефон, дату рождения и выберите регион</div>
+
+      <form id="regForm" class="form" onsubmit="return onRegister(event)">
         <div>
-          <div class="brand-title">Phs — Play & Work</div>
-          <div class="brand-sub">Игровая часть для медпредставителей</div>
+          <label>ФИО</label>
+          <input type="text" id="fullName" placeholder="Иванов Иван Иванович" required />
         </div>
-      </div>
-      <div class="hdr-actions">
-        <div class="hdr-stats" id="hdrStats">XP: <strong id="xpVal">0</strong> · Coins: <strong id="coinsVal">0</strong></div>
-      </div>
-    </div>
 
-    <div class="profile-card" id="profileCard">
-      <div class="avatar" id="avatar">DA</div>
-      <div class="profile-info">
-        <div class="profile-name" id="profileName">Гость</div>
-        <div class="profile-sub" id="profileSub">Пожалуйста, войдите по коду</div>
-        <div class="progress-bar" aria-hidden="true"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-      </div>
-      <div class="progress-wrap">
-        <div style="font-size:12px;color:var(--muted)">Уровень <strong id="levelVal">1</strong></div>
-        <div style="font-size:13px;font-weight:700;margin-top:6px" id="nextXp">0 / 100 XP</div>
-      </div>
-    </div>
-
-    <!-- экран ввода кода -->
-    <div id="codeScreen" style="width:100%;max-width:480px;margin-top:18px;padding:16px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);">
-      <h3 style="margin:0 0 8px 0">Вход по коду</h3>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <div class="code-box">
-          <input id="accessCode" maxlength="4" inputmode="numeric" placeholder="0000" />
-          <button class="btn small" onclick="verifyCode()">Войти</button>
+        <div class="row">
+          <div style="flex:1">
+            <label>Телефон</label>
+            <input type="tel" id="phone" placeholder="+998901234567" required />
+          </div>
+          <div style="width:160px">
+            <label>Дата рождения</label>
+            <input type="date" id="dob" required />
+          </div>
         </div>
-        <button class="btn small" onclick="requestCode()">Получить код</button>
-      </div>
-      <div style="margin-top:8px;color:var(--muted);font-size:13px">Код придёт администратору (в dev возвращается в ответе)</div>
+
+        <div>
+          <label>Регион</label>
+          <!-- простой "барабан" — выбор из списка + быстрые кнопки -->
+          <div style="display:flex;gap:8px;align-items:center">
+            <select id="regionSelect" style="flex:1">
+              <optgroup label="Регионы Узбекистана">
+                <option>Ташкент</option>
+                <option>Андижан</option>
+                <option>Бухара</option>
+                <option>Джизак</option>
+                <option>Кашкадарья</option>
+                <option>Навои</option>
+                <option>Наманган</option>
+                <option>Самарканд</option>
+                <option>Сурхандарья</option>
+                <option>Сырдарья</option>
+                <option>Фергана</option>
+                <option>Хорезм</option>
+                <option>НТ г. Ташкент</option>
+              </optgroup>
+            </select>
+            <button type="button" class="secondary" onclick="spinRegion()">🎛️</button>
+          </div>
+        </div>
+
+        <div>
+          <label>Придумайте 4-значный пароль (введите дважды)</label>
+          <div class="row">
+            <input type="text" id="code1" maxlength="4" inputmode="numeric" placeholder="0000" style="width:120px" required />
+            <input type="text" id="code2" maxlength="4" inputmode="numeric" placeholder="0000" style="width:120px" required />
+            <div style="flex:1"></div>
+          </div>
+          <div id="codeHint" style="color:#fbb;display:none;font-size:13px;margin-top:6px">Коды не совпадают</div>
+        </div>
+
+        <div class="center" style="margin-top:8px">
+          <button class="btn" type="submit">Зарегистрироваться</button>
+        </div>
+      </form>
     </div>
 
-    <div class="menu" id="mainMenu" style="display:none;">
-      <div class="menu-item" data-action="create_project" onclick="menuClick(event)" onmousedown="ripple(event)"><div class="menu-icon">📝</div><div class="menu-title">Создать проект</div><div class="menu-desc">Шаг за шагом</div></div>
-      <div class="menu-item" data-action="my_projects" onclick="menuClick(event)" onmousedown="ripple(event)"><div class="menu-icon">📁</div><div class="menu-title">Мои проекты</div><div class="menu-desc">Просмотр</div></div>
-      <div class="menu-item" data-action="visits" onclick="menuClick(event)" onmousedown="ripple(event)"><div class="menu-icon">🚑</div><div class="menu-title">Визиты</div><div class="menu-desc">Добавить визит</div></div>
-      <div class="menu-item" data-action="game" onclick="menuClick(event)" onmousedown="ripple(event)"><div class="menu-icon">🎮</div><div class="menu-title">Игры</div><div class="menu-desc">Мини-игры</div></div>
-      <div class="menu-item" data-action="leaderboard" onclick="menuClick(event)" onmousedown="ripple(event)"><div class="menu-icon">🏆</div><div class="menu-title">Топ</div><div class="menu-desc">Лидерборд</div></div>
-      <div class="menu-item" data-action="store" onclick="menuClick(event)" onmousedown="ripple(event)"><div class="menu-icon">🛍️</div><div class="menu-title">Магазин</div><div class="menu-desc">Бейджи</div></div>
-      <div class="menu-item" data-action="help" onclick="menuClick(event)" onmousedown="ripple(event)"><div class="menu-icon">❓</div><div class="menu-title">Помощь</div><div class="menu-desc">FAQ</div></div>
-      <div class="menu-item" data-action="settings" onclick="menuClick(event)" onmousedown="ripple(event)"><div class="menu-icon">⚙️</div><div class="menu-title">Настройки</div><div class="menu-desc">Язык</div></div>
-    </div>
+  </div>
 
-    <div class="footer">
-      <div>Версия 1.0 • Phs App</div>
-      <div style="opacity:.8">© Pharmasintez</div>
+  <!-- overlay для успешной регистрации -->
+  <div id="successOverlay" class="big-overlay" style="display:none">
+    <div style="background:#061226;padding:28px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);text-align:center;max-width:520px">
+      <h2 id="successTitle">Регистрация отправлена</h2>
+      <p id="successText" style="color:var(--muted)">Ваша регистрация отправлена администратору. После одобрения вам будут доступны все функции.</p>
+      <div style="margin-top:14px"><button class="btn" onclick="closeSuccess()">Закрыть</button></div>
     </div>
   </div>
 
 <script>
-  // Try to expand in Telegram; fallback to requestFullscreen for browsers
-  function tryFullScreen() {
-    try {
-      if (window.Telegram && Telegram.WebApp) {
-        Telegram.WebApp.ready();
-        if (typeof Telegram.WebApp.expand === 'function') {
-          try { Telegram.WebApp.expand(); } catch(e){ console.warn('expand failed', e); }
-        }
-      } else if (document.documentElement.requestFullscreen) {
-        // ask user gesture is needed; try only if not in iframe
-        try {
-          document.documentElement.requestFullscreen().catch(()=>{/*ignore*/});
-        } catch(e){/*ignore*/}
-      }
-    } catch(e){ console.warn(e); }
-  }
-  tryFullScreen();
+  const API_BASE = ''; // если backend на другом домене, укажи полный URL, например 'https://myserver.com'
 
-  // utils
-  function ripple(e){
-    const target = e.currentTarget;
-    const rect = target.getBoundingClientRect();
-    const r = document.createElement('span');
-    r.className = 'ripple';
-    const size = Math.max(rect.width, rect.height);
-    r.style.width = r.style.height = size + 'px';
-    r.style.left = (e.clientX - rect.left - size/2) + 'px';
-    r.style.top = (e.clientY - rect.top - size/2) + 'px';
-    target.appendChild(r);
-    setTimeout(()=> r.remove(), 700);
+  // region spinner: быстрый случайный выбор
+  function spinRegion(){
+    const sel = document.getElementById('regionSelect');
+    const options = sel.options;
+    const idx = Math.floor(Math.random() * options.length);
+    sel.selectedIndex = idx;
+    // лёгкая анимация: смена 6 раз
+    let i = 0;
+    const orig = sel.selectedIndex;
+    const timer = setInterval(()=>{
+      sel.selectedIndex = (sel.selectedIndex + 1) % options.length;
+      i++;
+      if(i > 6 + Math.floor(Math.random()*6)){ clearInterval(timer); sel.selectedIndex = idx; }
+    }, 80);
   }
 
-  function menuClick(e){
-    let el = e.target;
-    while(el && !el.dataset.action) el = el.parentElement;
-    if(!el) return;
-    const action = el.dataset.action;
-    switch(action){
-      case 'create_project': notify('Создать проект'); break;
-      case 'my_projects': notify('Мои проекты'); break;
-      case 'visits': notify('Визиты'); break;
-      case 'game': notify('Игры'); break;
-      case 'leaderboard': fetchLeaderboard(); break;
-      case 'store': notify('Магазин'); break;
-      case 'help': notify('Помощь'); break;
-      case 'settings': notify('Настройки'); break;
-    }
-  }
+  function closeSuccess(){ document.getElementById('successOverlay').style.display='none'; }
 
-  function notify(text){
-    const prev = document.getElementById('tmpNotify'); if(prev) prev.remove();
-    const n = document.createElement('div'); n.id='tmpNotify'; n.textContent=text;
-    Object.assign(n.style, {position:'fixed',left:'50%',transform:'translateX(-50%)',bottom:'70px',background:'rgba(0,0,0,0.6)',color:'#fff',padding:'10px 14px',borderRadius:'10px',zIndex:9999,fontSize:'14px'});
-    document.body.appendChild(n); setTimeout(()=> n.remove(), 1400);
-  }
+  async function onRegister(e){
+    e.preventDefault();
+    document.getElementById('codeHint').style.display='none';
+    const name = document.getElementById('fullName').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const dob = document.getElementById('dob').value;
+    const region = document.getElementById('regionSelect').value;
+    const code1 = document.getElementById('code1').value.trim();
+    const code2 = document.getElementById('code2').value.trim();
+    if(!name || !phone || !dob || !region) { alert('Заполните все поля'); return; }
+    if(!/^\d{4}$/.test(code1) || !/^\d{4}$/.test(code2)){ document.getElementById('codeHint').textContent='Код должен состоять из 4 цифр'; document.getElementById('codeHint').style.display='block'; return; }
+    if(code1 !== code2){ document.getElementById('codeHint').textContent='Коды не совпадают'; document.getElementById('codeHint').style.display='block'; return; }
 
-  // Backend host (если frontend хостится отдельно, поставь полный URL)
-  const API_BASE = ''; // empty => same origin, иначе 'https://your.domain'
-
-  // request 4-digit code
-  async function requestCode(){
-    const user = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) || {};
-    const userId = user.id || prompt('Введите ваш ID (для dev)');
-    if(!userId){ alert('Не указан user id'); return; }
-    const name = user.first_name || '';
+    // get telegram user id if available via WebApp
+    let userId = null;
     try{
-      const resp = await fetch(API_BASE + '/auth/request_code', {
+      if(window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user){
+        userId = Telegram.WebApp.initDataUnsafe.user.id;
+      }
+    }catch(e){ userId = null; }
+    if(!userId){
+      // для dev попросим ввести id
+      userId = prompt('Введите ваш Telegram ID (для dev теста)');
+      if(!userId) return;
+    }
+
+    const payload = { user_id: Number(userId), name, phone, dob, region, code: code1 };
+    try{
+      const resp = await fetch(API_BASE + '/auth/register', {
         method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ user_id: userId, name, source: window.location.href })
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
       });
       const j = await resp.json();
       if(j.ok){
-        // в dev возвращается код в JSON. В проде код отправляется только администратору.
-        alert('Код отправлен. (dev code: ' + (j.code || '—') + ')');
+        // показать полноэкранное сообщение
+        document.getElementById('successTitle').textContent = 'Регистрация успешно отправлена';
+        document.getElementById('successText').textContent = 'Данные отправлены администратору. После одобрения вам будут доступны функции приложения.';
+        document.getElementById('successOverlay').style.display = 'flex';
+        // сброс формы
+        document.getElementById('regForm').reset();
       } else {
         alert('Ошибка: ' + (j.error || JSON.stringify(j)));
       }
-    } catch(e){
-      console.error(e); alert('Ошибка сети');
+    } catch(err){
+      console.error(err); alert('Ошибка сети при регистрации');
     }
+    return false;
   }
 
-  // verify code
-  async function verifyCode(){
-    const code = document.getElementById('accessCode').value.trim();
-    if(!/^\d{4}$/.test(code)){ alert('Введите 4 цифры'); return; }
-    const user = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) || {};
-    const userId = user.id || prompt('Введите ваш ID (для dev)');
-    if(!userId){ alert('Не указан user id'); return; }
-    try{
-      const resp = await fetch(API_BASE + '/auth/verify_code', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        credentials: 'include',
-        body: JSON.stringify({ user_id: userId, code })
-      });
-      const j = await resp.json();
-      if(j.ok){
-        document.getElementById('codeScreen').classList.add('hidden');
-        document.getElementById('mainMenu').style.display = 'grid';
-        document.getElementById('profileName').textContent = (user.first_name || 'Пользователь') + (user.last_name ? ' ' + user.last_name : '');
-        document.getElementById('avatar').textContent = ((user.first_name||'U')[0] || 'U') + (user.last_name ? (user.last_name[0]||'') : '');
-        fetchStats(userId);
-      } else {
-        alert('Ошибка: ' + (j.error || j.message || JSON.stringify(j)));
-      }
-    } catch(e){
-      console.error(e); alert('Ошибка сети');
-    }
-  }
-
-  // fetch stats from backend and update UI
-  async function fetchStats(userId){
+  // helper: show stats - if logged in, backend /stats/get will provide
+  async function loadStats(userId){
     try{
       const resp = await fetch(API_BASE + '/stats/get?user_id=' + encodeURIComponent(userId));
       const j = await resp.json();
       if(j.ok && j.stats){
-        const s = j.stats;
-        document.getElementById('xpVal').textContent = s.xp || 0;
-        document.getElementById('coinsVal').textContent = s.coins || 0;
-        document.getElementById('levelVal').textContent = s.level || 1;
-        const next = (s.level || 1) * 100;
-        document.getElementById('nextXp').textContent = (s.xp || 0) + ' / ' + next + ' XP';
-        const percent = Math.min(100, Math.round((s.xp || 0) / next * 100));
-        document.getElementById('progressFill').style.width = percent + '%';
-        document.getElementById('profileSub').textContent = 'Визиты: ' + (s.visits_count || 0);
-      } else {
-        console.warn('no stats', j);
+        document.getElementById('xpNum').textContent = j.stats.xp || 0;
+        document.getElementById('coinsNum').textContent = j.stats.coins || 0;
       }
-    } catch(e){
-      console.error(e);
-    }
+    } catch(e){ /*ignore*/ }
   }
 
-  // fetch leaderboard
-  async function fetchLeaderboard(){
+  // try to pre-load stats if in WebApp
+  (function init(){
     try{
-      const resp = await fetch(API_BASE + '/stats/leaderboard?limit=10');
-      const j = await resp.json();
-      if(j.ok){
-        let text = 'Топ:\n';
-        j.leaderboard.forEach((r, i)=> {
-          text += `${i+1}. ${r.name||r.user_id} — XP ${r.xp} (lvl ${r.level})\n`;
-        });
-        alert(text);
-      } else alert('Ошибка лидерборда');
-    } catch(e){ console.error(e); alert('Ошибка сети'); }
-  }
-
-  // auto-check if user already has session: try fetch stats if Telegram user exists
-  (function initFromTelegram(){
-    const user = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) || null;
-    if(user && user.id){
-      // attempt to get stats — if success, open menu
-      fetch('/stats/get?user_id=' + user.id).then(r=>r.json()).then(j=>{
-        if(j.ok && j.stats){
-          document.getElementById('codeScreen').classList.add('hidden');
-          document.getElementById('mainMenu').style.display = 'grid';
-          document.getElementById('profileName').textContent = (user.first_name || 'Пользователь') + (user.last_name ? ' ' + user.last_name : '');
-          document.getElementById('avatar').textContent = ((user.first_name||'U')[0] || 'U') + (user.last_name ? (user.last_name[0]||'') : '');
-          fetchStats(user.id);
-        } else {
-          // leave code screen visible
-        }
-      }).catch(()=>{/*ignore*/});
-    }
+      const user = window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user;
+      if(user && user.id) loadStats(user.id);
+    } catch(e){ }
   })();
-
 </script>
 </body>
 </html>
