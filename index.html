@@ -5,257 +5,51 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#0f172a"/>
   <title>Phs App — Игровой WebApp</title>
-
-  <!-- Встроенные стили — современный "glass + neumorphism" -->
   <style>
     :root{
       --bg-a: #081226;
       --bg-b: #0b2740;
       --card: rgba(255,255,255,0.06);
-      --glass: rgba(255,255,255,0.04);
       --accent: #6ee7b7;
       --accent-2: #60a5fa;
       --muted: rgba(255,255,255,0.65);
       --glass-border: rgba(255,255,255,0.06);
-      --shadow: 0 8px 30px rgba(2,6,23,0.6);
       --radius: 16px;
-      --btn-radius: 14px;
       --gap: 14px;
     }
-
-    html,body{
-      height:100%;
-      margin:0;
-      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      background: linear-gradient(160deg, var(--bg-a) 0%, var(--bg-b) 100%);
-      color: #e6eef6;
-      overflow:hidden; /* webapp full-screen feel */
-    }
-
-    /* основная обёртка — занимает весь экран */
-    .app {
-      height:100vh;
-      display:flex;
-      flex-direction:column;
-      gap:var(--gap);
-      padding:calc(env(safe-area-inset-top,20px) + 20px) 18px 24px;
-      box-sizing:border-box;
-      align-items:center;
-      justify-content:flex-start;
-    }
-
-    /* шапка */
-    .header {
-      width:100%;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
-    .brand {
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-    .logo {
-      width:56px;
-      height:56px;
-      border-radius:12px;
-      background: linear-gradient(135deg,var(--accent),var(--accent-2));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:26px;
-      box-shadow: 0 6px 20px rgba(96,165,250,0.18), inset 0 -6px 18px rgba(255,255,255,0.06);
-      user-select:none;
-    }
-    .brand-title {
-      font-weight:700;
-      font-size:18px;
-      letter-spacing:0.2px;
-    }
-    .brand-sub {
-      font-size:12px;
-      color:var(--muted);
-      margin-top:-4px;
-    }
-
-    /* профиль/кнопки header */
-    .hdr-actions {
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .circle-btn {
-      width:44px;
-      height:44px;
-      border-radius:12px;
-      background:var(--glass);
-      border:1px solid var(--glass-border);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow: var(--shadow);
-      cursor:pointer;
-      transition: transform .14s ease, box-shadow .14s;
-      user-select:none;
-    }
-    .circle-btn:active { transform: translateY(2px) scale(.995); }
-    .hdr-stats {
-      display:flex;
-      gap:10px;
-      align-items:center;
-      padding:8px 12px;
-      border-radius:12px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border:1px solid rgba(255,255,255,0.03);
-      font-size:13px;
-    }
-
-    /* карточка профиля прогресс */
-    .profile-card {
-      width:100%;
-      max-width:980px;
-      margin-top:8px;
-      padding:14px;
-      border-radius:var(--radius);
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border:1px solid var(--glass-border);
-      box-shadow: var(--shadow);
-      display:flex;
-      align-items:center;
-      gap:14px;
-      box-sizing:border-box;
-    }
-    .avatar {
-      width:72px;
-      height:72px;
-      border-radius:14px;
-      background: linear-gradient(135deg,#7c3aed,#06b6d4);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:700;
-      font-size:24px;
-      color:white;
-    }
-    .profile-info { flex:1; min-width:0; }
-    .profile-name { font-weight:700; font-size:16px; }
-    .profile-sub { color:var(--muted); font-size:13px; margin-top:4px; }
-    .progress-wrap { width:260px; text-align:right; }
-
-    .progress-bar {
-      height:12px;
-      background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-      border-radius:10px;
-      overflow:hidden;
-      margin-top:10px;
-    }
-    .progress-fill {
-      height:100%;
-      width:35%; /* динамически перекрывать JS */
-      background: linear-gradient(90deg,var(--accent),var(--accent-2));
-      box-shadow: 0 6px 20px rgba(96,165,250,0.18);
-    }
-
-    /* главное меню — грид */
-    .menu {
-      width:100%;
-      max-width:980px;
-      display:grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap:14px;
-      margin-top:16px;
-    }
-
-    @media (max-width:900px){
-      .menu { grid-template-columns: repeat(3,1fr); }
-    }
-    @media (max-width:600px){
-      .menu { grid-template-columns: repeat(2,1fr); }
-      .profile-card { flex-direction:row; }
-    }
-
-    .menu-item {
-      position:relative;
-      padding:18px;
-      border-radius:16px;
-      min-height:120px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      justify-content:center;
-      align-items:flex-start;
-      cursor:pointer;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,0.03);
-      background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
-      transition: transform .16s cubic-bezier(.2,.9,.2,1), box-shadow .16s, background .2s;
-      box-shadow: 0 6px 24px rgba(2,6,23,0.5);
-      user-select:none;
-    }
-
-    .menu-item:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 18px 40px rgba(2,6,23,0.55); }
-    .menu-item:active { transform: translateY(-2px) scale(.995); }
-
-    .menu-icon {
-      width:56px;
-      height:56px;
-      border-radius:12px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:24px;
-      background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-      border:1px solid rgba(255,255,255,0.03);
-      box-shadow: inset 0 -6px 12px rgba(0,0,0,0.12);
-    }
-    .menu-title { font-weight:700; font-size:15px; }
-    .menu-desc { font-size:12px; color:var(--muted); margin-top:4px; }
-
-    /* ripple */
-    .ripple { position:absolute; border-radius:999px; transform: scale(0); animation: ripple .6s linear; background: rgba(255,255,255,0.08); pointer-events:none; }
-    @keyframes ripple { to { transform: scale(4); opacity:0; } }
-
-    /* небольшой футтер */
-    .footer {
-      width:100%;
-      max-width:980px;
-      margin-top:auto;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      color:var(--muted);
-      font-size:13px;
-      padding:18px;
-      box-sizing:border-box;
-    }
-
-    /* utility */
-    .hidden { display:none !important; }
-    .btn {
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      justify-content:center;
-      padding:10px 14px;
-      border-radius:12px;
-      background: linear-gradient(90deg,var(--accent),var(--accent-2));
-      color:#022633;
-      font-weight:700;
-      border:none;
-      cursor:pointer;
-      box-shadow:0 10px 26px rgba(6,182,212,0.12);
-    }
-    .small { font-size:13px; padding:8px 10px; border-radius:10px; }
-
+    html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(160deg,var(--bg-a) 0%,var(--bg-b) 100%);color:#e6eef6;overflow:hidden;}
+    .app{height:100vh;display:flex;flex-direction:column;gap:var(--gap);padding:calc(env(safe-area-inset-top,20px)+20px) 18px 24px;box-sizing:border-box;align-items:center;justify-content:flex-start;}
+    .header{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+    .brand{display:flex;gap:12px;align-items:center;}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 6px 20px rgba(96,165,250,0.18);user-select:none;}
+    .brand-title{font-weight:700;font-size:18px;}
+    .brand-sub{font-size:12px;color:var(--muted);margin-top:-4px;}
+    .hdr-actions{display:flex;gap:10px;align-items:center;}
+    .hdr-stats{display:flex;gap:10px;align-items:center;padding:8px 12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);font-size:13px;}
+    .profile-card{width:100%;max-width:980px;margin-top:8px;padding:14px;border-radius:var(--radius);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid var(--glass-border);box-shadow:0 8px 30px rgba(2,6,23,0.6);display:flex;align-items:center;gap:14px;box-sizing:border-box;}
+    .avatar{width:72px;height:72px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:24px;color:white;}
+    .profile-info{flex:1;min-width:0;}
+    .profile-name{font-weight:700;font-size:16px;}
+    .profile-sub{color:var(--muted);font-size:13px;margin-top:4px;}
+    .progress-bar{height:12px;background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));border-radius:10px;overflow:hidden;margin-top:10px;}
+    .progress-fill{height:100%;width:35%;background:linear-gradient(90deg,var(--accent),var(--accent-2));box-shadow:0 6px 20px rgba(96,165,250,0.18);}
+    .menu{width:100%;max-width:980px;display:grid;grid-template-columns: repeat(4, minmax(0,1fr));gap:14px;margin-top:16px;}
+    .menu-item{position:relative;padding:18px;border-radius:16px;min-height:120px;display:flex;flex-direction:column;gap:10px;justify-content:center;align-items:flex-start;cursor:pointer;overflow:hidden;border:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));transition:transform .16s cubic-bezier(.2,.9,.2,1),box-shadow .16s;background-size:200% 200%;}
+    .menu-item:hover{transform:translateY(-6px) scale(1.01);box-shadow:0 18px 40px rgba(2,6,23,0.55);}
+    .menu-icon{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);}
+    .menu-title{font-weight:700;font-size:15px;}
+    .menu-desc{font-size:12px;color:var(--muted);margin-top:4px;}
+    .ripple{position:absolute;border-radius:999px;transform:scale(0);animation:ripple .6s linear;background:rgba(255,255,255,0.08);pointer-events:none;}
+    @keyframes ripple{to{transform:scale(4);opacity:0;}}
+    .footer{width:100%;max-width:980px;margin-top:auto;display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:13px;padding:18px;box-sizing:border-box;}
+    .hidden{display:none !important;}
+    .btn{display:inline-flex;gap:8px;align-items:center;justify-content:center;padding:10px 14px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#022633;font-weight:700;border:none;cursor:pointer;box-shadow:0 10px 26px rgba(6,182,212,0.12);}
+    input[type="text"], input[type="tel"], input[type="number"]{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:inherit;width:160px}
+    .code-box{display:flex;gap:8px;align-items:center}
   </style>
 </head>
 <body>
   <div class="app" id="app">
-
     <div class="header">
       <div class="brand">
         <div class="logo">P</div>
@@ -264,83 +58,46 @@
           <div class="brand-sub">Игровая часть для медпредставителей</div>
         </div>
       </div>
-
       <div class="hdr-actions">
-        <!-- кнопки можно привязать к профилю/настройкам -->
         <div class="hdr-stats" id="hdrStats">XP: <strong id="xpVal">0</strong> · Coins: <strong id="coinsVal">0</strong></div>
-        <div class="circle-btn" id="btnSettings" title="Настройки" onclick="onSettings()">
-          ⚙️
-        </div>
       </div>
     </div>
 
-    <!-- профиль -->
     <div class="profile-card" id="profileCard">
       <div class="avatar" id="avatar">DA</div>
       <div class="profile-info">
-        <div class="profile-name" id="profileName">Диор Акмалович</div>
-        <div class="profile-sub" id="profileSub">Менеджер — Фармасинтез</div>
-
-        <div class="progress-bar" aria-hidden="true">
-          <div class="progress-fill" id="progressFill" style="width:35%"></div>
-        </div>
+        <div class="profile-name" id="profileName">Гость</div>
+        <div class="profile-sub" id="profileSub">Пожалуйста, войдите по коду</div>
+        <div class="progress-bar" aria-hidden="true"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
       </div>
       <div class="progress-wrap">
-        <div style="font-size:12px; color:var(--muted)">Уровень <strong id="levelVal">1</strong></div>
-        <div style="font-size:13px; font-weight:700; margin-top:6px" id="nextXp">35 / 100 XP</div>
+        <div style="font-size:12px;color:var(--muted)">Уровень <strong id="levelVal">1</strong></div>
+        <div style="font-size:13px;font-weight:700;margin-top:6px" id="nextXp">0 / 100 XP</div>
       </div>
     </div>
 
-    <!-- Главное меню (grid) -->
-    <div class="menu" id="mainMenu">
-      <!-- Пример интерактивной кнопки: создать проект -->
-      <div class="menu-item" data-action="create_project" onclick="menuClick(event)" onmousedown="ripple(event)">
-        <div class="menu-icon">📝</div>
-        <div class="menu-title">Создать проект</div>
-        <div class="menu-desc">Шаг за шагом — быстро и красиво</div>
+    <!-- экран ввода кода -->
+    <div id="codeScreen" style="width:100%;max-width:480px;margin-top:18px;padding:16px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);">
+      <h3 style="margin:0 0 8px 0">Вход по коду</h3>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="code-box">
+          <input id="accessCode" maxlength="4" inputmode="numeric" placeholder="0000" />
+          <button class="btn small" onclick="verifyCode()">Войти</button>
+        </div>
+        <button class="btn small" onclick="requestCode()">Получить код</button>
       </div>
+      <div style="margin-top:8px;color:var(--muted);font-size:13px">Код придёт администратору (в dev возвращается в ответе)</div>
+    </div>
 
-      <div class="menu-item" data-action="my_projects" onclick="menuClick(event)" onmousedown="ripple(event)">
-        <div class="menu-icon">📁</div>
-        <div class="menu-title">Мои проекты</div>
-        <div class="menu-desc">Просмотр и редактирование</div>
-      </div>
-
-      <div class="menu-item" data-action="visits" onclick="menuClick(event)" onmousedown="ripple(event)">
-        <div class="menu-icon">🚑</div>
-        <div class="menu-title">Визиты</div>
-        <div class="menu-desc">Добавить/отметить визит</div>
-      </div>
-
-      <div class="menu-item" data-action="game" onclick="menuClick(event)" onmousedown="ripple(event)">
-        <div class="menu-icon">🎮</div>
-        <div class="menu-title">Игры</div>
-        <div class="menu-desc">Мини-игры и очки</div>
-      </div>
-
-      <div class="menu-item" data-action="leaderboard" onclick="menuClick(event)" onmousedown="ripple(event)">
-        <div class="menu-icon">🏆</div>
-        <div class="menu-title">Топ</div>
-        <div class="menu-desc">Лидерборд сотрудников</div>
-      </div>
-
-      <div class="menu-item" data-action="store" onclick="menuClick(event)" onmousedown="ripple(event)">
-        <div class="menu-icon">🛍️</div>
-        <div class="menu-title">Магазин</div>
-        <div class="menu-desc">Потрать монеты на бейджи</div>
-      </div>
-
-      <div class="menu-item" data-action="help" onclick="menuClick(event)" onmousedown="ripple(event)">
-        <div class="menu-icon">❓</div>
-        <div class="menu-title">Помощь</div>
-        <div class="menu-desc">Инструкции и FAQ</div>
-      </div>
-
-      <div class="menu-item" data-action="settings" onclick="menuClick(event)" onmousedown="ripple(event)">
-        <div class="menu-icon">⚙️</div>
-        <div class="menu-title">Настройки</div>
-        <div class="menu-desc">Язык, уведомления</div>
-      </div>
+    <div class="menu" id="mainMenu" style="display:none;">
+      <div class="menu-item" data-action="create_project" onclick="menuClick(event)" onmousedown="ripple(event)"><div class="menu-icon">📝</div><div class="menu-title">Создать проект</div><div class="menu-desc">Шаг за шагом</div></div>
+      <div class="menu-item" data-action="my_projects" onclick="menuClick(event)" onmousedown="ripple(event)"><div class="menu-icon">📁</div><div class="menu-title">Мои проекты</div><div class="menu-desc">Просмотр</div></div>
+      <div class="menu-item" data-action="visits" onclick="menuClick(event)" onmousedown="ripple(event)"><div class="menu-icon">🚑</div><div class="menu-title">Визиты</div><div class="menu-desc">Добавить визит</div></div>
+      <div class="menu-item" data-action="game" onclick="menuClick(event)" onmousedown="ripple(event)"><div class="menu-icon">🎮</div><div class="menu-title">Игры</div><div class="menu-desc">Мини-игры</div></div>
+      <div class="menu-item" data-action="leaderboard" onclick="menuClick(event)" onmousedown="ripple(event)"><div class="menu-icon">🏆</div><div class="menu-title">Топ</div><div class="menu-desc">Лидерборд</div></div>
+      <div class="menu-item" data-action="store" onclick="menuClick(event)" onmousedown="ripple(event)"><div class="menu-icon">🛍️</div><div class="menu-title">Магазин</div><div class="menu-desc">Бейджи</div></div>
+      <div class="menu-item" data-action="help" onclick="menuClick(event)" onmousedown="ripple(event)"><div class="menu-icon">❓</div><div class="menu-title">Помощь</div><div class="menu-desc">FAQ</div></div>
+      <div class="menu-item" data-action="settings" onclick="menuClick(event)" onmousedown="ripple(event)"><div class="menu-icon">⚙️</div><div class="menu-title">Настройки</div><div class="menu-desc">Язык</div></div>
     </div>
 
     <div class="footer">
@@ -349,126 +106,176 @@
     </div>
   </div>
 
-  <!-- Скрипты: инициализация WebApp, ripple, обработчик нажатий -->
-  <script>
-    // --- Telegram WebApp init: при доступности стараемся разворачивать в полный экран ---
-    const isTelegram = typeof Telegram !== 'undefined' || (window.Telegram && Telegram.WebApp);
+<script>
+  // Try to expand in Telegram; fallback to requestFullscreen for browsers
+  function tryFullScreen() {
     try {
-      if (isTelegram) {
-        // Telegram.WebApp может быть глобальным объектом, но внутри iframe он доступен как Telegram.WebApp
-        const webapp = (window.Telegram && window.Telegram.WebApp) || Telegram.WebApp;
-        webapp.ready();
-        // попытаться расширить окно — даст "app-like" полноэкранный вид внутри Telegram
-        if (typeof webapp.expand === 'function') {
-          try { webapp.expand(); } catch(e) { /* ignore */ }
+      if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.ready();
+        if (typeof Telegram.WebApp.expand === 'function') {
+          try { Telegram.WebApp.expand(); } catch(e){ console.warn('expand failed', e); }
         }
-        // по желанию: получить initData и показать пользователя
-        if (webapp.initDataUnsafe && webapp.initDataUnsafe.user) {
-          const u = webapp.initDataUnsafe.user;
-          document.getElementById('profileName').textContent = (u.first_name || '') + (u.last_name ? ' ' + u.last_name : '');
-          document.getElementById('avatar').textContent = (u.first_name || 'U')[0] + (u.last_name ? u.last_name[0] : '');
-        }
+      } else if (document.documentElement.requestFullscreen) {
+        // ask user gesture is needed; try only if not in iframe
+        try {
+          document.documentElement.requestFullscreen().catch(()=>{/*ignore*/});
+        } catch(e){/*ignore*/}
+      }
+    } catch(e){ console.warn(e); }
+  }
+  tryFullScreen();
+
+  // utils
+  function ripple(e){
+    const target = e.currentTarget;
+    const rect = target.getBoundingClientRect();
+    const r = document.createElement('span');
+    r.className = 'ripple';
+    const size = Math.max(rect.width, rect.height);
+    r.style.width = r.style.height = size + 'px';
+    r.style.left = (e.clientX - rect.left - size/2) + 'px';
+    r.style.top = (e.clientY - rect.top - size/2) + 'px';
+    target.appendChild(r);
+    setTimeout(()=> r.remove(), 700);
+  }
+
+  function menuClick(e){
+    let el = e.target;
+    while(el && !el.dataset.action) el = el.parentElement;
+    if(!el) return;
+    const action = el.dataset.action;
+    switch(action){
+      case 'create_project': notify('Создать проект'); break;
+      case 'my_projects': notify('Мои проекты'); break;
+      case 'visits': notify('Визиты'); break;
+      case 'game': notify('Игры'); break;
+      case 'leaderboard': fetchLeaderboard(); break;
+      case 'store': notify('Магазин'); break;
+      case 'help': notify('Помощь'); break;
+      case 'settings': notify('Настройки'); break;
+    }
+  }
+
+  function notify(text){
+    const prev = document.getElementById('tmpNotify'); if(prev) prev.remove();
+    const n = document.createElement('div'); n.id='tmpNotify'; n.textContent=text;
+    Object.assign(n.style, {position:'fixed',left:'50%',transform:'translateX(-50%)',bottom:'70px',background:'rgba(0,0,0,0.6)',color:'#fff',padding:'10px 14px',borderRadius:'10px',zIndex:9999,fontSize:'14px'});
+    document.body.appendChild(n); setTimeout(()=> n.remove(), 1400);
+  }
+
+  // Backend host (если frontend хостится отдельно, поставь полный URL)
+  const API_BASE = ''; // empty => same origin, иначе 'https://your.domain'
+
+  // request 4-digit code
+  async function requestCode(){
+    const user = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) || {};
+    const userId = user.id || prompt('Введите ваш ID (для dev)');
+    if(!userId){ alert('Не указан user id'); return; }
+    const name = user.first_name || '';
+    try{
+      const resp = await fetch(API_BASE + '/auth/request_code', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ user_id: userId, name, source: window.location.href })
+      });
+      const j = await resp.json();
+      if(j.ok){
+        // в dev возвращается код в JSON. В проде код отправляется только администратору.
+        alert('Код отправлен. (dev code: ' + (j.code || '—') + ')');
+      } else {
+        alert('Ошибка: ' + (j.error || JSON.stringify(j)));
       }
     } catch(e){
-      console.warn('tg init error', e);
+      console.error(e); alert('Ошибка сети');
     }
+  }
 
-    // --- ripple effect для menu-item ---
-    function ripple(e){
-      const target = e.currentTarget;
-      const rect = target.getBoundingClientRect();
-      const r = document.createElement('span');
-      r.className = 'ripple';
-      const size = Math.max(rect.width, rect.height);
-      r.style.width = r.style.height = size + 'px';
-      r.style.left = (e.clientX - rect.left - size/2) + 'px';
-      r.style.top = (e.clientY - rect.top - size/2) + 'px';
-      target.appendChild(r);
-      setTimeout(()=> r.remove(), 700);
-    }
-
-    // --- общая обработка нажатий в меню ---
-    function menuClick(e){
-      // если клик пришёл из вложнего элемента, поднять до .menu-item
-      let el = e.target;
-      while(el && !el.dataset.action) el = el.parentElement;
-      if(!el) return;
-      const action = el.dataset.action;
-      // визуальный отклик:
-      el.style.transform = 'translateY(-2px) scale(.997)';
-      setTimeout(()=> el.style.transform = '', 160);
-
-      // обработка действий — сюда можно подключать вашу логику
-      switch(action){
-        case 'create_project': openCreateProject(); break;
-        case 'my_projects': openMyProjects(); break;
-        case 'visits': openVisits(); break;
-        case 'game': openGame(); break;
-        case 'leaderboard': getLeaderboard(); break;
-        case 'store': openStore(); break;
-        case 'help': openHelp(); break;
-        case 'settings': onSettings(); break;
-        default: console.log('action',action);
-      }
-    }
-
-    // ----------------- placeholder функции — замените своими реализациями -----------------
-    function openCreateProject(){
-      // TODO: показать экран создания проекта
-      // пример отправки данных в бота: Telegram.WebApp.sendData(JSON.stringify({ action:'open', screen:'create_project' }));
-      notify('Открыть: Создать проект');
-    }
-    function openMyProjects(){ notify('Открыть: Мои проекты'); }
-    function openVisits(){ notify('Открыть: Визиты'); }
-    function openGame(){ notify('Открыть: Игры'); 
-      // если есть игровая страница — можно перейти на неё или показать модал
-      // window.location.href = '/game.html';
-    }
-    function getLeaderboard(){
-      notify('Запросить лидерборд...');
-      // Если хотите — можно отправить произвольные данные боту:
-      try { Telegram.WebApp.sendData(JSON.stringify({ action:'get_leaderboard' })); } catch(e){ console.warn(e); }
-    }
-    function openStore(){ notify('Открыть магазин'); }
-    function openHelp(){ notify('Открыть помощь'); }
-    function onSettings(){ notify('Открыть настройки'); }
-
-    // простая нотификация — пока что простым toast
-    function notify(text){
-      // временно используем alert (можно заменить на кастомный toast)
-      //alert(text);
-      const prev = document.getElementById('tmpNotify');
-      if(prev) prev.remove();
-      const n = document.createElement('div');
-      n.id='tmpNotify';
-      n.textContent = text;
-      Object.assign(n.style, {
-        position:'fixed', left:'50%', transform:'translateX(-50%)', bottom:'70px',
-        background:'rgba(0,0,0,0.6)', color:'#fff', padding:'10px 14px', borderRadius:'10px',
-        zIndex:9999, fontSize:'14px', boxShadow:'0 8px 30px rgba(0,0,0,0.6)'
+  // verify code
+  async function verifyCode(){
+    const code = document.getElementById('accessCode').value.trim();
+    if(!/^\d{4}$/.test(code)){ alert('Введите 4 цифры'); return; }
+    const user = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) || {};
+    const userId = user.id || prompt('Введите ваш ID (для dev)');
+    if(!userId){ alert('Не указан user id'); return; }
+    try{
+      const resp = await fetch(API_BASE + '/auth/verify_code', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        credentials: 'include',
+        body: JSON.stringify({ user_id: userId, code })
       });
-      document.body.appendChild(n);
-      setTimeout(()=> n.remove(), 1400);
+      const j = await resp.json();
+      if(j.ok){
+        document.getElementById('codeScreen').classList.add('hidden');
+        document.getElementById('mainMenu').style.display = 'grid';
+        document.getElementById('profileName').textContent = (user.first_name || 'Пользователь') + (user.last_name ? ' ' + user.last_name : '');
+        document.getElementById('avatar').textContent = ((user.first_name||'U')[0] || 'U') + (user.last_name ? (user.last_name[0]||'') : '');
+        fetchStats(userId);
+      } else {
+        alert('Ошибка: ' + (j.error || j.message || JSON.stringify(j)));
+      }
+    } catch(e){
+      console.error(e); alert('Ошибка сети');
     }
+  }
 
-    // --- динамическое обновление прогресса (пример) ---
-    function setProgress(xp, level, coins){
-      // xp: текущее, level: номер уровня, coins: монеты
-      const next = (level) * 100; // простая формула: level*100 XP
-      const percent = Math.min(100, Math.round(xp / next * 100));
-      document.getElementById('xpVal').textContent = xp;
-      document.getElementById('coinsVal').textContent = coins;
-      document.getElementById('levelVal').textContent = level;
-      document.getElementById('nextXp').textContent = xp + ' / ' + next + ' XP';
-      document.getElementById('progressFill').style.width = percent + '%';
+  // fetch stats from backend and update UI
+  async function fetchStats(userId){
+    try{
+      const resp = await fetch(API_BASE + '/stats/get?user_id=' + encodeURIComponent(userId));
+      const j = await resp.json();
+      if(j.ok && j.stats){
+        const s = j.stats;
+        document.getElementById('xpVal').textContent = s.xp || 0;
+        document.getElementById('coinsVal').textContent = s.coins || 0;
+        document.getElementById('levelVal').textContent = s.level || 1;
+        const next = (s.level || 1) * 100;
+        document.getElementById('nextXp').textContent = (s.xp || 0) + ' / ' + next + ' XP';
+        const percent = Math.min(100, Math.round((s.xp || 0) / next * 100));
+        document.getElementById('progressFill').style.width = percent + '%';
+        document.getElementById('profileSub').textContent = 'Визиты: ' + (s.visits_count || 0);
+      } else {
+        console.warn('no stats', j);
+      }
+    } catch(e){
+      console.error(e);
     }
+  }
 
-    // пример начальных значений — можно заменить на реальные данные из tg.initDataUnsafe или с бота
-    setProgress(35, 1, 12);
+  // fetch leaderboard
+  async function fetchLeaderboard(){
+    try{
+      const resp = await fetch(API_BASE + '/stats/leaderboard?limit=10');
+      const j = await resp.json();
+      if(j.ok){
+        let text = 'Топ:\n';
+        j.leaderboard.forEach((r, i)=> {
+          text += `${i+1}. ${r.name||r.user_id} — XP ${r.xp} (lvl ${r.level})\n`;
+        });
+        alert(text);
+      } else alert('Ошибка лидерборда');
+    } catch(e){ console.error(e); alert('Ошибка сети'); }
+  }
 
-    // prevent overscroll inside telegram webapp iframe (улучшаем ощущение "приложения")
-    document.addEventListener('touchmove', function(e){ /* можно ограничить */ }, { passive:true });
+  // auto-check if user already has session: try fetch stats if Telegram user exists
+  (function initFromTelegram(){
+    const user = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) || null;
+    if(user && user.id){
+      // attempt to get stats — if success, open menu
+      fetch('/stats/get?user_id=' + user.id).then(r=>r.json()).then(j=>{
+        if(j.ok && j.stats){
+          document.getElementById('codeScreen').classList.add('hidden');
+          document.getElementById('mainMenu').style.display = 'grid';
+          document.getElementById('profileName').textContent = (user.first_name || 'Пользователь') + (user.last_name ? ' ' + user.last_name : '');
+          document.getElementById('avatar').textContent = ((user.first_name||'U')[0] || 'U') + (user.last_name ? (user.last_name[0]||'') : '');
+          fetchStats(user.id);
+        } else {
+          // leave code screen visible
+        }
+      }).catch(()=>{/*ignore*/});
+    }
+  })();
 
-  </script>
+</script>
 </body>
 </html>
