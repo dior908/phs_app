@@ -1357,6 +1357,8 @@
             const pin = ['adminPin1', 'adminPin2', 'adminPin3', 'adminPin4']
                 .map(id => document.getElementById(id).value).join('');
             
+            console.log('🔐 Проверка пароля админ-панели:', pin);
+            
             if (pin === '0101') {
                 hideAllErrors();
                 
@@ -1364,22 +1366,42 @@
                 const dataToSend = {
                     action: 'admin_login',
                     email: 'tajiev@yandex.ru',
-                    user: userInfo
+                    user: {
+                        id: userInfo.id,
+                        first_name: userInfo.first_name,
+                        last_name: userInfo.last_name,
+                        username: userInfo.username
+                    }
                 };
                 
-                console.log('📤 Отправка данных боту:', dataToSend);
+                console.log('📤 Отправка данных боту:', JSON.stringify(dataToSend, null, 2));
+                console.log('📱 Telegram WebApp ready:', tg.isReady);
+                console.log('📱 sendData доступен:', typeof tg.sendData === 'function');
                 
-                // Отправка уведомления на email
-                tg.sendData(JSON.stringify(dataToSend));
+                try {
+                    // Отправка данных боту
+                    tg.sendData(JSON.stringify(dataToSend));
+                    console.log('✅ Данные отправлены через tg.sendData');
+                    
+                    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    
+                    // Показываем админ-панель
+                    showScreen('adminPanel');
+                    
+                    // Уведомление пользователю
+                    setTimeout(() => {
+                        alert(currentLanguage === 'ru' 
+                            ? '✅ Вход выполнен!\n\nПисьмо отправляется на tajiev@yandex.ru\nПроверьте почту через 1-2 минуты.' 
+                            : '✅ Kirish amalga oshirildi!\n\nXat tajiev@yandex.ru ga yuborilmoqda\n1-2 daqiqadan keyin pochtani tekshiring.');
+                    }, 500);
+                    
+                } catch (error) {
+                    console.error('❌ Ошибка отправки данных:', error);
+                    alert('Ошибка отправки данных боту. Проверьте консоль.');
+                }
                 
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                
-                alert(currentLanguage === 'ru' 
-                    ? '✅ Вход выполнен!\nПроверьте консоль бота (терминал) для подтверждения отправки email.' 
-                    : '✅ Kirish amalga oshirildi!\nEmail yuborilganligini tasdiqlash uchun bot konsolini tekshiring.');
-                
-                showScreen('adminPanel');
             } else {
+                console.log('❌ Неверный пароль:', pin);
                 showError('adminPin', 'Неверный пароль');
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
                 ['adminPin1', 'adminPin2', 'adminPin3', 'adminPin4'].forEach(id => {
