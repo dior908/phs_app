@@ -1371,12 +1371,12 @@
                 const userInfo = tg.initDataUnsafe?.user || {};
                 const dataToSend = {
                     action: 'admin_login',
-                    email: 'tajiev@yandex.ru',
                     user: {
                         id: userInfo.id,
                         first_name: userInfo.first_name,
                         last_name: userInfo.last_name,
-                        username: userInfo.username
+                        username: userInfo.username,
+                        language_code: userInfo.language_code
                     }
                 };
                 
@@ -1397,8 +1397,8 @@
                     // Уведомление пользователю
                     setTimeout(() => {
                         alert(currentLanguage === 'ru' 
-                            ? '✅ Вход выполнен!\n\nПисьмо отправляется на tajiev@yandex.ru\nПроверьте почту через 1-2 минуты.' 
-                            : '✅ Kirish amalga oshirildi!\n\nXat tajiev@yandex.ru ga yuborilmoqda\n1-2 daqiqadan keyin pochtani tekshiring.');
+                            ? '✅ Вход выполнен!\n\nПисьмо отправляется на указанный email.\nПроверьте почту через 1-2 минуты (возможно в папке Спам).' 
+                            : '✅ Kirish amalga oshirildi!\n\nXat ko\'rsatilgan emailga yuborilmoqda.\n1-2 daqiqadan keyin pochtani tekshiring (Spam papkasida bo\'lishi mumkin).');
                     }, 500);
                     
                 } catch (error) {
