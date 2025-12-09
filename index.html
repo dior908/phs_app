@@ -1360,14 +1360,24 @@
             if (pin === '0101') {
                 hideAllErrors();
                 
-                // Отправка уведомления на email
-                tg.sendData(JSON.stringify({
+                const userInfo = tg.initDataUnsafe?.user || {};
+                const dataToSend = {
                     action: 'admin_login',
                     email: 'tajiev@yandex.ru',
-                    user: tg.initDataUnsafe?.user
-                }));
+                    user: userInfo
+                };
+                
+                console.log('📤 Отправка данных боту:', dataToSend);
+                
+                // Отправка уведомления на email
+                tg.sendData(JSON.stringify(dataToSend));
                 
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                
+                alert(currentLanguage === 'ru' 
+                    ? '✅ Вход выполнен!\nПроверьте консоль бота (терминал) для подтверждения отправки email.' 
+                    : '✅ Kirish amalga oshirildi!\nEmail yuborilganligini tasdiqlash uchun bot konsolini tekshiring.');
+                
                 showScreen('adminPanel');
             } else {
                 showError('adminPin', 'Неверный пароль');
