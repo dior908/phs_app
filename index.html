@@ -640,10 +640,40 @@
                 <div class="logo"><div class="logo-icon">⚙️</div></div>
                 <h1>Админ-панель</h1>
                 <p class="subtitle">Управление</p>
-                <div style="background:rgba(255,255,255,0.3);padding:20px;border-radius:12px;margin:20px 0;">
-                    <p style="color:#37474f;font-weight:600;">Статистика в разработке</p>
+                
+                <div class="menu-grid">
+                    <button class="menu-button" onclick="openUsersPanel()">
+                        <div class="menu-icon">👥</div>
+                        <div class="menu-text">Пользователи</div>
+                    </button>
+                    <button class="menu-button" onclick="openVisitsPanel()">
+                        <div class="menu-icon">📊</div>
+                        <div class="menu-text">Визиты</div>
+                    </button>
+                    <button class="menu-button" onclick="openReportsPanel()">
+                        <div class="menu-icon">📈</div>
+                        <div class="menu-text">Отчеты</div>
+                    </button>
+                    <button class="menu-button" onclick="openSettingsPanel()">
+                        <div class="menu-icon">⚙️</div>
+                        <div class="menu-text">Настройки</div>
+                    </button>
                 </div>
-                <button class="btn btn-secondary" onclick="backToMainMenu()">Вернуться</button>
+                
+                <button class="btn btn-secondary" onclick="backToMainMenu()" style="margin-top:20px;">Вернуться</button>
+            </div>
+
+            <!-- Панель пользователей -->
+            <div id="usersPanel" class="hidden">
+                <div class="logo"><div class="logo-icon">👥</div></div>
+                <h1>Пользователи</h1>
+                <p class="subtitle">Список зарегистрированных пользователей</p>
+                
+                <div id="usersList" style="background:rgba(255,255,255,0.3);padding:15px;border-radius:12px;margin:20px 0;max-height:400px;overflow-y:auto;">
+                    <p style="color:#37474f;font-weight:600;text-align:center;">Загрузка...</p>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="backToAdminPanel()">Назад</button>
             </div>
         </div>
     </div>
@@ -1201,6 +1231,106 @@
             } else {
                 alert(currentLanguage === 'ru' ? 'В разработке' : 'Ishlab chiqilmoqda');
             }
+        }
+
+        function openUsersPanel() {
+            showScreen('usersPanel');
+            loadUsersList();
+        }
+
+        function openVisitsPanel() {
+            alert(currentLanguage === 'ru' ? 'В разработке' : 'Ishlab chiqilmoqda');
+        }
+
+        function openReportsPanel() {
+            alert(currentLanguage === 'ru' ? 'В разработке' : 'Ishlab chiqilmoqda');
+        }
+
+        function openSettingsPanel() {
+            alert(currentLanguage === 'ru' ? 'В разработке' : 'Ishlab chiqilmoqda');
+        }
+
+        function backToAdminPanel() {
+            showScreen('adminPanel');
+        }
+
+        function loadUsersList() {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '<p style="color:#37474f;font-weight:600;text-align:center;">Загрузка пользователей...</p>';
+            
+            // Отправляем запрос на сервер для получения списка пользователей
+            tg.sendData(JSON.stringify({
+                action: 'get_users_list',
+                admin_id: tg.initDataUnsafe?.user?.id
+            }));
+            
+            // Временно показываем заглушку (в реальном приложении данные придут от бота)
+            setTimeout(() => {
+                const mockUsers = [];
+                
+                // Собираем всех пользователей из localStorage
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('user_')) {
+                        try {
+                            const userData = JSON.parse(localStorage.getItem(key));
+                            if (userData.name) {
+                                mockUsers.push(userData);
+                            }
+                        } catch (e) {
+                            console.error('Error parsing user data:', e);
+                        }
+                    }
+                }
+                
+                if (mockUsers.length === 0) {
+                    usersList.innerHTML = '<p style="color:#37474f;text-align:center;">Пользователи не найдены</p>';
+                } else {
+                    let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+                    mockUsers.forEach((user, index) => {
+                        html += `
+                            <div style="background:rgba(255,255,255,0.5);padding:12px;border-radius:8px;box-shadow:2px 2px 4px rgba(0,0,0,0.1);">
+                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                                    <div style="width:40px;height:40px;background:linear-gradient(145deg, #95a5a6, #7f8c8d);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:18px;">
+                                        ${user.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div style="flex:1;">
+                                        <div style="font-weight:600;color:#2c3e50;font-size:15px;">${user.name}</div>
+                                        <div style="font-size:12px;color:#7f8c8d;">${user.phone || 'Телефон не указан'}</div>
+                                    </div>
+                                </div>
+                                <div style="font-size:12px;color:#546e7a;line-height:1.4;">
+                                    <div>📧 ${user.email || 'Email не указан'}</div>
+                                    <div>📍 ${getRegionName(user.region) || 'Область не указана'}</div>
+                                    ${user.language ? `<div>🌐 ${user.language === 'ru' ? 'Русский' : 'O\'zbekcha'}</div>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    usersList.innerHTML = html;
+                }
+            }, 500);
+        }
+
+        function getRegionName(regionCode) {
+            const regions = {
+                'tashkent_city': 'г. Ташкент',
+                'andijan': 'Андижанская',
+                'bukhara': 'Бухарская',
+                'jizzakh': 'Джизакская',
+                'kashkadarya': 'Кашкадарьинская',
+                'navoi': 'Навоийская',
+                'namangan': 'Наманганская',
+                'samarkand': 'Самаркандская',
+                'surkhandarya': 'Сурхандарьинская',
+                'sirdarya': 'Сырдарьинская',
+                'tashkent': 'Ташкентская',
+                'fergana': 'Ферганская',
+                'khorezm': 'Хорезмская',
+                'karakalpakstan': 'Каракалпакстан'
+            };
+            return regions[regionCode] || regionCode;
         }
 
         function openEditProfile() {
