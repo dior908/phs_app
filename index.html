@@ -639,9 +639,9 @@
             <div id="adminPanel" class="hidden">
                 <div class="logo"><div class="logo-icon">⚙️</div></div>
                 <h1>Админ-панель</h1>
-                <p class="subtitle">Управление</p>
+                <p class="subtitle">Управление системой</p>
                 
-                <div class="menu-grid">
+                <div class="menu-grid" style="margin-top:20px;">
                     <button class="menu-button" onclick="openUsersPanel()">
                         <div class="menu-icon">👥</div>
                         <div class="menu-text">Пользователи</div>
@@ -667,13 +667,13 @@
             <div id="usersPanel" class="hidden">
                 <div class="logo"><div class="logo-icon">👥</div></div>
                 <h1>Пользователи</h1>
-                <p class="subtitle">Список зарегистрированных пользователей</p>
+                <p class="subtitle">Зарегистрированные пользователи</p>
                 
-                <div id="usersList" style="background:rgba(255,255,255,0.3);padding:15px;border-radius:12px;margin:20px 0;max-height:400px;overflow-y:auto;">
+                <div id="usersList" style="background:rgba(255,255,255,0.3);padding:15px;border-radius:12px;margin:20px 0;max-height:450px;overflow-y:auto;">
                     <p style="color:#37474f;font-weight:600;text-align:center;">Загрузка...</p>
                 </div>
                 
-                <button class="btn btn-secondary" onclick="backToAdminPanel()">Назад</button>
+                <button class="btn btn-secondary" onclick="backToAdminPanel()">Назад к админ-панели</button>
             </div>
         </div>
     </div>
@@ -1233,21 +1233,24 @@
             }
         }
 
+        // === ФУНКЦИИ АДМИН-ПАНЕЛИ ===
+        
         function openUsersPanel() {
+            console.log('📂 Открытие панели пользователей');
             showScreen('usersPanel');
             loadUsersList();
         }
 
         function openVisitsPanel() {
-            alert(currentLanguage === 'ru' ? 'В разработке' : 'Ishlab chiqilmoqda');
+            alert(currentLanguage === 'ru' ? 'Раздел "Визиты" в разработке' : 'Tashriflar bo\'limi ishlab chiqilmoqda');
         }
 
         function openReportsPanel() {
-            alert(currentLanguage === 'ru' ? 'В разработке' : 'Ishlab chiqilmoqda');
+            alert(currentLanguage === 'ru' ? 'Раздел "Отчеты" в разработке' : 'Hisobotlar bo\'limi ishlab chiqilmoqda');
         }
 
         function openSettingsPanel() {
-            alert(currentLanguage === 'ru' ? 'В разработке' : 'Ishlab chiqilmoqda');
+            alert(currentLanguage === 'ru' ? 'Раздел "Настройки" в разработке' : 'Sozlamalar bo\'limi ishlab chiqilmoqda');
         }
 
         function backToAdminPanel() {
@@ -1256,17 +1259,22 @@
 
         function loadUsersList() {
             const usersList = document.getElementById('usersList');
-            usersList.innerHTML = '<p style="color:#37474f;font-weight:600;text-align:center;">Загрузка пользователей...</p>';
+            usersList.innerHTML = '<p style="color:#37474f;font-weight:600;text-align:center;">⏳ Загрузка пользователей...</p>';
             
-            // Отправляем запрос на сервер для получения списка пользователей
-            tg.sendData(JSON.stringify({
+            console.log('📡 Отправка запроса на получение списка пользователей');
+            
+            // Отправляем запрос боту
+            const requestData = {
                 action: 'get_users_list',
                 admin_id: tg.initDataUnsafe?.user?.id
-            }));
+            };
             
-            // Временно показываем заглушку (в реальном приложении данные придут от бота)
+            console.log('📤 Данные запроса:', requestData);
+            tg.sendData(JSON.stringify(requestData));
+            
+            // Показываем локальных пользователей из localStorage
             setTimeout(() => {
-                const mockUsers = [];
+                const localUsers = [];
                 
                 // Собираем всех пользователей из localStorage
                 for (let i = 0; i < localStorage.length; i++) {
@@ -1275,40 +1283,58 @@
                         try {
                             const userData = JSON.parse(localStorage.getItem(key));
                             if (userData.name) {
-                                mockUsers.push(userData);
+                                localUsers.push(userData);
                             }
                         } catch (e) {
-                            console.error('Error parsing user data:', e);
+                            console.error('Ошибка парсинга:', e);
                         }
                     }
                 }
                 
-                if (mockUsers.length === 0) {
-                    usersList.innerHTML = '<p style="color:#37474f;text-align:center;">Пользователи не найдены</p>';
+                console.log('👥 Найдено локальных пользователей:', localUsers.length);
+                
+                if (localUsers.length === 0) {
+                    usersList.innerHTML = `
+                        <div style="text-align:center;padding:30px;">
+                            <div style="font-size:48px;margin-bottom:15px;">👥</div>
+                            <p style="color:#37474f;font-weight:600;margin-bottom:10px;">Пользователи не найдены</p>
+                            <p style="color:#7f8c8d;font-size:13px;">Зарегистрированные пользователи появятся здесь</p>
+                        </div>
+                    `;
                 } else {
-                    let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
-                    mockUsers.forEach((user, index) => {
+                    let html = '<div style="display:flex;flex-direction:column;gap:12px;">';
+                    
+                    localUsers.forEach((user, index) => {
+                        const initial = user.name.charAt(0).toUpperCase();
+                        const regionName = getRegionName(user.region) || 'Не указана';
+                        const phone = user.phone || 'Не указан';
+                        const email = user.email || 'Не указан';
+                        const lang = user.language === 'uz' ? 'O\'zbekcha' : 'Русский';
+                        
                         html += `
-                            <div style="background:rgba(255,255,255,0.5);padding:12px;border-radius:8px;box-shadow:2px 2px 4px rgba(0,0,0,0.1);">
-                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-                                    <div style="width:40px;height:40px;background:linear-gradient(145deg, #95a5a6, #7f8c8d);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:18px;">
-                                        ${user.name.charAt(0).toUpperCase()}
+                            <div style="background:rgba(255,255,255,0.5);padding:15px;border-radius:12px;box-shadow:2px 2px 6px rgba(0,0,0,0.1);">
+                                <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                                    <div style="width:45px;height:45px;background:linear-gradient(145deg, #95a5a6, #7f8c8d);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:20px;flex-shrink:0;">
+                                        ${initial}
                                     </div>
-                                    <div style="flex:1;">
-                                        <div style="font-weight:600;color:#2c3e50;font-size:15px;">${user.name}</div>
-                                        <div style="font-size:12px;color:#7f8c8d;">${user.phone || 'Телефон не указан'}</div>
+                                    <div style="flex:1;min-width:0;">
+                                        <div style="font-weight:600;color:#2c3e50;font-size:16px;margin-bottom:3px;">${user.name}</div>
+                                        <div style="font-size:12px;color:#7f8c8d;">📱 ${phone}</div>
                                     </div>
                                 </div>
-                                <div style="font-size:12px;color:#546e7a;line-height:1.4;">
-                                    <div>📧 ${user.email || 'Email не указан'}</div>
-                                    <div>📍 ${getRegionName(user.region) || 'Область не указана'}</div>
-                                    ${user.language ? `<div>🌐 ${user.language === 'ru' ? 'Русский' : 'O\'zbekcha'}</div>` : ''}
+                                <div style="font-size:12px;color:#546e7a;line-height:1.6;border-top:1px solid rgba(0,0,0,0.05);padding-top:10px;">
+                                    <div style="margin-bottom:4px;">📧 ${email}</div>
+                                    <div style="margin-bottom:4px;">📍 ${regionName}</div>
+                                    <div>🌐 ${lang}</div>
                                 </div>
                             </div>
                         `;
                     });
+                    
                     html += '</div>';
                     usersList.innerHTML = html;
+                    
+                    console.log('✅ Список пользователей отображен');
                 }
             }, 500);
         }
@@ -1316,18 +1342,18 @@
         function getRegionName(regionCode) {
             const regions = {
                 'tashkent_city': 'г. Ташкент',
-                'andijan': 'Андижанская',
-                'bukhara': 'Бухарская',
-                'jizzakh': 'Джизакская',
-                'kashkadarya': 'Кашкадарьинская',
-                'navoi': 'Навоийская',
-                'namangan': 'Наманганская',
-                'samarkand': 'Самаркандская',
-                'surkhandarya': 'Сурхандарьинская',
-                'sirdarya': 'Сырдарьинская',
-                'tashkent': 'Ташкентская',
-                'fergana': 'Ферганская',
-                'khorezm': 'Хорезмская',
+                'andijan': 'Андижанская обл.',
+                'bukhara': 'Бухарская обл.',
+                'jizzakh': 'Джизакская обл.',
+                'kashkadarya': 'Кашкадарьинская обл.',
+                'navoi': 'Навоийская обл.',
+                'namangan': 'Наманганская обл.',
+                'samarkand': 'Самаркандская обл.',
+                'surkhandarya': 'Сурхандарьинская обл.',
+                'sirdarya': 'Сырдарьинская обл.',
+                'tashkent': 'Ташкентская обл.',
+                'fergana': 'Ферганская обл.',
+                'khorezm': 'Хорезмская обл.',
                 'karakalpakstan': 'Каракалпакстан'
             };
             return regions[regionCode] || regionCode;
