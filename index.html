@@ -1,20 +1,39 @@
-<select id="region">
-  <option value="">Выберите регион</option>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
 
-  <option>г. Ташкент</option>
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no">
 
-  <option>Ташкентская область</option>
-  <option>Андижанская область</option>
-  <option>Ферганская область</option>
-  <option>Наманганская область</option>
-  <option>Самаркандская область</option>
-  <option>Бухарская область</option>
-  <option>Навоийская область</option>
-  <option>Джизакская область</option>
-  <option>Сырдарьинская область</option>
-  <option>Кашкадарьинская область</option>
-  <option>Сурхандарьинская область</option>
-  <option>Хорезмская область</option>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 
-  <option>Республика Каракалпакстан</option>
-</select>
+<title>Регистрация</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div class="app">
+  <div class="card">
+    <h2>Регистрация</h2>
+
+    <input id="full_name" placeholder="Иванов Иван Иванович">
+    <input id="phone" placeholder="+998901234567" inputmode="tel">
+
+    <!-- БАРАБАН -->
+    <div class="wheel-container">
+      <div class="wheel-highlight"></div>
+      <ul id="wheel"></ul>
+    </div>
+
+    <button onclick="sendRegistration()">Регистрация</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
