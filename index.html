@@ -1376,19 +1376,23 @@
                         const phone = user.phone || 'Не указан';
                         const email = user.email || 'Не указан';
                         const lang = user.language === 'uz' ? 'O\'zbekcha' : 'Русский';
+                        const userId = user.user_id || Object.keys(localStorage).find(k => k.startsWith('user_') && JSON.parse(localStorage.getItem(k)).name === user.name)?.replace('user_', '');
                         
                         html += `
-                            <div style="background:rgba(255,255,255,0.5);padding:15px;border-radius:12px;box-shadow:2px 2px 6px rgba(0,0,0,0.1);">
+                            <div onclick="showUserDetails('${userId}')" style="background:rgba(255,255,255,0.5);padding:15px;border-radius:12px;box-shadow:2px 2px 6px rgba(0,0,0,0.1);cursor:pointer;transition:all 0.3s;" 
+                                 onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='3px 3px 8px rgba(0,0,0,0.15)'" 
+                                 onmouseout="this.style.transform='scale(1)';this.style.boxShadow='2px 2px 6px rgba(0,0,0,0.1)'">
                                 <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
                                     <div style="width:45px;height:45px;background:linear-gradient(145deg, #95a5a6, #7f8c8d);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:20px;flex-shrink:0;">
                                         ${initial}
                                     </div>
                                     <div style="flex:1;min-width:0;">
                                         <div style="font-weight:600;color:#2c3e50;font-size:16px;margin-bottom:3px;">${user.name}</div>
-                                        <div style="font-size:12px;color:#7f8c8d;">📱 ${phone}</div>
+                                        <div style="font-size:12px;color:#7f8c8d;">👆 Нажмите для управления</div>
                                     </div>
                                 </div>
                                 <div style="font-size:12px;color:#546e7a;line-height:1.6;border-top:1px solid rgba(0,0,0,0.05);padding-top:10px;">
+                                    <div style="margin-bottom:4px;">📞 ${phone}</div>
                                     <div style="margin-bottom:4px;">📧 ${email}</div>
                                     <div style="margin-bottom:4px;">📍 ${regionName}</div>
                                     <div>🌐 ${lang}</div>
@@ -1504,6 +1508,105 @@
                 el.addEventListener('input', () => showError(field, null));
             }
         });
+
+        // ═════════════════════════════════════════════════════════════
+        // УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ (АДМИН)
+        // ═════════════════════════════════════════════════════════════
+        
+        let currentSelectedUser = null;
+
+        function showUserDetails(userId) {
+            console.log('👤 Детали пользователя:', userId);
+            const userData = JSON.parse(localStorage.getItem('user_' + userId) || '{}');
+            if (!userData.name) { alert('Ошибка загрузки'); return; }
+            
+            currentSelectedUser = { user_id: userId, ...userData };
+            const initial = userData.name.charAt(0).toUpperCase();
+            const regionName = getRegionName(userData.region) || 'Не указана';
+            
+            document.getElementById('userDetailsContent').innerHTML = `
+                <div style="text-align:center;margin-bottom:20px;">
+                    <div style="width:80px;height:80px;background:linear-gradient(145deg, #95a5a6, #7f8c8d);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:36px;margin-bottom:15px;">${initial}</div>
+                    <h2 style="color:#2c3e50;margin:10px 0;">${userData.name}</h2>
+                </div>
+                <div style="background:rgba(255,255,255,0.4);padding:15px;border-radius:8px;">
+                    <div style="margin-bottom:10px;font-size:14px;"><strong>📱 Телефон:</strong><br>${userData.phone || 'Не указан'}</div>
+                    <div style="margin-bottom:10px;font-size:14px;"><strong>📧 Email:</strong><br>${userData.email || 'Не указан'}</div>
+                    <div style="margin-bottom:10px;font-size:14px;"><strong>📍 Регион:</strong><br>${regionName}</div>
+                    <div style="font-size:14px;"><strong>🆔 ID:</strong><br>${userId}</div>
+                </div>
+            `;
+            showScreen('userDetailsPanel');
+        }
+
+        function backToUsersList() {
+            currentSelectedUser = null;
+            showScreen('usersPanel');
+        }
+
+        function editUserData() {
+            alert('Редактирование в разработке');
+        }
+
+        function changeUserPIN() {
+            if (!currentSelectedUser) return;
+            document.getElementById('changePinUserName').textContent = currentSelectedUser.name;
+            ['newPin1', 'newPin2', 'newPin3', 'newPin4'].forEach(id => document.getElementById(id).value = '');
+            hideAllErrors();
+            setTimeout(() => document.getElementById('newPin1').focus(), 300);
+            
+            // Автопереключение между полями PIN
+            for (let i = 1; i <= 4; i++) {
+                const input = document.getElementById('newPin' + i);
+                input.onkeyup = function() {
+                    if (this.value.length === 1 && i < 4) document.getElementById('newPin' + (i + 1)).focus();
+                };
+            }
+            
+            showScreen('changePinPanel');
+        }
+
+        function confirmPinChange() {
+            const newPin = ['newPin1', 'newPin2', 'newPin3', 'newPin4'].map(id => document.getElementById(id).value).join('');
+            if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) { showError('newPin', 'Введите 4 цифры'); return; }
+            
+            tg.sendData(JSON.stringify({ action: 'change_user_pin', user_id: currentSelectedUser.user_id, new_pin: newPin, admin_id: tg.initDataUnsafe?.user?.id }));
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            alert('✅ PIN изменён: ' + newPin);
+            showScreen('userDetailsPanel');
+        }
+
+        function cancelPinChange() {
+            showScreen('userDetailsPanel');
+        }
+
+        function toggleBlockUser() {
+            if (!currentSelectedUser) return;
+            const action = currentSelectedUser.is_blocked ? 'разблокировать' : 'заблокировать';
+            if (!confirm(`${action} ${currentSelectedUser.name}?`)) return;
+            
+            tg.sendData(JSON.stringify({ action: currentSelectedUser.is_blocked ? 'unblock_user' : 'block_user', user_id: currentSelectedUser.user_id, admin_id: tg.initDataUnsafe?.user?.id }));
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            
+            currentSelectedUser.is_blocked = !currentSelectedUser.is_blocked;
+            localStorage.setItem('user_' + currentSelectedUser.user_id, JSON.stringify(currentSelectedUser));
+            alert(`✅ Пользователь ${currentSelectedUser.is_blocked ? 'заблокирован' : 'разблокирован'}!`);
+            backToUsersList();
+        }
+
+        function deleteUserConfirm() {
+            if (!currentSelectedUser) return;
+            if (!confirm(`⚠️ Удалить ${currentSelectedUser.name}?\n\nЭто НЕОБРАТИМО!`)) return;
+            if (prompt('Введите "УДАЛИТЬ"') !== 'УДАЛИТЬ') { alert('Отменено'); return; }
+            
+            tg.sendData(JSON.stringify({ action: 'delete_user', user_id: currentSelectedUser.user_id, admin_id: tg.initDataUnsafe?.user?.id }));
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            localStorage.removeItem('user_' + currentSelectedUser.user_id);
+            alert('✅ Удалён!');
+            currentSelectedUser = null;
+            backToUsersList();
+            loadUsersList();
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(checkRegistration, 500);
