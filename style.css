@@ -2,8 +2,7 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden;
-  background: var(--tg-theme-bg-color, #e5e5e5);
+  background: #e5e5e5;
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
@@ -18,13 +17,12 @@ html, body {
 .card {
   width: 100%;
   background: silver;
-  border-radius: 20px;
+  border-radius: 18px;
   padding: 20px;
 }
 
 h2 {
   text-align: center;
-  margin-bottom: 16px;
 }
 
 input {
@@ -38,43 +36,38 @@ input {
 
 /* ===== БАРАБАН ===== */
 
-.wheel-container {
+.picker {
   position: relative;
-  height: 180px;
+  height: 160px;
   overflow: hidden;
   margin-bottom: 16px;
   background: #f2f2f2;
-  border-radius: 16px;
+  border-radius: 14px;
 }
 
-#wheel {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  text-align: center;
-  transition: transform 0.2s ease-out;
+.picker-list {
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
 }
 
-#wheel li {
+.picker-item {
   height: 40px;
   line-height: 40px;
+  text-align: center;
   font-size: 16px;
+  scroll-snap-align: center;
   color: #666;
 }
 
-#wheel li.active {
-  font-weight: 600;
-  color: #000;
-}
-
-.wheel-highlight {
+.picker-line {
   position: absolute;
-  top: 70px;
+  top: 60px;
   height: 40px;
   left: 0;
   right: 0;
-  border-top: 1px solid #999;
-  border-bottom: 1px solid #999;
+  border-top: 1px solid #888;
+  border-bottom: 1px solid #888;
   pointer-events: none;
 }
 
@@ -84,6 +77,6 @@ button {
   border-radius: 16px;
   border: none;
   font-size: 16px;
-  background: var(--tg-theme-button-color, #444);
-  color: var(--tg-theme-button-text-color, #fff);
+  background: #444;
+  color: #fff;
 }
