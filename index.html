@@ -675,6 +675,56 @@
                 
                 <button class="btn btn-secondary" onclick="backToAdminPanel()">Назад к админ-панели</button>
             </div>
+
+            <!-- Детали пользователя -->
+            <div id="userDetailsPanel" class="hidden">
+                <div class="logo"><div class="logo-icon">👤</div></div>
+                <h1>Управление пользователем</h1>
+                <p class="subtitle">Детали и действия</p>
+                
+                <div id="userDetailsContent" style="background:rgba(255,255,255,0.3);padding:20px;border-radius:12px;margin:20px 0;">
+                    <!-- Здесь будут детали -->
+                </div>
+                
+                <div class="menu-grid">
+                    <button class="menu-button" onclick="editUserData()" style="background:linear-gradient(145deg, #e3f2fd, #bbdefb);">
+                        <div class="menu-icon">✏️</div>
+                        <div class="menu-text">Редактировать</div>
+                    </button>
+                    <button class="menu-button" onclick="changeUserPIN()" style="background:linear-gradient(145deg, #fff3e0, #ffe0b2);">
+                        <div class="menu-icon">🔑</div>
+                        <div class="menu-text">Сменить PIN</div>
+                    </button>
+                    <button class="menu-button" id="blockUserBtn" onclick="toggleBlockUser()" style="background:linear-gradient(145deg, #ffebee, #ffcdd2);">
+                        <div class="menu-icon">🚫</div>
+                        <div class="menu-text">Заблокировать</div>
+                    </button>
+                    <button class="menu-button" onclick="deleteUserConfirm()" style="background:linear-gradient(145deg, #ffcdd2, #ef9a9a);">
+                        <div class="menu-icon">🗑️</div>
+                        <div class="menu-text">Удалить</div>
+                    </button>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="backToUsersList()" style="margin-top:15px;">◀️ К списку</button>
+            </div>
+
+            <!-- Экран смены PIN -->
+            <div id="changePinPanel" class="hidden">
+                <div class="logo"><div class="logo-icon">🔑</div></div>
+                <h1>Смена PIN-кода</h1>
+                <p class="subtitle" id="changePinUserName">Пользователь</p>
+                
+                <div class="pin-input-container">
+                    <input type="password" maxlength="1" class="pin-digit" id="newPin1" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-digit" id="newPin2" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-digit" id="newPin3" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-digit" id="newPin4" inputmode="numeric">
+                </div>
+                <div class="error" id="newPinError">Введите новый PIN</div>
+                
+                <button class="btn btn-success" onclick="confirmPinChange()">✅ Сохранить новый PIN</button>
+                <button class="btn btn-secondary" onclick="cancelPinChange()">❌ Отмена</button>
+            </div>
         </div>
     </div>
 
@@ -1203,6 +1253,7 @@
                     }
                 };
                 
+                console.log('📤 Отправка данных входа в админ-панель');
                 tg.sendData(JSON.stringify(dataToSend));
                 
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
@@ -1211,13 +1262,28 @@
                 
                 setTimeout(() => {
                     alert(currentLanguage === 'ru' 
-                        ? '✅ Вход выполнен!\n\nПисьмо отправляется на email администратора.' 
-                        : '✅ Kirish amalga oshirildi!\n\nXat administrator emailiga yuborilmoqda.');
+                        ? '✅ Вход выполнен!\n\n📧 Письмо отправлено на email администратора.\n\nПроверьте почту (возможно в папке Спам)' 
+                        : '✅ Kirish amalga oshirildi!\n\n📧 Xat administrator emailiga yuborildi.');
                 }, 500);
                 
             } else {
-                showError('adminPin', 'Неверный пароль');
+                // Неверный пароль - отправляем на сервер для блокировки
+                console.log('❌ Неверный PIN код');
+                
+                const userInfo = tg.initDataUnsafe?.user || {};
+                const dataToSend = {
+                    action: 'failed_admin_login',
+                    user_id: userInfo.id
+                };
+                
+                tg.sendData(JSON.stringify(dataToSend));
+                
+                showError('adminPin', currentLanguage === 'ru' 
+                    ? 'Неверный пароль! Осталось 2 попытки' 
+                    : 'Noto\'g\'ri parol! 2 ta urinish qoldi');
+                
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+                
                 ['adminPin1', 'adminPin2', 'adminPin3', 'adminPin4'].forEach(id => {
                     document.getElementById(id).value = '';
                 });
