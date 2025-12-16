@@ -1304,7 +1304,48 @@
         function openUsersPanel() {
             console.log('📂 Открытие панели пользователей');
             showScreen('usersPanel');
-            loadUsersList();
+            
+            // Показываем инструкцию + форму управления по ID
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = `
+                <div style="text-align:center;padding:20px;">
+                    <div style="font-size:48px;margin-bottom:15px;">👥</div>
+                    <h3 style="color:#2c3e50;margin-bottom:15px;">Управление пользователями</h3>
+                    
+                    <div style="background:rgba(33,150,243,0.1);padding:15px;border-radius:12px;margin:20px 0;border-left:4px solid #2196f3;">
+                        <p style="color:#37474f;font-size:14px;line-height:1.6;text-align:left;">
+                            📋 <strong>Список всех пользователей смотрите в чате с ботом выше</strong><br><br>
+                            Там указаны:<br>
+                            • ID пользователя<br>
+                            • Имя и телефон<br>
+                            • Статус (активен/заблокирован)
+                        </p>
+                    </div>
+                    
+                    <div style="background:rgba(255,255,255,0.5);padding:20px;border-radius:12px;margin-top:20px;">
+                        <h4 style="color:#2c3e50;margin-bottom:15px;">🔧 Управление по ID</h4>
+                        <p style="font-size:13px;color:#7f8c8d;margin-bottom:15px;">Введите ID пользователя из списка выше</p>
+                        
+                        <input type="number" id="manageUserId" placeholder="Telegram ID" 
+                               style="width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;font-size:16px;margin-bottom:15px;text-align:center;">
+                        
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px;">
+                            <button onclick="manageUserById('pin')" class="btn" style="background:linear-gradient(145deg, #fff3e0, #ffe0b2);color:#e65100;padding:12px;">
+                                🔑 Сменить PIN
+                            </button>
+                            <button onclick="manageUserById('block')" class="btn" style="background:linear-gradient(145deg, #ffebee, #ffcdd2);color:#c62828;padding:12px;">
+                                🚫 Блокировать
+                            </button>
+                            <button onclick="manageUserById('unblock')" class="btn" style="background:linear-gradient(145deg, #e8f5e9, #c8e6c9);color:#2e7d32;padding:12px;">
+                                ✅ Разблокировать
+                            </button>
+                            <button onclick="manageUserById('delete')" class="btn" style="background:linear-gradient(145deg, #ffcdd2, #ef9a9a);color:#b71c1c;padding:12px;">
+                                🗑️ Удалить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         function openVisitsPanel() {
@@ -1321,6 +1362,73 @@
 
         function backToAdminPanel() {
             showScreen('adminPanel');
+        }
+
+        function manageUserById(action) {
+            const userId = document.getElementById('manageUserId').value.trim();
+            
+            if (!userId) {
+                alert('❌ Введите ID пользователя');
+                return;
+            }
+            
+            if (!/^\d+$/.test(userId)) {
+                alert('❌ ID должен содержать только цифры');
+                return;
+            }
+            
+            console.log(`🔧 Действие: ${action} для пользователя ${userId}`);
+            
+            if (action === 'pin') {
+                // Смена PIN
+                currentSelectedUser = { user_id: userId };
+                changeUserPIN();
+            } else if (action === 'block') {
+                // Блокировка
+                if (!confirm(`Заблокировать пользователя ${userId}?`)) return;
+                
+                tg.sendData(JSON.stringify({
+                    action: 'block_user',
+                    user_id: userId,
+                    admin_id: tg.initDataUnsafe?.user?.id
+                }));
+                
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                alert('✅ Пользователь заблокирован!\n\nСмотрите подтверждение в чате.');
+                
+            } else if (action === 'unblock') {
+                // Разблокировка
+                if (!confirm(`Разблокировать пользователя ${userId}?\n\nСнимутся все блокировки (включая PIN).`)) return;
+                
+                tg.sendData(JSON.stringify({
+                    action: 'unblock_user',
+                    user_id: userId,
+                    admin_id: tg.initDataUnsafe?.user?.id
+                }));
+                
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                alert('✅ Пользователь разблокирован!\n\nСмотрите подтверждение в чате.');
+                
+            } else if (action === 'delete') {
+                // Удаление
+                if (!confirm(`⚠️ ВНИМАНИЕ!\n\nУдалить пользователя ${userId}?\n\nЭто НЕОБРАТИМО!`)) return;
+                
+                const confirm2 = prompt('Для подтверждения введите "УДАЛИТЬ"');
+                if (confirm2 !== 'УДАЛИТЬ') {
+                    alert('Отменено');
+                    return;
+                }
+                
+                tg.sendData(JSON.stringify({
+                    action: 'delete_user',
+                    user_id: userId,
+                    admin_id: tg.initDataUnsafe?.user?.id
+                }));
+                
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                alert('✅ Пользователь удалён!\n\nСмотрите подтверждение в чате.');
+                document.getElementById('manageUserId').value = '';
+            }
         }
 
         function loadUsersList() {
@@ -1550,7 +1658,7 @@
 
         function changeUserPIN() {
             if (!currentSelectedUser) return;
-            document.getElementById('changePinUserName').textContent = currentSelectedUser.name;
+            document.getElementById('changePinUserName').textContent = `ID: ${currentSelectedUser.user_id}`;
             ['newPin1', 'newPin2', 'newPin3', 'newPin4'].forEach(id => document.getElementById(id).value = '');
             hideAllErrors();
             setTimeout(() => document.getElementById('newPin1').focus(), 300);
