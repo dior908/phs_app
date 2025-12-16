@@ -1305,47 +1305,83 @@
             console.log('📂 Открытие панели пользователей');
             showScreen('usersPanel');
             
-            // Показываем инструкцию + форму управления по ID
             const usersList = document.getElementById('usersList');
-            usersList.innerHTML = `
-                <div style="text-align:center;padding:20px;">
-                    <div style="font-size:48px;margin-bottom:15px;">👥</div>
-                    <h3 style="color:#2c3e50;margin-bottom:15px;">Управление пользователями</h3>
-                    
-                    <div style="background:rgba(33,150,243,0.1);padding:15px;border-radius:12px;margin:20px 0;border-left:4px solid #2196f3;">
-                        <p style="color:#37474f;font-size:14px;line-height:1.6;text-align:left;">
-                            📋 <strong>Список всех пользователей смотрите в чате с ботом выше</strong><br><br>
-                            Там указаны:<br>
-                            • ID пользователя<br>
-                            • Имя и телефон<br>
-                            • Статус (активен/заблокирован)
-                        </p>
-                    </div>
-                    
-                    <div style="background:rgba(255,255,255,0.5);padding:20px;border-radius:12px;margin-top:20px;">
-                        <h4 style="color:#2c3e50;margin-bottom:15px;">🔧 Управление по ID</h4>
-                        <p style="font-size:13px;color:#7f8c8d;margin-bottom:15px;">Введите ID пользователя из списка выше</p>
+            usersList.innerHTML = '<p style="color:#37474f;font-weight:600;text-align:center;">⏳ Загрузка пользователей из базы данных...</p>';
+            
+            console.log('📡 Отправка запроса get_users_list');
+            
+            // Отправляем запрос боту для получения списка из БД
+            tg.sendData(JSON.stringify({
+                action: 'get_users_list',
+                admin_id: tg.initDataUnsafe?.user?.id
+            }));
+            
+            // Показываем сообщение пользователю
+            setTimeout(() => {
+                usersList.innerHTML = `
+                    <div style="text-align:center;padding:30px;">
+                        <div style="font-size:48px;margin-bottom:15px;">👥</div>
+                        <h3 style="color:#2c3e50;margin-bottom:15px;">Пользователи из базы данных</h3>
                         
-                        <input type="number" id="manageUserId" placeholder="Telegram ID" 
-                               style="width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;font-size:16px;margin-bottom:15px;text-align:center;">
+                        <div style="background:rgba(76,175,80,0.1);padding:20px;border-radius:12px;margin:20px 0;border-left:4px solid #4CAF50;">
+                            <div style="font-size:48px;margin-bottom:10px;">✅</div>
+                            <p style="color:#37474f;font-size:16px;line-height:1.6;font-weight:600;">
+                                Запрос отправлен!
+                            </p>
+                            <p style="color:#7f8c8d;font-size:14px;margin-top:10px;">
+                                Список пользователей из базы данных <strong>users.db</strong><br>
+                                отправлен в чат с ботом выше 👆
+                            </p>
+                        </div>
                         
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px;">
-                            <button onclick="manageUserById('pin')" class="btn" style="background:linear-gradient(145deg, #fff3e0, #ffe0b2);color:#e65100;padding:12px;">
-                                🔑 Сменить PIN
-                            </button>
-                            <button onclick="manageUserById('block')" class="btn" style="background:linear-gradient(145deg, #ffebee, #ffcdd2);color:#c62828;padding:12px;">
-                                🚫 Блокировать
-                            </button>
-                            <button onclick="manageUserById('unblock')" class="btn" style="background:linear-gradient(145deg, #e8f5e9, #c8e6c9);color:#2e7d32;padding:12px;">
-                                ✅ Разблокировать
-                            </button>
-                            <button onclick="manageUserById('delete')" class="btn" style="background:linear-gradient(145deg, #ffcdd2, #ef9a9a);color:#b71c1c;padding:12px;">
-                                🗑️ Удалить
-                            </button>
+                        <div style="background:rgba(255,255,255,0.6);padding:20px;border-radius:12px;margin-top:20px;text-align:left;">
+                            <h4 style="color:#2c3e50;margin-bottom:15px;text-align:center;">📋 Что вы увидите в чате:</h4>
+                            <div style="background:#f5f5f5;padding:15px;border-radius:8px;font-family:monospace;font-size:13px;line-height:1.8;">
+                                👥 Список пользователей (X):<br><br>
+                                1. ✅ <strong>Иван Иванов</strong><br>
+                                &nbsp;&nbsp;&nbsp;ID: 123456789<br>
+                                &nbsp;&nbsp;&nbsp;📱 @ivanov<br>
+                                &nbsp;&nbsp;&nbsp;📞 +998901234567<br><br>
+                                2. ✅ <strong>Петр Петров</strong><br>
+                                &nbsp;&nbsp;&nbsp;ID: 987654321<br>
+                                &nbsp;&nbsp;&nbsp;...<br>
+                            </div>
+                        </div>
+                        
+                        <div style="background:rgba(33,150,243,0.1);padding:15px;border-radius:12px;margin-top:20px;border-left:4px solid #2196F3;">
+                            <p style="color:#37474f;font-size:14px;line-height:1.6;text-align:left;">
+                                💡 <strong>Для управления пользователем:</strong><br><br>
+                                1. Скопируйте ID из списка в чате<br>
+                                2. Нажмите на пользователя в WebApp<br>
+                                3. Или используйте кнопки управления ниже
+                            </p>
+                        </div>
+                        
+                        <div style="background:rgba(255,255,255,0.5);padding:20px;border-radius:12px;margin-top:20px;">
+                            <h4 style="color:#2c3e50;margin-bottom:15px;">🔧 Быстрое управление</h4>
+                            <p style="font-size:13px;color:#7f8c8d;margin-bottom:15px;">Введите ID пользователя из списка выше</p>
+                            
+                            <input type="number" id="manageUserId" placeholder="Введите Telegram ID" 
+                                   style="width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;font-size:16px;margin-bottom:15px;text-align:center;">
+                            
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px;">
+                                <button onclick="manageUserById('pin')" class="btn" style="background:linear-gradient(145deg, #fff3e0, #ffe0b2);color:#e65100;padding:12px;font-size:14px;">
+                                    🔑 Сменить PIN
+                                </button>
+                                <button onclick="manageUserById('block')" class="btn" style="background:linear-gradient(145deg, #ffebee, #ffcdd2);color:#c62828;padding:12px;font-size:14px;">
+                                    🚫 Блокировать
+                                </button>
+                                <button onclick="manageUserById('unblock')" class="btn" style="background:linear-gradient(145deg, #e8f5e9, #c8e6c9);color:#2e7d32;padding:12px;font-size:14px;">
+                                    ✅ Разблокировать
+                                </button>
+                                <button onclick="manageUserById('delete')" class="btn" style="background:linear-gradient(145deg, #ffcdd2, #ef9a9a);color:#b71c1c;padding:12px;font-size:14px;">
+                                    🗑️ Удалить
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
+                `;
+            }, 500);
         }
 
         function openVisitsPanel() {
