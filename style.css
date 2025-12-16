@@ -1,18 +1,89 @@
-body {
-  background: #e5e5e5;
-  font-family: sans-serif;
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--tg-theme-bg-color, #e5e5e5);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.app {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
 }
 
 .card {
+  width: 100%;
   background: silver;
+  border-radius: 20px;
   padding: 20px;
-  border-radius: 18px;
 }
 
-input, select, button {
+h2 {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+input {
   width: 100%;
-  margin: 8px 0;
   padding: 14px;
+  margin-bottom: 12px;
   border-radius: 14px;
   border: none;
+  font-size: 16px;
+}
+
+/* ===== БАРАБАН ===== */
+
+.wheel-container {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  background: #f2f2f2;
+  border-radius: 16px;
+}
+
+#wheel {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+  transition: transform 0.2s ease-out;
+}
+
+#wheel li {
+  height: 40px;
+  line-height: 40px;
+  font-size: 16px;
+  color: #666;
+}
+
+#wheel li.active {
+  font-weight: 600;
+  color: #000;
+}
+
+.wheel-highlight {
+  position: absolute;
+  top: 70px;
+  height: 40px;
+  left: 0;
+  right: 0;
+  border-top: 1px solid #999;
+  border-bottom: 1px solid #999;
+  pointer-events: none;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  border: none;
+  font-size: 16px;
+  background: var(--tg-theme-button-color, #444);
+  color: var(--tg-theme-button-text-color, #fff);
 }
