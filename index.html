@@ -5,8 +5,8 @@
 
 <meta name="viewport"
       content="width=device-width,
-               initial-scale=1.0,
-               maximum-scale=1.0,
+               initial-scale=1,
+               maximum-scale=1,
                user-scalable=no">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,18 +19,20 @@
 <body>
 <div class="app">
   <div class="card">
+
     <h2>Регистрация</h2>
 
     <input id="full_name" placeholder="Иванов Иван Иванович">
     <input id="phone" placeholder="+998901234567" inputmode="tel">
 
     <!-- БАРАБАН -->
-    <div class="wheel-container">
-      <div class="wheel-highlight"></div>
-      <ul id="wheel"></ul>
+    <div class="picker">
+      <div class="picker-line"></div>
+      <div class="picker-list" id="picker"></div>
     </div>
 
-    <button onclick="sendRegistration()">Регистрация</button>
+    <button id="submit">Регистрация</button>
+
   </div>
 </div>
 
