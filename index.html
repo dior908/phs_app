@@ -184,12 +184,13 @@
 
 <script>
     const tg = window.Telegram.WebApp;
-    const API_BASE = 'http://localhost:5000/api'; // ЗАМЕНИТЕ НА ВАШ URL
+    // URL вашего API сервера
+    const API_BASE = 'http://localhost:5000/api'; 
 
     async function init() {
         tg.expand();
         
-        // ПРИНУДИТЕЛЬНАЯ ОЧИСТКА СТАРЫХ ДАННЫХ
+        // Очистка локальных хранилищ при каждом входе для актуальности данных
         localStorage.clear();
         sessionStorage.clear();
 
@@ -204,7 +205,7 @@
 
     async function loadAppData(myId) {
         try {
-            // Добавляем timestamp для обхода кэша
+            // Запрос с параметром времени для предотвращения кэширования браузером
             const response = await fetch(`${API_BASE}/users?_t=${Date.now()}`);
             const data = await response.json();
 
@@ -223,6 +224,7 @@
                     document.getElementById('blocked-screen').style.display = 'block';
                 } else {
                     renderProfile(me);
+                    // Проверка прав администратора
                     if (me.is_admin === 1 || myId === 7774588164) {
                         document.getElementById('admin-nav').style.display = 'flex';
                         renderUsersList(users);
@@ -261,8 +263,8 @@
                         ${u.is_blocked ? 'БЛОК' : 'ОК'}
                     </div>
                     <div style="margin-top: 5px;">
-                        <button onclick="handleAction(${u.user_id}, 'toggle_block')" style="font-size: 10px; border: none; background: #fff; padding: 2px 5px; border-radius: 4px;">⚙️</button>
-                        <button onclick="handleAction(${u.user_id}, 'delete_user')" style="font-size: 10px; border: none; background: #ff4444; color: white; padding: 2px 5px; border-radius: 4px; margin-left: 5px;">✖</button>
+                        <button onclick="handleAction(${u.user_id}, 'toggle_block')" style="font-size: 14px; border: none; background: #fff; padding: 4px 8px; border-radius: 6px; cursor: pointer;">⚙️</button>
+                        <button onclick="handleAction(${u.user_id}, 'delete_user')" style="font-size: 14px; border: none; background: #ff4444; color: white; padding: 4px 8px; border-radius: 6px; margin-left: 5px; cursor: pointer;">✖</button>
                     </div>
                 </div>
             `;
@@ -279,9 +281,10 @@
             admin_id: tg.initDataUnsafe?.user?.id
         }));
         
-        tg.HapticFeedback.impactOccurred('light');
-        // Обновляем через секунду, чтобы сервер успел обработать
-        setTimeout(() => loadAppData(tg.initDataUnsafe?.user?.id), 1000);
+        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        
+        // Обновление данных через короткую паузу
+        setTimeout(() => loadAppData(tg.initDataUnsafe?.user?.id), 1200);
     }
 
     function switchTab(tab) {
