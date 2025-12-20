@@ -3,320 +3,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Штаб Управления: Система Визитов</title>
+    <title>Система управления визитами</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Roboto:wght@300;400;700&display=swap');
-
-        :root {
-            --army-green: #4b5320;
-            --army-dark: #252911;
-            --accent-gold: #c5a059;
-            --danger-red: #8b0000;
-            --text-light: #f4f4f4;
-            --card-bg: rgba(37, 41, 17, 0.95);
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-touch-callout: none;
             -webkit-tap-highlight-color: transparent;
         }
 
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: #1a1c0e url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
-            color: var(--text-light);
-            height: 100vh;
+        html, body {
+            height: 100%;
+            width: 100%;
             overflow: hidden;
+            position: fixed;
+            touch-action: pan-y;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%);
+            color: #ffffff;
+            line-height: 1.5;
+        }
+
+        #app {
+            height: 100vh;
             display: flex;
             flex-direction: column;
-        }
-
-        /* Загрузочный экран */
-        #loader {
-            position: fixed;
-            inset: 0;
-            background: var(--army-dark);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.5s;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(197, 160, 89, 0.2);
-            border-top-color: var(--accent-gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Экран блокировки */
-        #blocked-screen {
-            position: fixed;
-            inset: 0;
-            background: black;
-            z-index: 10000;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 40px;
-        }
-
-        #blocked-screen i { font-size: 80px; color: var(--danger-red); margin-bottom: 20px; }
-
-        header {
             padding: 20px;
-            background: linear-gradient(to bottom, var(--army-dark), transparent);
-            text-align: center;
-            border-bottom: 1px solid var(--accent-gold);
+            padding-top: calc(20px + env(safe-area-inset-top));
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
         }
 
-        header h1 {
-            font-family: 'Oswald', sans-serif;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: var(--accent-gold);
-        }
-
-        .page {
-            display: none;
+        .container {
             flex: 1;
-            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 24px;
             overflow-y: auto;
-            animation: fadeIn 0.3s ease-out;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
 
-        .page.active { display: block; }
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
 
         .card {
-            background: var(--card-bg);
-            border: 1px solid rgba(197, 160, 89, 0.3);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            position: relative;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            color: #2c3e50;
         }
 
-        .card.blocked {
-            border-color: var(--danger-red);
-            background: rgba(139, 0, 0, 0.1);
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .status-badge {
-            padding: 2px 8px;
-            border-radius: 4px;
             font-size: 10px;
-            font-weight: bold;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
             text-transform: uppercase;
         }
 
-        .status-active { background: var(--army-green); color: white; }
-        .status-blocked { background: var(--danger-red); color: white; }
+        .status-ok { background: #27ae60; color: white; }
+        .status-blocked { background: #e74c3c; color: white; }
 
         .btn {
-            display: block;
             width: 100%;
-            padding: 12px;
-            background: var(--army-green);
-            color: white;
-            border: 1px solid var(--accent-gold);
-            border-radius: 4px;
-            font-family: 'Oswald', sans-serif;
-            text-transform: uppercase;
+            padding: 16px;
+            border-radius: 14px;
+            border: none;
+            font-weight: 600;
+            font-size: 16px;
             cursor: pointer;
+            transition: all 0.2s;
             margin-top: 10px;
         }
 
-        .btn-danger { background: var(--danger-red); border-color: #ff4444; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
 
-        nav {
+        #loader {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #2c3e50;
             display: flex;
-            background: var(--army-dark);
-            border-top: 2px solid var(--accent-gold);
-            padding-bottom: env(safe-area-inset-bottom);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
 
-        nav button {
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
             flex: 1;
-            padding: 15px;
-            background: transparent;
-            border: none;
-            color: #666;
-            font-size: 20px;
+            padding: 10px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
         }
 
-        nav button.active { color: var(--accent-gold); }
+        .tab.active {
+            background: #3498db;
+        }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10deg); } to { opacity: 1; transform: translateY(0); } }
+        #blocked-screen {
+            display: none;
+            text-align: center;
+            padding-top: 100px;
+        }
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <div class="spinner"></div>
-        <p>ИДЕНТИФИКАЦИЯ В СИСТЕМЕ...</p>
-    </div>
+<div id="loader">Загрузка системы...</div>
 
+<div id="app">
     <div id="blocked-screen">
-        <i class="fas fa-user-slash"></i>
-        <h1 style="color: var(--danger-red); font-family: 'Oswald';">ДОСТУП ЗАКРЫТ</h1>
-        <p style="margin-top: 20px;">Ваше личное дело заблокировано командованием.</p>
+        <h1 style="color: #ff4444;">ДОСТУП ЗАБЛОКИРОВАН</h1>
+        <p>Обратитесь к администратору.</p>
+        <button class="btn btn-primary" onclick="tg.close()">Закрыть</button>
     </div>
 
-    <header>
-        <h1>Штаб Управления</h1>
-    </header>
+    <div id="main-content">
+        <div class="nav-tabs" id="admin-nav" style="display: none;">
+            <div class="tab active" onclick="switchTab('profile')">Профиль</div>
+            <div class="tab" onclick="switchTab('admin')">Админ</div>
+        </div>
 
-    <!-- Главная страница -->
-    <div id="page-main" class="page active">
-        <div class="card">
-            <h2 id="user-rank" style="color: var(--accent-gold); font-family: 'Oswald';">ЗАГРУЗКА...</h2>
-            <p id="user-name" style="font-size: 1.2rem; margin: 10px 0; font-weight: bold;"></p>
-            <div style="border-top: 1px solid #444; padding-top: 10px; display: flex; justify-content: space-between;">
-                <span>Статус:</span>
-                <span id="user-status-text" class="status-badge">ОПРЕДЕЛЕНИЕ...</span>
+        <div id="tab-profile">
+            <div class="container">
+                <h1>Мой профиль</h1>
+                <div class="card" id="profile-info">
+                    <p>Загрузка данных...</p>
+                </div>
+                <button class="btn btn-primary" onclick="tg.close()">ВЫХОД</button>
             </div>
         </div>
-        <button class="btn" onclick="tg.close();">ПОКИНУТЬ ШТАБ</button>
-    </div>
 
-    <!-- Админ-панель -->
-    <div id="page-admin" class="page">
-        <h2 style="font-family: 'Oswald'; margin-bottom: 15px;">ЛИЧНЫЙ СОСТАВ</h2>
-        <div id="users-list">
-            <!-- Список загружается динамически -->
+        <div id="tab-admin" style="display: none;">
+            <div class="container">
+                <h1>Управление пользователями</h1>
+                <div id="users-list">
+                    <!-- Список пользователей -->
+                </div>
+            </div>
         </div>
     </div>
+</div>
 
-    <nav id="nav-bar" style="display: none;">
-        <button onclick="switchPage('main')" id="btn-nav-main" class="active"><i class="fas fa-user-shield"></i></button>
-        <button onclick="switchPage('admin')" id="btn-nav-admin"><i class="fas fa-users-cog"></i></button>
-    </nav>
+<script>
+    const tg = window.Telegram.WebApp;
+    const API_BASE = 'http://localhost:5000/api'; // ЗАМЕНИТЕ НА ВАШ URL
 
-    <script>
-        const tg = window.Telegram.WebApp;
+    async function init() {
         tg.expand();
+        
+        // ПРИНУДИТЕЛЬНАЯ ОЧИСТКА СТАРЫХ ДАННЫХ
+        localStorage.clear();
+        sessionStorage.clear();
 
-        // АДРЕС ВАШЕГО СЕРВЕРА
-        const API_BASE = 'http://localhost:5000/api'; 
-
-        async function init() {
-            const userId = tg.initDataUnsafe?.user?.id;
-            if (!userId) {
-                document.getElementById('loader').innerText = "ОШИБКА: ЗАПУСТИТЕ ИЗ ТЕЛЕГРАМ";
-                return;
-            }
-            await refreshData();
+        const userId = tg.initDataUnsafe?.user?.id;
+        if (!userId) {
+            document.getElementById('loader').innerText = "Ошибка: Откройте в Telegram";
+            return;
         }
 
-        async function refreshData() {
-            const userId = tg.initDataUnsafe?.user?.id;
-            try {
-                // Прямой запрос к серверу без кэширования
-                const res = await fetch(`${API_BASE}/users?_t=${Date.now()}`);
-                const data = await res.json();
+        await loadAppData(userId);
+    }
 
-                if (data.success) {
-                    const allUsers = data.users;
-                    const me = allUsers.find(u => u.user_id === userId);
+    async function loadAppData(myId) {
+        try {
+            // Добавляем timestamp для обхода кэша
+            const response = await fetch(`${API_BASE}/users?_t=${Date.now()}`);
+            const data = await response.json();
 
-                    if (!me) {
-                        tg.showAlert("Вы не зарегистрированы в системе!");
-                        tg.close();
-                        return;
-                    }
+            if (data.success) {
+                const users = data.users;
+                const me = users.find(u => u.user_id === myId);
 
-                    // ПРОВЕРКА БЛОКИРОВКИ
-                    if (me.is_blocked === 1) {
-                        document.getElementById('blocked-screen').style.display = 'flex';
-                        document.getElementById('loader').style.display = 'none';
-                        return;
-                    }
-
-                    // Обновляем профиль
-                    document.getElementById('user-name').innerText = me.name;
-                    document.getElementById('user-rank').innerText = (me.role || 'Рядовой').toUpperCase();
-                    document.getElementById('user-status-text').innerText = "АКТИВЕН";
-                    document.getElementById('user-status-text').className = "status-badge status-active";
-
-                    // Если админ - показываем навигацию и список
-                    if (me.is_admin === 1 || userId === 7774588164) { // 7774588164 - ваш ID
-                        document.getElementById('nav-bar').style.display = 'flex';
-                        renderUsersList(allUsers);
-                    }
-
-                    document.getElementById('loader').style.opacity = '0';
-                    setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
+                if (!me) {
+                    tg.showAlert("Вы не зарегистрированы!");
+                    tg.close();
+                    return;
                 }
-            } catch (err) {
-                console.error("Критический сбой связи:", err);
+
+                if (me.is_blocked === 1) {
+                    document.getElementById('main-content').style.display = 'none';
+                    document.getElementById('blocked-screen').style.display = 'block';
+                } else {
+                    renderProfile(me);
+                    if (me.is_admin === 1 || myId === 7774588164) {
+                        document.getElementById('admin-nav').style.display = 'flex';
+                        renderUsersList(users);
+                    }
+                }
             }
+        } catch (e) {
+            console.error(e);
+            document.getElementById('loader').innerText = "Ошибка связи с сервером";
+        } finally {
+            document.getElementById('loader').style.display = 'none';
         }
+    }
 
-        function renderUsersList(users) {
-            const list = document.getElementById('users-list');
-            list.innerHTML = '';
+    function renderProfile(user) {
+        document.getElementById('profile-info').innerHTML = `
+            <p><b>Имя:</b> ${user.name}</p>
+            <p><b>Телефон:</b> ${user.phone}</p>
+            <p><b>Статус:</b> <span class="status-badge status-ok">Активен</span></p>
+        `;
+    }
 
-            users.forEach(u => {
-                const card = document.createElement('div');
-                card.className = `card ${u.is_blocked ? 'blocked' : ''}`;
-                card.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center">
-                        <span style="font-weight:bold">${u.name}</span>
-                        <span class="status-badge ${u.is_blocked ? 'status-blocked' : 'status-active'}">
-                            ${u.is_blocked ? 'БЛОК' : 'ОК'}
-                        </span>
+    function renderUsersList(users) {
+        const list = document.getElementById('users-list');
+        list.innerHTML = '';
+        users.forEach(u => {
+            const item = document.createElement('div');
+            item.className = 'user-item';
+            item.innerHTML = `
+                <div>
+                    <div style="font-weight: 600;">${u.name}</div>
+                    <div style="font-size: 12px; opacity: 0.7;">${u.phone}</div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="status-badge ${u.is_blocked ? 'status-blocked' : 'status-ok'}">
+                        ${u.is_blocked ? 'БЛОК' : 'ОК'}
                     </div>
-                    <p style="font-size:11px; color:#888; margin:5px 0">ID: ${u.user_id} | Тел: ${u.phone}</p>
-                    <div style="display:flex; gap:10px; margin-top:10px">
-                        <button class="btn" style="padding:5px; font-size:12px" onclick="userAction(${u.user_id}, 'toggle_block')">
-                            ${u.is_blocked ? 'РАЗБЛОКИРОВАТЬ' : 'ЗАБЛОКИРОВАТЬ'}
-                        </button>
-                        <button class="btn btn-danger" style="padding:5px; font-size:12px" onclick="userAction(${u.user_id}, 'delete_user')">
-                            УДАЛИТЬ
-                        </button>
+                    <div style="margin-top: 5px;">
+                        <button onclick="handleAction(${u.user_id}, 'toggle_block')" style="font-size: 10px; border: none; background: #fff; padding: 2px 5px; border-radius: 4px;">⚙️</button>
+                        <button onclick="handleAction(${u.user_id}, 'delete_user')" style="font-size: 10px; border: none; background: #ff4444; color: white; padding: 2px 5px; border-radius: 4px; margin-left: 5px;">✖</button>
                     </div>
-                `;
-                list.appendChild(card);
-            });
+                </div>
+            `;
+            list.appendChild(item);
+        });
+    }
+
+    function handleAction(uid, action) {
+        if (action === 'delete_user' && !confirm("Удалить пользователя навсегда?")) return;
+        
+        tg.sendData(JSON.stringify({
+            action: action,
+            user_id: uid,
+            admin_id: tg.initDataUnsafe?.user?.id
+        }));
+        
+        tg.HapticFeedback.impactOccurred('light');
+        // Обновляем через секунду, чтобы сервер успел обработать
+        setTimeout(() => loadAppData(tg.initDataUnsafe?.user?.id), 1000);
+    }
+
+    function switchTab(tab) {
+        if (tab === 'profile') {
+            document.getElementById('tab-profile').style.display = 'block';
+            document.getElementById('tab-admin').style.display = 'none';
+            document.querySelectorAll('.tab')[0].classList.add('active');
+            document.querySelectorAll('.tab')[1].classList.remove('active');
+        } else {
+            document.getElementById('tab-profile').style.display = 'none';
+            document.getElementById('tab-admin').style.display = 'block';
+            document.querySelectorAll('.tab')[1].classList.add('active');
+            document.querySelectorAll('.tab')[0].classList.remove('active');
         }
+    }
 
-        function userAction(targetId, action) {
-            if (action === 'delete_user' && !confirm("Удалить бойца навсегда?")) return;
+    window.onload = init;
+</script>
 
-            // Отправляем команду в Telegram
-            tg.sendData(JSON.stringify({
-                action: action,
-                user_id: targetId,
-                admin_id: tg.initDataUnsafe?.user?.id
-            }));
-
-            tg.HapticFeedback.impactOccurred('medium');
-            
-            // Визуально ждем секунду и обновляемся
-            setTimeout(refreshData, 1000);
-        }
-
-        function switchPage(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-            document.getElementById('page-' + pageId).classList.add('active');
-            document.getElementById('btn-nav-' + pageId).classList.add('active');
-        }
-
-        window.onload = init;
-    </script>
 </body>
 </html>
