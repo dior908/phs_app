@@ -1370,7 +1370,13 @@
             statusEl.style.background = '#e2e6ea';
             statusEl.style.color = '#333';
 
-            fetch(`${API_BASE_URL}/api/health`)
+            // ДОБАВЛЕН ЗАГОЛОВОК ngrok-skip-browser-warning
+            fetch(`${API_BASE_URL}/api/health`, {
+                headers: {
+                    "ngrok-skip-browser-warning": "69420",
+                    "Content-Type": "application/json"
+                }
+            })
                 .then(response => {
                     if (response.ok) return response.json();
                     throw new Error('Network response was not ok');
@@ -1397,7 +1403,13 @@
             const url = getApiUrl();
             console.log('Запрос к:', url);
 
-            fetch(url)
+            // ДОБАВЛЕН ЗАГОЛОВОК ngrok-skip-browser-warning
+            fetch(url, {
+                headers: {
+                    "ngrok-skip-browser-warning": "69420",
+                    "Content-Type": "application/json"
+                }
+            })
                 .then(response => {
                      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                      return response.json();
@@ -1480,7 +1492,13 @@
             console.log('👤 Загрузка деталей пользователя:', userId);
             
             // Загружаем детали пользователя из API (динамический URL)
-            fetch(`${API_BASE_URL}/api/user/${userId}`)
+            // ДОБАВЛЕН ЗАГОЛОВОК ngrok-skip-browser-warning
+            fetch(`${API_BASE_URL}/api/user/${userId}`, {
+                headers: {
+                    "ngrok-skip-browser-warning": "69420",
+                    "Content-Type": "application/json"
+                }
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (!data.success) {
