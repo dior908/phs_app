@@ -1302,7 +1302,28 @@
         // === ФУНКЦИИ АДМИН-ПАНЕЛИ ===
         
         // API URL - ngrok
-        const API_URL = 'https://burnoused-evan-uncautioned.ngrok-free.dev/api/users';
+        const API_URL = 'https://burnoused-evan-uncautioned.ngrok-free.dev';
+        
+        // Универсальная функция для всех API запросов (обходит ngrok warning)
+        async function apiRequest(endpoint, options = {}) {
+            const url = API_URL + endpoint;
+            const defaultOptions = {
+                headers: {
+                    'ngrok-skip-browser-warning': 'true',
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                },
+                ...options
+            };
+            
+            const response = await fetch(url, defaultOptions);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            return await response.json();
+        }
         
         function openUsersPanel() {
             console.log('📂 Открытие панели пользователей');
@@ -1311,9 +1332,8 @@
             const usersList = document.getElementById('usersList');
             usersList.innerHTML = '<p style="color:#37474f;font-weight:600;text-align:center;">⏳ Загрузка пользователей из базы данных...</p>';
             
-            // Загружаем пользователей из API
-            fetch(`${API_URL}/api/users`)
-                .then(response => response.json())
+            // Загружаем пользователей из API с ngrok заголовком
+            apiRequest('/api/users')
                 .then(data => {
                     console.log('✅ Получено пользователей:', data.count);
                     
@@ -1391,9 +1411,8 @@
         function showUserDetailsById(userId) {
             console.log('👤 Загрузка деталей пользователя:', userId);
             
-            // Загружаем детали пользователя из API
-            fetch(`${API_URL}/api/user/${userId}`)
-                .then(response => response.json())
+            // Загружаем детали пользователя из API с ngrok заголовком
+            apiRequest(`/api/user/${userId}`)
                 .then(data => {
                     if (!data.success) {
                         alert('Ошибка загрузки данных пользователя');
