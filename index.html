@@ -332,6 +332,21 @@
         .location-btn {
             background: linear-gradient(145deg, #42a5f5, #1e88e5);
         }
+        
+        /* Статус соединения для админки */
+        .connection-status {
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .status-ok { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status-err { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
     </style>
 </head>
 <body>
@@ -663,6 +678,27 @@
                 <button class="btn btn-secondary" onclick="backToMainMenu()" style="margin-top:20px;">Вернуться</button>
             </div>
 
+            <!-- Панель Настроек (для смены API URL) -->
+            <div id="settingsPanel" class="hidden">
+                <div class="logo"><div class="logo-icon">⚙️</div></div>
+                <h1>Настройки</h1>
+                <p class="subtitle">Конфигурация приложения</p>
+                
+                <div id="apiStatus" class="connection-status status-err">
+                    ⚠️ Нет соединения с сервером
+                </div>
+
+                <div class="form-group">
+                    <label for="apiUrlInput">URL Сервера (Ngrok)</label>
+                    <input type="text" id="apiUrlInput" placeholder="https://xxxx.ngrok-free.app">
+                    <p style="font-size:11px;color:#78909c;margin-top:5px;">Введите базовый URL без /api/users</p>
+                </div>
+
+                <button class="btn btn-success" onclick="saveApiUrl()">Сохранить</button>
+                <button class="btn" onclick="checkApiConnection()">🔄 Проверить соединение</button>
+                <button class="btn btn-secondary" onclick="backToAdminPanel()">Назад</button>
+            </div>
+
             <!-- Панель пользователей -->
             <div id="usersPanel" class="hidden">
                 <div class="logo"><div class="logo-icon">👥</div></div>
@@ -892,7 +928,7 @@
         }
 
         function showScreen(screenId) {
-            if (screenId !== 'adminLoginScreen' && screenId !== 'adminPanel') {
+            if (screenId !== 'adminLoginScreen' && screenId !== 'adminPanel' && screenId !== 'settingsPanel') {
                 previousScreen = Array.from(document.querySelectorAll('.card > div:not(.hidden)')).find(el => !el.classList.contains('hidden'))?.id;
             }
             
@@ -1260,12 +1296,6 @@
                 
                 showScreen('adminPanel');
                 
-                setTimeout(() => {
-                    alert(currentLanguage === 'ru' 
-                        ? '✅ Вход выполнен!\n\n📧 Письмо отправлено на email администратора.\n\nПроверьте почту (возможно в папке Спам)' 
-                        : '✅ Kirish amalga oshirildi!\n\n📧 Xat administrator emailiga yuborildi.');
-                }, 500);
-                
             } else {
                 // Неверный пароль - отправляем на сервер для блокировки
                 console.log('❌ Неверный PIN код');
@@ -1301,8 +1331,60 @@
 
         // === ФУНКЦИИ АДМИН-ПАНЕЛИ ===
         
-        // API URL - ngrok
-        const API_URL = 'https://burnoused-evan-uncautioned.ngrok-free.dev';
+        // Получаем сохраненный API URL или используем дефолтный (без /api/users в конце!)
+        let API_BASE_URL = localStorage.getItem('api_base_url') || 'https://burnoused-evan-uncautioned.ngrok-free.dev';
+        
+        // Убираем слеш в конце если есть
+        if (API_BASE_URL.endsWith('/')) API_BASE_URL = API_BASE_URL.slice(0, -1);
+
+        // Функция получения полного URL
+        function getApiUrl() {
+             return `${API_BASE_URL}/api/users`;
+        }
+        
+        function openSettingsPanel() {
+            showScreen('settingsPanel');
+            document.getElementById('apiUrlInput').value = API_BASE_URL;
+            checkApiConnection();
+        }
+
+        function saveApiUrl() {
+            let url = document.getElementById('apiUrlInput').value.trim();
+            // Убираем слеш в конце
+            if (url.endsWith('/')) url = url.slice(0, -1);
+            // Убираем /api/users если пользователь случайно добавил
+            if (url.endsWith('/api/users')) url = url.replace('/api/users', '');
+            
+            API_BASE_URL = url;
+            localStorage.setItem('api_base_url', url);
+            
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            checkApiConnection();
+            alert('URL сохранен!');
+        }
+
+        function checkApiConnection() {
+            const statusEl = document.getElementById('apiStatus');
+            statusEl.className = 'connection-status';
+            statusEl.textContent = '⏳ Проверка соединения...';
+            statusEl.style.background = '#e2e6ea';
+            statusEl.style.color = '#333';
+
+            fetch(`${API_BASE_URL}/api/health`)
+                .then(response => {
+                    if (response.ok) return response.json();
+                    throw new Error('Network response was not ok');
+                })
+                .then(data => {
+                    statusEl.className = 'connection-status status-ok';
+                    statusEl.textContent = '✅ Соединение установлено';
+                })
+                .catch(error => {
+                    console.error('Ошибка соединения:', error);
+                    statusEl.className = 'connection-status status-err';
+                    statusEl.textContent = '❌ Ошибка соединения (Проверьте URL и Ngrok)';
+                });
+        }
         
         function openUsersPanel() {
             console.log('📂 Открытие панели пользователей');
@@ -1311,9 +1393,15 @@
             const usersList = document.getElementById('usersList');
             usersList.innerHTML = '<p style="color:#37474f;font-weight:600;text-align:center;">⏳ Загрузка пользователей из базы данных...</p>';
             
-            // Загружаем пользователей из API
-            fetch(`${API_URL}/api/users`)
-                .then(response => response.json())
+            // Используем динамический URL
+            const url = getApiUrl();
+            console.log('Запрос к:', url);
+
+            fetch(url)
+                .then(response => {
+                     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                     return response.json();
+                })
                 .then(data => {
                     console.log('✅ Получено пользователей:', data.count);
                     
@@ -1371,18 +1459,18 @@
                             <div style="font-size:48px;margin-bottom:15px;">❌</div>
                             <h3 style="color:#e53935;margin-bottom:10px;">Ошибка подключения</h3>
                             <p style="color:#7f8c8d;font-size:14px;margin-bottom:20px;">
-                                Не удалось загрузить пользователей из базы данных
+                                Не удалось подключиться к серверу.<br>
+                                Проверьте настройки URL.
                             </p>
                             <div style="background:rgba(229,57,53,0.1);padding:15px;border-radius:8px;border-left:4px solid #e53935;text-align:left;">
                                 <p style="color:#37474f;font-size:13px;line-height:1.6;">
-                                    <strong>Возможные причины:</strong><br>
-                                    • API сервер не запущен<br>
-                                    • Неверный URL в коде<br>
-                                    • Проблемы с CORS<br><br>
+                                    <strong>Текущий URL:</strong><br>
+                                    <code>${url}</code><br><br>
                                     <strong>Решение:</strong><br>
-                                    Запустите: <code>python api_server.py</code>
+                                    Зайдите в "Настройки" и обновите URL Ngrok.
                                 </p>
                             </div>
+                            <button class="btn btn-secondary" onclick="openSettingsPanel()">⚙️ Открыть настройки</button>
                         </div>
                     `;
                 });
@@ -1391,8 +1479,8 @@
         function showUserDetailsById(userId) {
             console.log('👤 Загрузка деталей пользователя:', userId);
             
-            // Загружаем детали пользователя из API
-            fetch(`${API_URL}/api/user/${userId}`)
+            // Загружаем детали пользователя из API (динамический URL)
+            fetch(`${API_BASE_URL}/api/user/${userId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (!data.success) {
@@ -1452,10 +1540,6 @@
 
         function openReportsPanel() {
             alert(currentLanguage === 'ru' ? 'Раздел "Отчеты" в разработке' : 'Hisobotlar bo\'limi ishlab chiqilmoqda');
-        }
-
-        function openSettingsPanel() {
-            alert(currentLanguage === 'ru' ? 'Раздел "Настройки" в разработке' : 'Sozlamalar bo\'limi ishlab chiqilmoqda');
         }
 
         function backToAdminPanel() {
