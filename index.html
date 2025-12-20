@@ -976,12 +976,37 @@
         async function checkRegistration() {
             const userId = tg.initDataUnsafe?.user?.id;
             
+            // СЛУЧАЙ 1: НЕТ Telegram ID (открыто через "Open App")
             if (!userId) {
-                console.error('❌ Не удалось получить Telegram ID');
-                showScreen('registrationForm');
+                console.log('⚠️ Нет Telegram ID - открыто через Open App');
+                
+                // Показываем сообщение и кнопку для перехода в чат
+                document.querySelector('.card').innerHTML = `
+                    <div style="text-align:center;padding:40px 20px;">
+                        <div style="font-size:64px;margin-bottom:20px;">🤖</div>
+                        <h2 style="color:#2c3e50;margin-bottom:15px;">Требуется регистрация</h2>
+                        <p style="color:#7f8c8d;margin-bottom:30px;line-height:1.6;">
+                            Для регистрации необходимо открыть бота в чате.<br><br>
+                            Нажмите кнопку ниже, чтобы перейти в чат с ботом.
+                        </p>
+                        <button onclick="goToBot()" style="
+                            background:linear-gradient(145deg, #667eea, #764ba2);
+                            color:white;
+                            border:none;
+                            padding:15px 30px;
+                            border-radius:10px;
+                            font-size:16px;
+                            font-weight:bold;
+                            cursor:pointer;
+                        ">
+                            📝 Зарегистрироваться
+                        </button>
+                    </div>
+                `;
                 return;
             }
             
+            // СЛУЧАЙ 2: ЕСТЬ Telegram ID - проверяем в БД
             console.log('🔍 Проверка регистрации пользователя:', userId);
             
             try {
@@ -1001,6 +1026,18 @@
                 console.log('📝 Пользователь не найден (ошибка API) - показываем регистрацию');
                 // Если пользователь не найден - показываем форму регистрации
                 showScreen('registrationForm');
+            }
+        }
+        
+        function goToBot() {
+            // Закрываем WebApp - пользователь окажется в чате с ботом
+            console.log('🔙 Возврат в чат бота');
+            
+            if (tg.close) {
+                tg.close();
+            } else {
+                // Fallback: показываем инструкцию
+                alert('Пожалуйста, закройте это окно и откройте бота в чате Telegram.\n\nНажмите /start в чате с ботом для регистрации.');
             }
         }
 
