@@ -1301,6 +1301,10 @@
 
         // === ФУНКЦИИ АДМИН-ПАНЕЛИ ===
         
+        // API URL - ЗАМЕНИТЕ НА ВАШ СЕРВЕР!
+        const API_URL = 'http://localhost:5000';  // Локально
+        // const API_URL = 'http://ваш_ip:5000';  // Если на сервере
+        
         function openUsersPanel() {
             console.log('📂 Открытие панели пользователей');
             showScreen('usersPanel');
@@ -1308,80 +1312,139 @@
             const usersList = document.getElementById('usersList');
             usersList.innerHTML = '<p style="color:#37474f;font-weight:600;text-align:center;">⏳ Загрузка пользователей из базы данных...</p>';
             
-            console.log('📡 Отправка запроса get_users_list');
-            
-            // Отправляем запрос боту для получения списка из БД
-            tg.sendData(JSON.stringify({
-                action: 'get_users_list',
-                admin_id: tg.initDataUnsafe?.user?.id
-            }));
-            
-            // Показываем сообщение пользователю
-            setTimeout(() => {
-                usersList.innerHTML = `
-                    <div style="text-align:center;padding:30px;">
-                        <div style="font-size:48px;margin-bottom:15px;">👥</div>
-                        <h3 style="color:#2c3e50;margin-bottom:15px;">Пользователи из базы данных</h3>
+            // Загружаем пользователей из API
+            fetch(`${API_URL}/api/users`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('✅ Получено пользователей:', data.count);
+                    
+                    if (!data.success || data.count === 0) {
+                        usersList.innerHTML = `
+                            <div style="text-align:center;padding:30px;">
+                                <div style="font-size:48px;margin-bottom:15px;">👥</div>
+                                <p style="color:#37474f;font-weight:600;margin-bottom:10px;">Пользователей не найдено</p>
+                                <p style="color:#7f8c8d;font-size:13px;">Зарегистрированные пользователи появятся здесь</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    let html = '<div style="display:flex;flex-direction:column;gap:12px;">';
+                    
+                    data.users.forEach((user, index) => {
+                        const initial = user.name.charAt(0).toUpperCase();
+                        const regionName = getRegionName(user.region) || 'Не указана';
+                        const phone = user.phone || 'Не указан';
+                        const email = user.email || 'Не указан';
+                        const status = user.is_blocked ? '🚫 Заблокирован' : '✅ Активен';
+                        const statusColor = user.is_blocked ? '#ef5350' : '#66bb6a';
                         
-                        <div style="background:rgba(76,175,80,0.1);padding:20px;border-radius:12px;margin:20px 0;border-left:4px solid #4CAF50;">
-                            <div style="font-size:48px;margin-bottom:10px;">✅</div>
-                            <p style="color:#37474f;font-size:16px;line-height:1.6;font-weight:600;">
-                                Запрос отправлен!
+                        html += `
+                            <div onclick="showUserDetailsById(${user.user_id})" style="background:rgba(255,255,255,0.5);padding:15px;border-radius:12px;box-shadow:2px 2px 6px rgba(0,0,0,0.1);cursor:pointer;transition:all 0.3s;" 
+                                 onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='3px 3px 8px rgba(0,0,0,0.15)'" 
+                                 onmouseout="this.style.transform='scale(1)';this.style.boxShadow='2px 2px 6px rgba(0,0,0,0.1)'">
+                                <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                                    <div style="width:50px;height:50px;background:linear-gradient(145deg, #667eea, #764ba2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:22px;flex-shrink:0;">
+                                        ${initial}
+                                    </div>
+                                    <div style="flex:1;min-width:0;">
+                                        <div style="font-weight:600;color:#2c3e50;font-size:16px;margin-bottom:5px;">${user.name}</div>
+                                        <div style="font-size:12px;color:${statusColor};font-weight:600;">${status}</div>
+                                    </div>
+                                </div>
+                                <div style="font-size:12px;color:#546e7a;line-height:1.8;border-top:1px solid rgba(0,0,0,0.05);padding-top:10px;">
+                                    <div><strong>📞 Телефон:</strong> ${phone}</div>
+                                    <div><strong>📧 Email:</strong> ${email}</div>
+                                    <div><strong>📍 Регион:</strong> ${regionName}</div>
+                                    <div><strong>🆔 ID:</strong> ${user.user_id}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    usersList.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('❌ Ошибка загрузки:', error);
+                    usersList.innerHTML = `
+                        <div style="text-align:center;padding:30px;">
+                            <div style="font-size:48px;margin-bottom:15px;">❌</div>
+                            <h3 style="color:#e53935;margin-bottom:10px;">Ошибка подключения</h3>
+                            <p style="color:#7f8c8d;font-size:14px;margin-bottom:20px;">
+                                Не удалось загрузить пользователей из базы данных
                             </p>
-                            <p style="color:#7f8c8d;font-size:14px;margin-top:10px;">
-                                Список пользователей из базы данных <strong>users.db</strong><br>
-                                отправлен в чат с ботом выше 👆
-                            </p>
-                        </div>
-                        
-                        <div style="background:rgba(255,255,255,0.6);padding:20px;border-radius:12px;margin-top:20px;text-align:left;">
-                            <h4 style="color:#2c3e50;margin-bottom:15px;text-align:center;">📋 Что вы увидите в чате:</h4>
-                            <div style="background:#f5f5f5;padding:15px;border-radius:8px;font-family:monospace;font-size:13px;line-height:1.8;">
-                                👥 Список пользователей (X):<br><br>
-                                1. ✅ <strong>Иван Иванов</strong><br>
-                                &nbsp;&nbsp;&nbsp;ID: 123456789<br>
-                                &nbsp;&nbsp;&nbsp;📱 @ivanov<br>
-                                &nbsp;&nbsp;&nbsp;📞 +998901234567<br><br>
-                                2. ✅ <strong>Петр Петров</strong><br>
-                                &nbsp;&nbsp;&nbsp;ID: 987654321<br>
-                                &nbsp;&nbsp;&nbsp;...<br>
+                            <div style="background:rgba(229,57,53,0.1);padding:15px;border-radius:8px;border-left:4px solid #e53935;text-align:left;">
+                                <p style="color:#37474f;font-size:13px;line-height:1.6;">
+                                    <strong>Возможные причины:</strong><br>
+                                    • API сервер не запущен<br>
+                                    • Неверный URL в коде<br>
+                                    • Проблемы с CORS<br><br>
+                                    <strong>Решение:</strong><br>
+                                    Запустите: <code>python api_server.py</code>
+                                </p>
                             </div>
                         </div>
-                        
-                        <div style="background:rgba(33,150,243,0.1);padding:15px;border-radius:12px;margin-top:20px;border-left:4px solid #2196F3;">
-                            <p style="color:#37474f;font-size:14px;line-height:1.6;text-align:left;">
-                                💡 <strong>Для управления пользователем:</strong><br><br>
-                                1. Скопируйте ID из списка в чате<br>
-                                2. Нажмите на пользователя в WebApp<br>
-                                3. Или используйте кнопки управления ниже
-                            </p>
-                        </div>
-                        
-                        <div style="background:rgba(255,255,255,0.5);padding:20px;border-radius:12px;margin-top:20px;">
-                            <h4 style="color:#2c3e50;margin-bottom:15px;">🔧 Быстрое управление</h4>
-                            <p style="font-size:13px;color:#7f8c8d;margin-bottom:15px;">Введите ID пользователя из списка выше</p>
-                            
-                            <input type="number" id="manageUserId" placeholder="Введите Telegram ID" 
-                                   style="width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;font-size:16px;margin-bottom:15px;text-align:center;">
-                            
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px;">
-                                <button onclick="manageUserById('pin')" class="btn" style="background:linear-gradient(145deg, #fff3e0, #ffe0b2);color:#e65100;padding:12px;font-size:14px;">
-                                    🔑 Сменить PIN
-                                </button>
-                                <button onclick="manageUserById('block')" class="btn" style="background:linear-gradient(145deg, #ffebee, #ffcdd2);color:#c62828;padding:12px;font-size:14px;">
-                                    🚫 Блокировать
-                                </button>
-                                <button onclick="manageUserById('unblock')" class="btn" style="background:linear-gradient(145deg, #e8f5e9, #c8e6c9);color:#2e7d32;padding:12px;font-size:14px;">
-                                    ✅ Разблокировать
-                                </button>
-                                <button onclick="manageUserById('delete')" class="btn" style="background:linear-gradient(145deg, #ffcdd2, #ef9a9a);color:#b71c1c;padding:12px;font-size:14px;">
-                                    🗑️ Удалить
-                                </button>
+                    `;
+                });
+        }
+        
+        function showUserDetailsById(userId) {
+            console.log('👤 Загрузка деталей пользователя:', userId);
+            
+            // Загружаем детали пользователя из API
+            fetch(`${API_URL}/api/user/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert('Ошибка загрузки данных пользователя');
+                        return;
+                    }
+                    
+                    const user = data.user;
+                    currentSelectedUser = { user_id: userId, ...user };
+                    
+                    const initial = user.name.charAt(0).toUpperCase();
+                    const regionName = getRegionName(user.region) || 'Не указана';
+                    const status = user.is_blocked ? '🚫 Заблокирован' : '✅ Активен';
+                    const statusColor = user.is_blocked ? '#ef5350' : '#66bb6a';
+                    
+                    document.getElementById('userDetailsContent').innerHTML = `
+                        <div style="text-align:center;margin-bottom:20px;">
+                            <div style="width:80px;height:80px;background:linear-gradient(145deg, #667eea, #764ba2);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:36px;margin-bottom:15px;">
+                                ${initial}
                             </div>
+                            <h2 style="color:#2c3e50;margin:10px 0;">${user.name}</h2>
+                            <div style="color:${statusColor};font-weight:600;font-size:16px;">${status}</div>
                         </div>
-                    </div>
-                `;
-            }, 500);
+                        
+                        <div style="background:rgba(255,255,255,0.4);padding:15px;border-radius:8px;">
+                            <div style="margin-bottom:10px;font-size:14px;"><strong>📱 Телефон:</strong><br>${user.phone || 'Не указан'}</div>
+                            <div style="margin-bottom:10px;font-size:14px;"><strong>📧 Email:</strong><br>${user.email || 'Не указан'}</div>
+                            <div style="margin-bottom:10px;font-size:14px;"><strong>📍 Регион:</strong><br>${regionName}</div>
+                            <div style="margin-bottom:10px;font-size:14px;"><strong>📅 Регистрация:</strong><br>${user.registration_date || 'Не указана'}</div>
+                            <div style="font-size:14px;"><strong>🆔 ID:</strong><br>${userId}</div>
+                        </div>
+                    `;
+                    
+                    // Обновляем кнопку блокировки
+                    const blockBtn = document.getElementById('blockUserBtn');
+                    if (blockBtn) {
+                        if (user.is_blocked) {
+                            blockBtn.innerHTML = '<div class="menu-icon">✅</div><div class="menu-text">Разблокировать</div>';
+                            blockBtn.style.background = 'linear-gradient(145deg, #e8f5e9, #c8e6c9)';
+                        } else {
+                            blockBtn.innerHTML = '<div class="menu-icon">🚫</div><div class="menu-text">Заблокировать</div>';
+                            blockBtn.style.background = 'linear-gradient(145deg, #ffebee, #ffcdd2)';
+                        }
+                    }
+                    
+                    showScreen('userDetailsPanel');
+                })
+                .catch(error => {
+                    console.error('❌ Ошибка:', error);
+                    alert('Ошибка загрузки данных пользователя');
+                });
         }
 
         function openVisitsPanel() {
