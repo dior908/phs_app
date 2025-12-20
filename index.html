@@ -1,118 +1,322 @@
-import sqlite3
-import os
-import time
-import glob
-from config import DATABASE_NAME
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Штаб Управления: Система Визитов</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Roboto:wght@300;400;700&display=swap');
 
-def reset_database():
-    """
-    Радикальное удаление базы, временных файлов и пересоздание структуры.
-    ВНИМАНИЕ: Перед запуском убедитесь, что все процессы python (bot.py, api_server.py) ОСТАНОВЛЕНЫ.
-    """
-    print("=" * 60)
-    print("🚨 ВНИМАНИЕ: ЗАПУЩЕН ПРОЦЕСС ПОЛНОЙ СТЕРИЛИЗАЦИИ СИСТЕМЫ 🚨")
-    print("=" * 60)
-    
-    # 1. Список всех файлов SQLite, включая временные файлы журналов
-    patterns = [
-        DATABASE_NAME,
-        f"{DATABASE_NAME}-journal",
-        f"{DATABASE_NAME}-wal",
-        f"{DATABASE_NAME}-shm",
-        "*.db",
-        "*.db-*"
-    ]
-    
-    found_files = []
-    for pattern in patterns:
-        found_files.extend(glob.glob(pattern))
-    
-    # Убираем дубликаты
-    found_files = list(set(found_files))
-    
-    if found_files:
-        print(f"🕵️ Найдено подозрительных файлов: {len(found_files)}")
-        for file in found_files:
-            try:
-                if os.path.exists(file):
-                    os.remove(file)
-                    print(f"✅ Файл полностью уничтожен: {file}")
-            except PermissionError:
-                print(f"❌ КРИТИЧЕСКАЯ ОШИБКА: Файл {file} ЗАНЯТ!")
-                print("👉 СРОЧНО: Закройте CMD/Терминал, где запущен бот или сервер!")
-                return
-            except Exception as e:
-                print(f"❌ Непредвиденная ошибка при удалении {file}: {e}")
-    else:
-        print("ℹ️ Файлы базы данных не обнаружены. Начинаем установку с нуля.")
+        :root {
+            --army-green: #4b5320;
+            --army-dark: #252911;
+            --accent-gold: #c5a059;
+            --danger-red: #8b0000;
+            --text-light: #f4f4f4;
+            --card-bg: rgba(37, 41, 17, 0.95);
+        }
 
-    # Небольшая пауза для синхронизации файловой системы
-    time.sleep(1)
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    # 2. Создание новой структуры (Штаб Военной Иерархии)
-    try:
-        conn = sqlite3.connect(DATABASE_NAME)
-        c = conn.cursor()
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #1a1c0e url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            color: var(--text-light);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
 
-        print("\n🛠 Формирование новой структуры таблиц...")
+        /* Загрузочный экран */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: var(--army-dark);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s;
+        }
 
-        # Таблица пользователей: иерархия, опыт, админ-права
-        c.execute('''
-            CREATE TABLE users (
-                user_id INTEGER PRIMARY KEY,        -- Telegram ID (уникальный ключ)
-                username TEXT,                      -- @username пользователя
-                name TEXT,                          -- ФИО (позывной)
-                phone TEXT UNIQUE,                  -- Номер телефона
-                email TEXT UNIQUE,                  -- Почта
-                region TEXT,                        -- Код региона
-                pin TEXT,                           -- PIN-код для входа
-                role TEXT DEFAULT 'Рядовой',        -- Звание (Рядовой, Сержант и т.д.)
-                is_admin INTEGER DEFAULT 0,         -- Флаг доступа к штабу (0 или 1)
-                is_blocked INTEGER DEFAULT 0,       -- Статус блокировки
-                registration_date TEXT,             -- Дата призыва
-                xp INTEGER DEFAULT 0,               -- Опыт за визиты
-                points INTEGER DEFAULT 0,           -- Игровые баллы
-                plan_visits INTEGER DEFAULT 10      -- Боевая задача (план на период)
-            )
-        ''')
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(197, 160, 89, 0.2);
+            border-top-color: var(--accent-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
 
-        # Таблица визитов (Отчеты о вылазках)
-        c.execute('''
-            CREATE TABLE visits (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                employee_id INTEGER,
-                doctor_name TEXT,
-                organization TEXT,
-                visit_date TEXT,
-                points_earned INTEGER DEFAULT 10,
-                FOREIGN KEY (employee_id) REFERENCES users (user_id)
-            )
-        ''')
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        # Таблица для защиты от брутфорса PIN-кода
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS pin_blocks (
-                user_id INTEGER PRIMARY KEY,
-                failed_attempts INTEGER DEFAULT 0,
-                block_until TEXT
-            )
-        ''')
+        /* Экран блокировки */
+        #blocked-screen {
+            position: fixed;
+            inset: 0;
+            background: black;
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+        }
 
-        conn.commit()
-        conn.close()
-        
-        print("=" * 60)
-        print("🚀 СИСТЕМА УСПЕШНО ОБНУЛЕНА И ПЕРЕЗАГРУЖЕНА")
-        print("=" * 60)
-        print("🛑 ВАЖНЫЕ ИНСТРУКЦИИ ДЛЯ РАБОТЫ:")
-        print("1. В ТЕЛЕФОНЕ: Откройте Mini App -> (⋮) -> Reload Page (Обязательно!)")
-        print("   Это удалит старые данные из localStorage вашего телефона.")
-        print("2. ЗАПУСК: Сначала запустите bot.py, пройдите регистрацию.")
-        print("3. ПРАВА: Поскольку ваш ID в config.py, вы станете ГЛАВНЫМ автоматически.")
-        print("=" * 60)
+        #blocked-screen i { font-size: 80px; color: var(--danger-red); margin-bottom: 20px; }
 
-    except Exception as e:
-        print(f"❌ Ошибка при создании структуры БД: {e}")
+        header {
+            padding: 20px;
+            background: linear-gradient(to bottom, var(--army-dark), transparent);
+            text-align: center;
+            border-bottom: 1px solid var(--accent-gold);
+        }
 
-if __name__ == "__main__":
-    reset_database()
+        header h1 {
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+        }
+
+        .page {
+            display: none;
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .page.active { display: block; }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(197, 160, 89, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .card.blocked {
+            border-color: var(--danger-red);
+            background: rgba(139, 0, 0, 0.1);
+        }
+
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-active { background: var(--army-green); color: white; }
+        .status-blocked { background: var(--danger-red); color: white; }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: var(--army-green);
+            color: white;
+            border: 1px solid var(--accent-gold);
+            border-radius: 4px;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-danger { background: var(--danger-red); border-color: #ff4444; }
+
+        nav {
+            display: flex;
+            background: var(--army-dark);
+            border-top: 2px solid var(--accent-gold);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        nav button {
+            flex: 1;
+            padding: 15px;
+            background: transparent;
+            border: none;
+            color: #666;
+            font-size: 20px;
+        }
+
+        nav button.active { color: var(--accent-gold); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10deg); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <p>ИДЕНТИФИКАЦИЯ В СИСТЕМЕ...</p>
+    </div>
+
+    <div id="blocked-screen">
+        <i class="fas fa-user-slash"></i>
+        <h1 style="color: var(--danger-red); font-family: 'Oswald';">ДОСТУП ЗАКРЫТ</h1>
+        <p style="margin-top: 20px;">Ваше личное дело заблокировано командованием.</p>
+    </div>
+
+    <header>
+        <h1>Штаб Управления</h1>
+    </header>
+
+    <!-- Главная страница -->
+    <div id="page-main" class="page active">
+        <div class="card">
+            <h2 id="user-rank" style="color: var(--accent-gold); font-family: 'Oswald';">ЗАГРУЗКА...</h2>
+            <p id="user-name" style="font-size: 1.2rem; margin: 10px 0; font-weight: bold;"></p>
+            <div style="border-top: 1px solid #444; padding-top: 10px; display: flex; justify-content: space-between;">
+                <span>Статус:</span>
+                <span id="user-status-text" class="status-badge">ОПРЕДЕЛЕНИЕ...</span>
+            </div>
+        </div>
+        <button class="btn" onclick="tg.close();">ПОКИНУТЬ ШТАБ</button>
+    </div>
+
+    <!-- Админ-панель -->
+    <div id="page-admin" class="page">
+        <h2 style="font-family: 'Oswald'; margin-bottom: 15px;">ЛИЧНЫЙ СОСТАВ</h2>
+        <div id="users-list">
+            <!-- Список загружается динамически -->
+        </div>
+    </div>
+
+    <nav id="nav-bar" style="display: none;">
+        <button onclick="switchPage('main')" id="btn-nav-main" class="active"><i class="fas fa-user-shield"></i></button>
+        <button onclick="switchPage('admin')" id="btn-nav-admin"><i class="fas fa-users-cog"></i></button>
+    </nav>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // АДРЕС ВАШЕГО СЕРВЕРА
+        const API_BASE = 'http://localhost:5000/api'; 
+
+        async function init() {
+            const userId = tg.initDataUnsafe?.user?.id;
+            if (!userId) {
+                document.getElementById('loader').innerText = "ОШИБКА: ЗАПУСТИТЕ ИЗ ТЕЛЕГРАМ";
+                return;
+            }
+            await refreshData();
+        }
+
+        async function refreshData() {
+            const userId = tg.initDataUnsafe?.user?.id;
+            try {
+                // Прямой запрос к серверу без кэширования
+                const res = await fetch(`${API_BASE}/users?_t=${Date.now()}`);
+                const data = await res.json();
+
+                if (data.success) {
+                    const allUsers = data.users;
+                    const me = allUsers.find(u => u.user_id === userId);
+
+                    if (!me) {
+                        tg.showAlert("Вы не зарегистрированы в системе!");
+                        tg.close();
+                        return;
+                    }
+
+                    // ПРОВЕРКА БЛОКИРОВКИ
+                    if (me.is_blocked === 1) {
+                        document.getElementById('blocked-screen').style.display = 'flex';
+                        document.getElementById('loader').style.display = 'none';
+                        return;
+                    }
+
+                    // Обновляем профиль
+                    document.getElementById('user-name').innerText = me.name;
+                    document.getElementById('user-rank').innerText = (me.role || 'Рядовой').toUpperCase();
+                    document.getElementById('user-status-text').innerText = "АКТИВЕН";
+                    document.getElementById('user-status-text').className = "status-badge status-active";
+
+                    // Если админ - показываем навигацию и список
+                    if (me.is_admin === 1 || userId === 7774588164) { // 7774588164 - ваш ID
+                        document.getElementById('nav-bar').style.display = 'flex';
+                        renderUsersList(allUsers);
+                    }
+
+                    document.getElementById('loader').style.opacity = '0';
+                    setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
+                }
+            } catch (err) {
+                console.error("Критический сбой связи:", err);
+            }
+        }
+
+        function renderUsersList(users) {
+            const list = document.getElementById('users-list');
+            list.innerHTML = '';
+
+            users.forEach(u => {
+                const card = document.createElement('div');
+                card.className = `card ${u.is_blocked ? 'blocked' : ''}`;
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center">
+                        <span style="font-weight:bold">${u.name}</span>
+                        <span class="status-badge ${u.is_blocked ? 'status-blocked' : 'status-active'}">
+                            ${u.is_blocked ? 'БЛОК' : 'ОК'}
+                        </span>
+                    </div>
+                    <p style="font-size:11px; color:#888; margin:5px 0">ID: ${u.user_id} | Тел: ${u.phone}</p>
+                    <div style="display:flex; gap:10px; margin-top:10px">
+                        <button class="btn" style="padding:5px; font-size:12px" onclick="userAction(${u.user_id}, 'toggle_block')">
+                            ${u.is_blocked ? 'РАЗБЛОКИРОВАТЬ' : 'ЗАБЛОКИРОВАТЬ'}
+                        </button>
+                        <button class="btn btn-danger" style="padding:5px; font-size:12px" onclick="userAction(${u.user_id}, 'delete_user')">
+                            УДАЛИТЬ
+                        </button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function userAction(targetId, action) {
+            if (action === 'delete_user' && !confirm("Удалить бойца навсегда?")) return;
+
+            // Отправляем команду в Telegram
+            tg.sendData(JSON.stringify({
+                action: action,
+                user_id: targetId,
+                admin_id: tg.initDataUnsafe?.user?.id
+            }));
+
+            tg.HapticFeedback.impactOccurred('medium');
+            
+            // Визуально ждем секунду и обновляемся
+            setTimeout(refreshData, 1000);
+        }
+
+        function switchPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            document.getElementById('btn-nav-' + pageId).classList.add('active');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
