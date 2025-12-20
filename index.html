@@ -848,21 +848,63 @@
             }
         };
 
-        function setLanguage(lang) {
+        async function setLanguage(lang) {
             currentLanguage = lang;
-            // УБРАНО: localStorage - язык не сохраняем
             updateLanguage();
             
             // Добавляем язык к данным пользователя
             userData.language = lang;
             
-            // Отправляем данные регистрации в бота (будет сохранено в БД)
-            tg.sendData(JSON.stringify({
-                action: 'registration',
-                data: userData
-            }));
+            // Получаем Telegram ID (если есть)
+            const telegramId = tg.initDataUnsafe?.user?.id;
             
-            showScreen('mainMenu');
+            console.log('📤 Отправка регистрации...');
+            console.log('👤 Telegram ID:', telegramId);
+            console.log('📦 Данные:', userData);
+            
+            // ГИБРИДНЫЙ РЕЖИМ: пробуем tg.sendData, если не работает → API
+            try {
+                if (telegramId && tg.sendData) {
+                    // Режим 1: Через бота (если открыто через кнопку в боте)
+                    console.log('🤖 Отправка через бота...');
+                    tg.sendData(JSON.stringify({
+                        action: 'registration',
+                        data: userData
+                    }));
+                    console.log('✅ Отправлено в бота');
+                    showScreen('mainMenu');
+                } else {
+                    // Режим 2: Напрямую в API (если открыто через "Open App")
+                    console.log('🌐 Отправка напрямую в API...');
+                    
+                    const registerData = {
+                        telegram_id: telegramId || Math.floor(Math.random() * 1000000000),
+                        username: tg.initDataUnsafe?.user?.username || 'unknown',
+                        name: userData.name,
+                        phone: userData.phone,
+                        email: userData.email,
+                        region: userData.region,
+                        pin: userData.pin
+                    };
+                    
+                    const response = await apiRequest('/api/register', {
+                        method: 'POST',
+                        body: JSON.stringify(registerData)
+                    });
+                    
+                    if (response.success) {
+                        console.log('✅ Регистрация успешна!');
+                        alert('✅ Регистрация завершена!\n\nВаш ID: ' + response.user_id);
+                        showScreen('mainMenu');
+                    } else {
+                        console.error('❌ Ошибка:', response.error);
+                        alert('❌ Ошибка регистрации: ' + response.error);
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Ошибка отправки:', error);
+                alert('❌ Ошибка: ' + error.message);
+            }
         }
 
         function switchLanguage(lang) {
