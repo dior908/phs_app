@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PHS App - Версия 1.5</title>
+    <title>Система управления визитами</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         console.log('🔧 Telegram WebApp API загружен');
@@ -382,11 +382,13 @@
                     </div>
                     <div class="form-group">
                         <label for="phone" id="phoneLabel">Номер телефона <span class="required">*</span></label>
-                        <div style="position:relative;">
-                            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#2c3e50;font-weight:500;pointer-events:none;">+998</span>
-                            <input type="tel" id="phone" placeholder="901234567" maxlength="9" pattern="[0-9]{9}" inputmode="numeric" style="padding-left:65px;" required>
-                        </div>
-                        <div class="error" id="phoneError">Введите 9 цифр номера</div>
+                        <input type="tel" id="phone" placeholder="+998 90 123 45 67" required>
+                        <div class="error" id="phoneError">Введите номер</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email" id="emailLabel">Email <span class="required">*</span></label>
+                        <input type="email" id="email" placeholder="example@mail.com" required>
+                        <div class="error" id="emailError">Введите email</div>
                     </div>
                     <div class="form-group">
                         <label for="region" id="regionLabel">Область <span class="required">*</span></label>
@@ -846,21 +848,63 @@
             }
         };
 
-        function setLanguage(lang) {
+        async function setLanguage(lang) {
             currentLanguage = lang;
-            // УБРАНО: localStorage - язык не сохраняем
             updateLanguage();
             
             // Добавляем язык к данным пользователя
             userData.language = lang;
             
-            // Отправляем данные регистрации в бота (будет сохранено в БД)
-            tg.sendData(JSON.stringify({
-                action: 'registration',
-                data: userData
-            }));
+            // Получаем Telegram ID (если есть)
+            const telegramId = tg.initDataUnsafe?.user?.id;
             
-            showScreen('mainMenu');
+            console.log('📤 Отправка регистрации...');
+            console.log('👤 Telegram ID:', telegramId);
+            console.log('📦 Данные:', userData);
+            
+            // ГИБРИДНЫЙ РЕЖИМ: пробуем tg.sendData, если не работает → API
+            try {
+                if (telegramId && tg.sendData) {
+                    // Режим 1: Через бота (если открыто через кнопку в боте)
+                    console.log('🤖 Отправка через бота...');
+                    tg.sendData(JSON.stringify({
+                        action: 'registration',
+                        data: userData
+                    }));
+                    console.log('✅ Отправлено в бота');
+                    showScreen('mainMenu');
+                } else {
+                    // Режим 2: Напрямую в API (если открыто через "Open App")
+                    console.log('🌐 Отправка напрямую в API...');
+                    
+                    const registerData = {
+                        telegram_id: telegramId || Math.floor(Math.random() * 1000000000),
+                        username: tg.initDataUnsafe?.user?.username || 'unknown',
+                        name: userData.name,
+                        phone: userData.phone,
+                        email: userData.email,
+                        region: userData.region,
+                        pin: userData.pin
+                    };
+                    
+                    const response = await apiRequest('/api/register', {
+                        method: 'POST',
+                        body: JSON.stringify(registerData)
+                    });
+                    
+                    if (response.success) {
+                        console.log('✅ Регистрация успешна!');
+                        alert('✅ Регистрация завершена!\n\nВаш ID: ' + response.user_id);
+                        showScreen('mainMenu');
+                    } else {
+                        console.error('❌ Ошибка:', response.error);
+                        alert('❌ Ошибка регистрации: ' + response.error);
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Ошибка отправки:', error);
+                alert('❌ Ошибка: ' + error.message);
+            }
         }
 
         function switchLanguage(lang) {
@@ -932,12 +976,37 @@
         async function checkRegistration() {
             const userId = tg.initDataUnsafe?.user?.id;
             
+            // СЛУЧАЙ 1: НЕТ Telegram ID (открыто через "Open App")
             if (!userId) {
-                console.error('❌ Не удалось получить Telegram ID');
-                showScreen('registrationForm');
+                console.log('⚠️ Нет Telegram ID - открыто через Open App');
+                
+                // Показываем сообщение и кнопку для перехода в чат
+                document.querySelector('.card').innerHTML = `
+                    <div style="text-align:center;padding:40px 20px;">
+                        <div style="font-size:64px;margin-bottom:20px;">🤖</div>
+                        <h2 style="color:#2c3e50;margin-bottom:15px;">Требуется регистрация</h2>
+                        <p style="color:#7f8c8d;margin-bottom:30px;line-height:1.6;">
+                            Для регистрации необходимо открыть бота в чате.<br><br>
+                            Нажмите кнопку ниже, чтобы перейти в чат с ботом.
+                        </p>
+                        <button onclick="goToBot()" style="
+                            background:linear-gradient(145deg, #667eea, #764ba2);
+                            color:white;
+                            border:none;
+                            padding:15px 30px;
+                            border-radius:10px;
+                            font-size:16px;
+                            font-weight:bold;
+                            cursor:pointer;
+                        ">
+                            📝 Зарегистрироваться
+                        </button>
+                    </div>
+                `;
                 return;
             }
             
+            // СЛУЧАЙ 2: ЕСТЬ Telegram ID - проверяем в БД
             console.log('🔍 Проверка регистрации пользователя:', userId);
             
             try {
@@ -959,14 +1028,25 @@
                 showScreen('registrationForm');
             }
         }
+        
+        function goToBot() {
+            // Закрываем WebApp - пользователь окажется в чате с ботом
+            console.log('🔙 Возврат в чат бота');
+            
+            if (tg.close) {
+                tg.close();
+            } else {
+                // Fallback: показываем инструкцию
+                alert('Пожалуйста, закройте это окно и откройте бота в чате Telegram.\n\nНажмите /start в чате с ботом для регистрации.');
+            }
+        }
 
         function isValidEmail(email) {
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
         function isValidPhone(phone) {
-            // Проверка что введено ровно 9 цифр
-            return /^\d{9}$/.test(phone);
+            return /^[\d\s\+\-\(\)]+$/.test(phone) && phone.replace(/\D/g, '').length >= 9;
         }
 
         function setupPinNavigation(prefix) {
@@ -1031,19 +1111,13 @@
             }
         });
 
-        // Телефон: только цифры
-        document.getElementById('phone').addEventListener('input', function(e) {
-            this.value = this.value.replace(/\D/g, '');
-        });
-        
         document.getElementById('regForm').addEventListener('submit', (e) => {
             e.preventDefault();
             hideAllErrors();
 
             const name = document.getElementById('name').value.trim();
             const phone = document.getElementById('phone').value.trim();
-            const name = document.getElementById('name').value.trim();
-            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
             const region = document.getElementById('region').value;
 
             let isValid = true;
@@ -1054,7 +1128,12 @@
             }
 
             if (!isValidPhone(phone)) {
-                showError('phone', 'Введите 9 цифр номера');
+                showError('phone', 'Введите номер');
+                isValid = false;
+            }
+
+            if (!isValidEmail(email)) {
+                showError('email', 'Введите email');
                 isValid = false;
             }
 
@@ -1064,10 +1143,7 @@
             }
 
             if (isValid) {
-                userData = { 
-                    name, 
-                    phone: '+998' + phone,  // Добавляем +998 автоматически
-                    region,
+                userData = { name, phone, email, region,
                     telegramId: tg.initDataUnsafe?.user?.id || 'unknown',
                     username: tg.initDataUnsafe?.user?.username || 'unknown'
                 };
