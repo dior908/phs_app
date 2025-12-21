@@ -2,1859 +2,232 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Система управления визитами</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram WebApp Debug</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script>
-        console.log('🔧 Telegram WebApp API загружен');
-    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-touch-callout: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        html, body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            position: fixed;
-            touch-action: pan-y;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%);
-            height: 100vh;
-            height: -webkit-fill-available;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            padding: 0;
-            overflow-y: auto;
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 400px;
-            min-height: 100vh;
-            min-height: -webkit-fill-available;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: #f5f5f5;
+            margin: 0;
         }
-
-        .card {
-            background: linear-gradient(145deg, #e6e9ed 0%, #c5ccd4 100%);
-            border-radius: 24px;
-            padding: 30px;
-            box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.2), -8px -8px 16px rgba(255, 255, 255, 0.5);
-            animation: slideUp 0.5s ease;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            overflow-x: hidden;
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-
-        .card::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .card::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
-
-        .card::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .logo-icon {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(145deg, #95a5a6, #7f8c8d);
-            border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 35px;
-            margin-bottom: 10px;
-            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.5);
-        }
-
         h1 {
-            color: #2c3748;
-            font-size: 24px;
-            text-align: center;
-            margin-bottom: 8px;
-            font-weight: 700;
-            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #546e7a;
-            font-size: 13px;
-            margin-bottom: 25px;
-            font-weight: 500;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        label {
-            display: block;
-            color: #37474f;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 14px 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.3s;
-            background: #d1d9e0;
-            box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.1), inset -3px -3px 6px rgba(255, 255, 255, 0.5);
             color: #2c3e50;
+            margin-top: 0;
         }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            background: #dfe6ed;
-            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.15), inset -2px -2px 5px rgba(255, 255, 255, 0.7);
-        }
-
-        textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .btn {
-            width: 100%;
+        .section {
+            margin: 20px 0;
             padding: 15px;
-            background: linear-gradient(145deg, #95a5a6, #7f8c8d);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
-            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.3);
-            font-family: 'Inter', sans-serif;
-        }
-
-        .btn:active {
-            transform: translateY(0);
-            box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.2), inset -3px -3px 6px rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(145deg, #b0bec5, #90a4ae);
-        }
-
-        .btn-success {
-            background: linear-gradient(145deg, #66bb6a, #4caf50);
-        }
-
-        .error {
-            color: #d32f2f;
-            font-size: 13px;
-            margin-top: 8px;
-            display: none;
-            background: rgba(244, 67, 54, 0.1);
-            padding: 10px;
+            background: #f8f9fa;
             border-radius: 8px;
-            border-left: 3px solid #d32f2f;
+            border-left: 4px solid #667eea;
         }
-
-        .error.show {
-            display: block;
+        .label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 8px;
         }
-
-        .hidden {
-            display: none;
+        .value {
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            word-break: break-all;
+            white-space: pre-wrap;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
         }
-
-        .pin-input-container {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 25px 0;
-        }
-
-        .pin-digit {
-            width: 60px;
-            height: 60px;
-            text-align: center;
-            font-size: 28px;
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .warning { color: orange; font-weight: bold; }
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
             font-weight: bold;
         }
-
-        .menu-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
+        .status.ok {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
-
-        .menu-button {
-            padding: 20px;
-            background: linear-gradient(145deg, #e6e9ed, #cfd8dc);
+        .status.fail {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        button {
+            background: #667eea;
+            color: white;
             border: none;
-            border-radius: 15px;
+            padding: 12px 24px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.15), -4px -4px 8px rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            margin: 5px;
         }
-
-        .menu-button:active {
-            transform: translateY(0);
-            box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.1), inset -3px -3px 6px rgba(255, 255, 255, 0.5);
-        }
-
-        .menu-icon {
-            font-size: 32px;
-            margin-bottom: 8px;
-        }
-
-        .menu-text {
-            font-size: 13px;
-            font-weight: 600;
-            color: #37474f;
-        }
-
-        .lang-flags {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 1000;
-        }
-
-        .flag-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            font-size: 24px;
-            box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2), -3px -3px 6px rgba(255, 255, 255, 0.3);
-            background: linear-gradient(145deg, #e6e9ed, #cfd8dc);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .flag-btn.active {
-            box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.2), inset -3px -3px 6px rgba(255, 255, 255, 0.3);
-            transform: scale(0.95);
-        }
-
-        .admin-icon {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(145deg, #ffa726, #ff9800);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 20px;
-            box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2), -3px -3px 6px rgba(255, 255, 255, 0.3);
-            z-index: 1000;
-        }
-
-        .char-counter {
-            text-align: right;
-            font-size: 12px;
-            color: #78909c;
-            margin-top: 4px;
-        }
-
-        .required {
-            color: #d32f2f;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-        }
-
-        .spinner {
-            border: 3px solid rgba(0,0,0,0.1);
-            border-top: 3px solid #7f8c8d;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .location-btn {
-            background: linear-gradient(145deg, #42a5f5, #1e88e5);
+        button:hover {
+            background: #5568d3;
         }
     </style>
 </head>
 <body>
-    <!-- Флаги языков -->
-    <div class="lang-flags" id="langFlags" style="display: none;">
-        <button class="flag-btn" id="flagRu" onclick="switchLanguage('ru')" title="Русский">🇷🇺</button>
-        <button class="flag-btn" id="flagUz" onclick="switchLanguage('uz')" title="O'zbekcha">🇺🇿</button>
-    </div>
-
-    <!-- Админ иконка -->
-    <div class="admin-icon" id="adminIcon" onclick="openAdminPanel()" title="Админ-панель" style="display: none;">⚙️</div>
-
     <div class="container">
-        <div class="card">
-            <!-- Загрузка -->
-            <div id="loadingScreen" class="loading">
-                <div class="spinner"></div>
-                <p style="margin-top: 15px; color: #546e7a;">Загрузка...</p>
-            </div>
+        <h1>🔍 Telegram WebApp Diagnostics</h1>
+        
+        <div class="section">
+            <div class="label">📱 Telegram ID Status:</div>
+            <div id="idStatus" class="status"></div>
+        </div>
 
-            <!-- Вход по PIN -->
-            <div id="pinLoginScreen" class="hidden">
-                <div class="logo">
-                    <div class="logo-icon">🔐</div>
-                </div>
-                <h1 id="loginTitle">Вход в систему</h1>
-                <p class="subtitle" id="loginSubtitle">Введите ваш PIN-код</p>
-                <div class="pin-input-container">
-                    <input type="password" maxlength="1" class="pin-digit" id="loginPin1" inputmode="numeric">
-                    <input type="password" maxlength="1" class="pin-digit" id="loginPin2" inputmode="numeric">
-                    <input type="password" maxlength="1" class="pin-digit" id="loginPin3" inputmode="numeric">
-                    <input type="password" maxlength="1" class="pin-digit" id="loginPin4" inputmode="numeric">
-                </div>
-                <div class="error" id="loginPinError">Неверный PIN-код</div>
-                <button class="btn" id="loginBtn">Войти</button>
-            </div>
+        <div class="section">
+            <div class="label">👤 User Data (tg.initDataUnsafe.user):</div>
+            <div id="userData" class="value"></div>
+        </div>
 
-            <!-- Регистрация -->
-            <div id="registrationForm" class="hidden">
-                <div class="logo"><div class="logo-icon">📋</div></div>
-                <h1 id="regTitle">Регистрация</h1>
-                <p class="subtitle" id="regSubtitle">Заполните данные</p>
-                <form id="regForm">
-                    <div class="form-group">
-                        <label for="name" id="nameLabel">Полное имя <span class="required">*</span></label>
-                        <input type="text" id="name" placeholder="Иван Иванов" required>
-                        <div class="error" id="nameError">Введите имя</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone" id="phoneLabel">Номер телефона <span class="required">*</span></label>
-                        <input type="tel" id="phone" placeholder="+998 90 123 45 67" required>
-                        <div class="error" id="phoneError">Введите номер</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="email" id="emailLabel">Email <span class="required">*</span></label>
-                        <input type="email" id="email" placeholder="example@mail.com" required>
-                        <div class="error" id="emailError">Введите email</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="region" id="regionLabel">Область <span class="required">*</span></label>
-                        <select id="region" required>
-                            <option value="">Выберите область</option>
-                            <option value="tashkent_city">г. Ташкент</option>
-                            <option value="andijan">Андижанская область</option>
-                            <option value="bukhara">Бухарская область</option>
-                            <option value="jizzakh">Джизакская область</option>
-                            <option value="kashkadarya">Кашкадарьинская область</option>
-                            <option value="navoi">Навоийская область</option>
-                            <option value="namangan">Наманганская область</option>
-                            <option value="samarkand">Самаркандская область</option>
-                            <option value="surkhandarya">Сурхандарьинская область</option>
-                            <option value="sirdarya">Сырдарьинская область</option>
-                            <option value="tashkent">Ташкентская область</option>
-                            <option value="fergana">Ферганская область</option>
-                            <option value="khorezm">Хорезмская область</option>
-                            <option value="karakalpakstan">Республика Каракалпакстан</option>
-                        </select>
-                        <div class="error" id="regionError">Выберите область</div>
-                    </div>
-                    <button type="submit" class="btn" id="regSubmitBtn">Продолжить</button>
-                </form>
-            </div>
+        <div class="section">
+            <div class="label">📦 Full initDataUnsafe:</div>
+            <div id="fullData" class="value"></div>
+        </div>
 
-            <!-- Установка PIN -->
-            <div id="pinSetupScreen" class="hidden">
-                <div class="logo"><div class="logo-icon">🔐</div></div>
-                <h1 id="pinSetupTitle">Установите PIN-код</h1>
-                <p class="subtitle" id="pinSetupSubtitle">Введите 4-значный PIN</p>
-                <div class="pin-input-container">
-                    <input type="password" maxlength="1" class="pin-digit" id="pin1" inputmode="numeric">
-                    <input type="password" maxlength="1" class="pin-digit" id="pin2" inputmode="numeric">
-                    <input type="password" maxlength="1" class="pin-digit" id="pin3" inputmode="numeric">
-                    <input type="password" maxlength="1" class="pin-digit" id="pin4" inputmode="numeric">
-                </div>
-                <div class="error" id="pinError">PIN из 4 цифр</div>
-                <button class="btn" id="setPinBtn">Установить PIN</button>
-            </div>
+        <div class="section">
+            <div class="label">🔐 Raw initData (encrypted):</div>
+            <div id="rawData" class="value"></div>
+        </div>
 
-            <!-- Подтверждение PIN -->
-            <div id="pinConfirmScreen" class="hidden">
-                <div class="logo"><div class="logo-icon">✅</div></div>
-                <h1 id="pinConfirmTitle">Подтвердите PIN-код</h1>
-                <p class="subtitle" id="pinConfirmSubtitle">Введите PIN ещё раз</p>
-                <div class="pin-input-container">
-                    <input type="password" maxlength="1" class="pin-digit" id="confirmPin1" inputmode="numeric">
-                    <input type="password" maxlength="1" class="pin-digit" id="confirmPin2" inputmode="numeric">
-                    <input type="password" maxlength="1" class="pin-digit" id="confirmPin3" inputmode="numeric">
-                    <input type="password" maxlength="1" class="pin-digit" id="confirmPin4" inputmode="numeric">
-                </div>
-                <div class="error" id="confirmPinError">PIN не совпадает</div>
-                <button class="btn" id="confirmPinBtn">Подтвердить</button>
-            </div>
+        <div class="section">
+            <div class="label">🌐 WebApp Info:</div>
+            <div id="webappInfo" class="value"></div>
+        </div>
 
-            <!-- Выбор языка -->
-            <div id="languageScreen" class="hidden">
-                <div class="logo"><div class="logo-icon">🌐</div></div>
-                <h1>Выберите язык / Tilni tanlang</h1>
-                <p class="subtitle">Выберите язык</p>
-                <div style="display:flex; gap:10px; margin-top:20px;">
-                    <button class="btn" style="flex:1;" onclick="setLanguage('ru')">🇷🇺 Русский</button>
-                    <button class="btn" style="flex:1;" onclick="setLanguage('uz')">🇺🇿 O'zbekcha</button>
-                </div>
-            </div>
+        <div class="section">
+            <div class="label">📍 Platform & Version:</div>
+            <div id="platform" class="value"></div>
+        </div>
 
-            <!-- Главное меню -->
-            <div id="mainMenu" class="hidden">
-                <div class="logo"><div class="logo-icon">🏠</div></div>
-                <h1 id="menuTitle">Главное меню</h1>
-                <p class="subtitle" id="menuSubtitle">Выберите действие</p>
-                <div class="menu-grid">
-                    <div class="menu-button" onclick="openVisitMenu()">
-                        <div class="menu-icon">📝</div>
-                        <div class="menu-text" id="menuVisit">Регистрация визита</div>
-                    </div>
-                    <div class="menu-button" onclick="alert('В разработке')">
-                        <div class="menu-icon">🗺️</div>
-                        <div class="menu-text" id="menuMap">Карта визитов</div>
-                    </div>
-                    <div class="menu-button" onclick="alert('В разработке')">
-                        <div class="menu-icon">📊</div>
-                        <div class="menu-text" id="menuReports">Отчеты</div>
-                    </div>
-                    <div class="menu-button" onclick="alert('В разработке')">
-                        <div class="menu-icon">🗓️</div>
-                        <div class="menu-text" id="menuTour">Тур план</div>
-                    </div>
-                    <div class="menu-button" onclick="alert('В разработке')">
-                        <div class="menu-icon">📚</div>
-                        <div class="menu-text" id="menuMaterials">Материалы</div>
-                    </div>
-                    <div class="menu-button" onclick="openSection('help')">
-                        <div class="menu-icon">❓</div>
-                        <div class="menu-text" id="menuHelp">Помощь</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Меню типов визитов -->
-            <div id="visitTypeMenu" class="hidden">
-                <div class="logo"><div class="logo-icon">📝</div></div>
-                <h1 id="visitTypeTitle">Тип визита</h1>
-                <p class="subtitle" id="visitTypeSubtitle">Выберите тип</p>
-                <div class="menu-grid">
-                    <div class="menu-button" onclick="openVisitForm('doctor')">
-                        <div class="menu-icon">👨‍⚕️</div>
-                        <div class="menu-text" id="visitDoctor">Врач</div>
-                    </div>
-                    <div class="menu-button" onclick="alert('В разработке')">
-                        <div class="menu-icon">💊</div>
-                        <div class="menu-text" id="visitPharmacy">Аптека</div>
-                    </div>
-                    <div class="menu-button" onclick="alert('В разработке')">
-                        <div class="menu-icon">📦</div>
-                        <div class="menu-text" id="visitWholesale">Оптом</div>
-                    </div>
-                </div>
-                <button class="btn btn-secondary" onclick="backToMainMenu()" style="margin-top:15px;" id="backBtn">Вернуться</button>
-            </div>
-
-            <!-- Форма визита к врачу -->
-            <div id="doctorVisitForm" class="hidden">
-                <div class="logo"><div class="logo-icon">👨‍⚕️</div></div>
-                <h1 id="doctorFormTitle">Визит к врачу</h1>
-                <p class="subtitle" id="doctorFormSubtitle">Заполните данные</p>
-                <form id="doctorForm">
-                    <div class="form-group">
-                        <label for="doctorName" id="doctorNameLabel">ФИО Врача <span class="required">*</span></label>
-                        <input type="text" id="doctorName" required>
-                        <div class="error" id="doctorNameError">Введите ФИО</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="doctorPhone" id="doctorPhoneLabel">Телефон врача</label>
-                        <input type="tel" id="doctorPhone">
-                    </div>
-                    <div class="form-group">
-                        <label for="organization" id="organizationLabel">Организация <span class="required">*</span></label>
-                        <input type="text" id="organization" required>
-                        <div class="error" id="organizationError">Введите организацию</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="specialty" id="specialtyLabel">Специальность <span class="required">*</span></label>
-                        <input type="text" id="specialty" required>
-                        <div class="error" id="specialtyError">Введите специальность</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="visitTopic" id="visitTopicLabel">Тема визита <span class="required">*</span></label>
-                        <input type="text" id="visitTopic" required>
-                        <div class="error" id="visitTopicError">Введите тему</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="visitResult" id="visitResultLabel">Результат <span class="required">*</span></label>
-                        <textarea id="visitResult" required minlength="20"></textarea>
-                        <div class="char-counter"><span id="resultCounter">0</span>/20 минимум</div>
-                        <div class="error" id="visitResultError">Минимум 20 символов</div>
-                    </div>
-                    <button type="button" class="btn location-btn" onclick="getLocation()" id="locationBtn">📍 Геолокация</button>
-                    <div id="locationStatus" style="text-align:center;margin-top:10px;color:#546e7a;font-size:13px;"></div>
-                    <button type="submit" class="btn btn-success" id="submitVisitBtn">Сохранить</button>
-                    <button type="button" class="btn btn-secondary" onclick="backToVisitMenu()" id="backToVisitBtn">Назад</button>
-                </form>
-            </div>
-
-            <!-- Помощь -->
-            <div id="helpScreen" class="hidden">
-                <div class="logo"><div class="logo-icon">❓</div></div>
-                <h1 id="helpTitle">Помощь</h1>
-                <p class="subtitle" id="helpSubtitle">Функции</p>
-                <div class="menu-grid" style="grid-template-columns:1fr;">
-                    <div class="menu-button" onclick="openEditProfile()">
-                        <div class="menu-icon">✏️</div>
-                        <div class="menu-text" id="helpEditData">Изменить данные</div>
-                    </div>
-                    <div class="menu-button" onclick="alert(currentLanguage==='ru'?'Инструкция':'Yo\\'riqnoma')">
-                        <div class="menu-icon">📖</div>
-                        <div class="menu-text" id="helpInstructions">Инструкция</div>
-                    </div>
-                </div>
-                <button class="btn btn-secondary" onclick="backToMainMenu()" style="margin-top:20px;" id="helpBackBtn">Вернуться</button>
-            </div>
-
-            <!-- Редактирование профиля -->
-            <div id="editProfileScreen" class="hidden">
-                <div class="logo"><div class="logo-icon">✏️</div></div>
-                <h1 id="editProfileTitle">Изменить данные</h1>
-                <p class="subtitle" id="editProfileSubtitle">Обновите информацию</p>
-                <form id="editProfileForm">
-                    <div class="form-group">
-                        <label for="editName" id="editNameLabel">Имя <span class="required">*</span></label>
-                        <input type="text" id="editName" required>
-                        <div class="error" id="editNameError">Введите имя</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="editPhone" id="editPhoneLabel">Телефон <span class="required">*</span></label>
-                        <input type="tel" id="editPhone" required>
-                        <div class="error" id="editPhoneError">Введите номер</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="editEmail" id="editEmailLabel">Email <span class="required">*</span></label>
-                        <input type="email" id="editEmail" required>
-                        <div class="error" id="editEmailError">Введите email</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="editRegion" id="editRegionLabel">Область <span class="required">*</span></label>
-                        <select id="editRegion" required>
-                            <option value="">Выберите</option>
-                            <option value="tashkent_city">г. Ташкент</option>
-                            <option value="andijan">Андижанская</option>
-                            <option value="bukhara">Бухарская</option>
-                            <option value="jizzakh">Джизакская</option>
-                            <option value="kashkadarya">Кашкадарьинская</option>
-                            <option value="navoi">Навоийская</option>
-                            <option value="namangan">Наманганская</option>
-                            <option value="samarkand">Самаркандская</option>
-                            <option value="surkhandarya">Сурхандарьинская</option>
-                            <option value="sirdarya">Сырдарьинская</option>
-                            <option value="tashkent">Ташкентская</option>
-                            <option value="fergana">Ферганская</option>
-                            <option value="khorezm">Хорезмская</option>
-                            <option value="karakalpakstan">Каракалпакстан</option>
-                            </select>
-                        <div class="error" id="editRegionError">Выберите область</div>
-                    </div>
-                    <button type="submit" class="btn btn-success" id="saveProfileBtn">Сохранить</button>
-                    <button type="button" class="btn btn-secondary" onclick="cancelEditProfile()" id="cancelEditBtn">Отмена</button>
-                </form>
-            </div>
-
-            <!-- Админ-панель вход -->
-            <div id="adminLoginScreen" class="hidden">
-                <div class="logo"><div class="logo-icon">⚙️</div></div>
-                <h1>Админ-панель</h1>
-                <p class="subtitle">Введите пароль</p>
-                <div class="pin-input-container">
-                    <input type="password" maxlength="1" class="pin-digit" id="adminPin1" inputmode="numeric">
-                    <input type="password" maxlength="1" class="pin-digit" id="adminPin2" inputmode="numeric">
-                    <input type="password" maxlength="1" class="pin-digit" id="adminPin3" inputmode="numeric">
-                    <input type="password" maxlength="1" class="pin-digit" id="adminPin4" inputmode="numeric">
-                </div>
-                <div class="error" id="adminPinError">Неверный пароль</div>
-                <button class="btn" onclick="checkAdminPassword()">Войти</button>
-                <button class="btn btn-secondary" onclick="closeAdminPanel()">Отмена</button>
-            </div>
-
-            <!-- Админ-панель -->
-            <div id="adminPanel" class="hidden">
-                <div class="logo"><div class="logo-icon">⚙️</div></div>
-                <h1>Админ-панель</h1>
-                <p class="subtitle">Управление системой</p>
-                
-                <div class="menu-grid" style="margin-top:20px;">
-                    <button class="menu-button" onclick="openUsersPanel()">
-                        <div class="menu-icon">👥</div>
-                        <div class="menu-text">Пользователи</div>
-                    </button>
-                    <button class="menu-button" onclick="openVisitsPanel()">
-                        <div class="menu-icon">📊</div>
-                        <div class="menu-text">Визиты</div>
-                    </button>
-                    <button class="menu-button" onclick="openReportsPanel()">
-                        <div class="menu-icon">📈</div>
-                        <div class="menu-text">Отчеты</div>
-                    </button>
-                    <button class="menu-button" onclick="openSettingsPanel()">
-                        <div class="menu-icon">⚙️</div>
-                        <div class="menu-text">Настройки</div>
-                    </button>
-                </div>
-                
-                <button class="btn btn-secondary" onclick="backToMainMenu()" style="margin-top:20px;">Вернуться</button>
-            </div>
-
-            <!-- Панель пользователей -->
-            <div id="usersPanel" class="hidden">
-                <div class="logo"><div class="logo-icon">👥</div></div>
-                <h1>Пользователи</h1>
-                <p class="subtitle">Зарегистрированные пользователи</p>
-                
-                <div id="usersList" style="background:rgba(255,255,255,0.3);padding:15px;border-radius:12px;margin:20px 0;max-height:450px;overflow-y:auto;">
-                    <p style="color:#37474f;font-weight:600;text-align:center;">Загрузка...</p>
-                </div>
-                
-                <button class="btn btn-secondary" onclick="backToAdminPanel()">Назад к админ-панели</button>
-            </div>
-
-            <!-- Детали пользователя -->
-            <div id="userDetailsPanel" class="hidden">
-                <div class="logo"><div class="logo-icon">👤</div></div>
-                <h1>Управление пользователем</h1>
-                <p class="subtitle">Детали и действия</p>
-                
-                <div id="userDetailsContent" style="background:rgba(255,255,255,0.3);padding:20px;border-radius:12px;margin:20px 0;">
-                    <!-- Здесь будут детали -->
-                </div>
-                
-                <div class="menu-grid">
-                    <button class="menu-button" onclick="editUserData()" style="background:linear-gradient(145deg, #e3f2fd, #bbdefb);">
-                        <div class="menu-icon">✏️</div>
-                        <div class="menu-text">Редактировать</div>
-                    </button>
-                    <button class="menu-button" onclick="changeUserPIN()" style="background:linear-gradient(145deg, #fff3e0, #ffe0b2);">
-                        <div class="menu-icon">🔑</div>
-                        <div class="menu-text">Сменить PIN</div>
-                    </button>
-                    <button class="menu-button" id="blockUserBtn" onclick="toggleBlockUser()" style="background:linear-gradient(145deg, #ffebee, #ffcdd2);">
-                        <div class="menu-icon">🚫</div>
-                        <div class="menu-text">Заблокировать</div>
-                    </button>
-                    <button class="menu-button" onclick="deleteUserConfirm()" style="background:linear-gradient(145deg, #ffcdd2, #ef9a9a);">
-                        <div class="menu-icon">🗑️</div>
-                        <div class="menu-text">Удалить</div>
-                    </button>
-                </div>
-                
-                <button class="btn btn-secondary" onclick="backToUsersList()" style="margin-top:15px;">◀️ К списку</button>
-            </div>
-
-            <!-- Экран смены PIN -->
-            <div id="changePinPanel" class="hidden">
-                <div class="logo"><div class="logo-icon">🔑</div></div>
-                <h1>Смена PIN-кода</h1>
-                <p class="subtitle" id="changePinUserName">Пользователь</p>
-                
-                <div class="pin-input-container">
-                    <input type="password" maxlength="1" class="pin-digit" id="newPin1" inputmode="numeric">
-                    <input type="password" maxlength="1" class="pin-digit" id="newPin2" inputmode="numeric">
-                    <input type="password" maxlength="1" class="pin-digit" id="newPin3" inputmode="numeric">
-                    <input type="password" maxlength="1" class="pin-digit" id="newPin4" inputmode="numeric">
-                </div>
-                <div class="error" id="newPinError">Введите новый PIN</div>
-                
-                <button class="btn btn-success" onclick="confirmPinChange()">✅ Сохранить новый PIN</button>
-                <button class="btn btn-secondary" onclick="cancelPinChange()">❌ Отмена</button>
-            </div>
+        <div class="section">
+            <button onclick="copyDebugInfo()">📋 Copy All Info</button>
+            <button onclick="location.reload()">🔄 Reload</button>
         </div>
     </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
-
-        let userData = {};
-        let userPin = '';
-        let currentLanguage = 'ru';
-        let visitLocation = null;
-        let previousScreen = null;
-
-        // ═══════════════════════════════════════════════════════════
-        // ФУНКЦИЯ: Проверка наличия Telegram ID
-        // ═══════════════════════════════════════════════════════════
-        function getTelegramId() {
-            const userId = tg.initDataUnsafe?.user?.id;
-            
-            if (!userId) {
-                console.error('❌ КРИТИЧЕСКАЯ ОШИБКА: Telegram ID не найден!');
-                console.error('tg.initDataUnsafe:', tg.initDataUnsafe);
-                console.error('tg.initData:', tg.initData);
-            }
-            
-            return userId;
-        }
+        const tg = window.Telegram.WebApp;
         
-        function requireTelegramId(actionName = 'действие') {
-            const userId = getTelegramId();
-            
-            if (!userId) {
-                alert(
-                    currentLanguage === 'ru'
-                    ? `❌ Ошибка!\n\nНе удалось получить ваш Telegram ID.\n\nПожалуйста, откройте приложение ЧЕРЕЗ БОТА (кнопка "${actionName}" в чате).`
-                    : `❌ Xatolik!\n\nTelegram ID topilmadi.\n\nIltimos, botdan oching.`
-                );
-                return null;
-            }
-            
-            return userId;
-        }
+        // Инициализация
+        tg.ready();
+        tg.expand();
 
-        const translations = {
-            ru: {
-                loginTitle: 'Вход в систему',
-                loginSubtitle: 'Введите ваш PIN-код',
-                regTitle: 'Регистрация',
-                regSubtitle: 'Заполните данные',
-                nameLabel: 'Полное имя',
-                phoneLabel: 'Номер телефона',
-                emailLabel: 'Email адрес',
-                regionLabel: 'Область',
-                pinSetupTitle: 'Установите PIN-код',
-                pinSetupSubtitle: 'Введите 4-значный PIN',
-                pinConfirmTitle: 'Подтвердите PIN-код',
-                pinConfirmSubtitle: 'Введите PIN ещё раз',
-                menuTitle: 'Главное меню',
-                menuSubtitle: 'Выберите действие',
-                menuVisit: 'Регистрация визита',
-                menuMap: 'Карта визитов',
-                menuReports: 'Отчеты',
-                menuTour: 'Тур план',
-                menuMaterials: 'Материалы',
-                menuHelp: 'Помощь',
-                visitTypeTitle: 'Тип визита',
-                visitTypeSubtitle: 'Выберите тип визита',
-                visitDoctor: 'Врач',
-                visitPharmacy: 'Аптека',
-                visitWholesale: 'Оптом',
-                backBtn: 'Вернуться',
-                doctorFormTitle: 'Визит к врачу',
-                doctorFormSubtitle: 'Заполните данные о визите',
-                doctorNameLabel: 'ФИО Врача',
-                doctorPhoneLabel: 'Номер телефона врача',
-                organizationLabel: 'Организация',
-                specialtyLabel: 'Специальность',
-                visitTopicLabel: 'Тема визита',
-                visitResultLabel: 'Результат визита',
-                locationBtn: '📍 Поделиться геолокацией',
-                submitVisitBtn: 'Сохранить визит',
-                backToVisitBtn: 'Назад',
-                helpTitle: 'Помощь',
-                helpSubtitle: 'Дополнительные функции',
-                helpEditData: 'Изменить данные',
-                helpInstructions: 'Инструкция',
-                helpBackBtn: 'Вернуться в меню',
-                editProfileTitle: 'Изменить данные',
-                editProfileSubtitle: 'Обновите информацию',
-                editNameLabel: 'Полное имя',
-                editPhoneLabel: 'Номер телефона',
-                editEmailLabel: 'Email адрес',
-                editRegionLabel: 'Область',
-                saveProfileBtn: 'Сохранить изменения',
-                cancelEditBtn: 'Отмена',
-                regSubmitBtn: 'Продолжить'
-            },
-            uz: {
-                loginTitle: 'Tizimga kirish',
-                loginSubtitle: 'PIN-kodingizni kiriting',
-                regTitle: "Ro'yxatdan o'tish",
-                regSubtitle: "Ma'lumotlarni to'ldiring",
-                nameLabel: "To'liq ism",
-                phoneLabel: 'Telefon raqami',
-                emailLabel: 'Email manzil',
-                regionLabel: 'Viloyat',
-                pinSetupTitle: "PIN-kod o'rnating",
-                pinSetupSubtitle: '4 xonali PIN kiriting',
-                pinConfirmTitle: 'PIN-kodni tasdiqlang',
-                pinConfirmSubtitle: 'PIN-ni yana kiriting',
-                menuTitle: 'Asosiy menyu',
-                menuSubtitle: 'Harakatni tanlang',
-                menuVisit: "Tashrif ro'yxati",
-                menuMap: 'Tashriflar xaritasi',
-                menuReports: 'Hisobotlar',
-                menuTour: 'Tur rejasi',
-                menuMaterials: 'Materiallar',
-                menuHelp: 'Yordam',
-                visitTypeTitle: 'Tashrif turi',
-                visitTypeSubtitle: 'Tashrif turini tanlang',
-                visitDoctor: 'Shifokor',
-                visitPharmacy: 'Dorixona',
-                visitWholesale: 'Ulgurji',
-                backBtn: 'Ortga',
-                doctorFormTitle: 'Shifokor tashrifi',
-                doctorFormSubtitle: "Tashrif ma'lumotlarini to'ldiring",
-                doctorNameLabel: 'Shifokor F.I.O',
-                doctorPhoneLabel: 'Shifokor telefon raqami',
-                organizationLabel: 'Tashkilot',
-                specialtyLabel: 'Mutaxassislik',
-                visitTopicLabel: 'Tashrif mavzusi',
-                visitResultLabel: 'Tashrif natijasi',
-                locationBtn: "📍 Joylashuvni ulashish",
-                submitVisitBtn: 'Tashrifni saqlash',
-                backToVisitBtn: 'Ortga',
-                helpTitle: 'Yordam',
-                helpSubtitle: "Qo'shimcha funksiyalar",
-                helpEditData: "Ma'lumotlarni o'zgartirish",
-                helpInstructions: "Yo'riqnoma",
-                helpBackBtn: 'Menyuga qaytish',
-                editProfileTitle: "Ma'lumotlarni o'zgartirish",
-                editProfileSubtitle: "Ma'lumotlaringizni yangilang",
-                editNameLabel: "To'liq ism",
-                editPhoneLabel: 'Telefon raqami',
-                editEmailLabel: 'Email manzil',
-                editRegionLabel: 'Viloyat',
-                saveProfileBtn: "O'zgarishlarni saqlash",
-                cancelEditBtn: 'Bekor qilish',
-                regSubmitBtn: 'Davom etish'
-            }
-        };
-
-        async function setLanguage(lang) {
-            currentLanguage = lang;
-            updateLanguage();
-            
-            // Добавляем язык к данным пользователя
-            userData.language = lang;
-            
-            // Получаем Telegram ID (если есть)
-            const telegramId = tg.initDataUnsafe?.user?.id;
-            
-            // ═══════════════════════════════════════════════════════════
-            // КРИТИЧЕСКАЯ ПРОВЕРКА: Telegram ID должен быть!
-            // ═══════════════════════════════════════════════════════════
-            if (!telegramId) {
-                console.error('❌ ОШИБКА: Telegram ID не найден!');
-                console.error('tg.initDataUnsafe:', tg.initDataUnsafe);
-                alert(
-                    currentLanguage === 'ru' 
-                    ? '❌ Ошибка!\n\nНе удалось получить ваш Telegram ID.\n\nПожалуйста, откройте приложение ЧЕРЕЗ БОТА (кнопка "Зарегистрироваться" в чате).'
-                    : '❌ Xatolik!\n\nTelegram ID topilmadi.\n\nIltimos, botdan oching ("Ro\'yxatdan o\'tish" tugmasi).'
-                );
-                return;
-            }
-            
-            console.log('📤 Отправка регистрации...');
-            console.log('👤 Telegram ID:', telegramId);
-            console.log('📦 Данные:', userData);
-            
-            // ГИБРИДНЫЙ РЕЖИМ: пробуем tg.sendData, если не работает → API
+        // Функция безопасного stringify
+        function safeStringify(obj, indent = 2) {
             try {
-                if (telegramId && tg.sendData) {
-                    // Режим 1: Через бота (если открыто через кнопку в боте)
-                    console.log('🤖 Отправка через бота...');
-                    tg.sendData(JSON.stringify({
-                        action: 'registration',
-                        data: userData
-                    }));
-                    console.log('✅ Отправлено в бота');
-                    showScreen('mainMenu');
-                } else {
-                    // Режим 2: Напрямую в API (если открыто через "Open App")
-                    console.log('🌐 Отправка напрямую в API...');
-                    
-                    const registerData = {
-                        telegram_id: telegramId, // Гарантированно есть после проверки выше
-                        username: tg.initDataUnsafe?.user?.username || 'unknown',
-                        name: userData.name,
-                        phone: userData.phone,
-                        email: userData.email,
-                        region: userData.region,
-                        pin: userData.pin
-                    };
-                    
-                    const response = await apiRequest('/api/register', {
-                        method: 'POST',
-                        body: JSON.stringify(registerData)
-                    });
-                    
-                    if (response.success) {
-                        console.log('✅ Регистрация успешна!');
-                        alert('✅ Регистрация завершена!\n\nВаш ID: ' + response.user_id);
-                        showScreen('mainMenu');
-                    } else {
-                        console.error('❌ Ошибка:', response.error);
-                        alert('❌ Ошибка регистрации: ' + response.error);
-                    }
-                }
-            } catch (error) {
-                console.error('❌ Ошибка отправки:', error);
-                alert('❌ Ошибка: ' + error.message);
+                return JSON.stringify(obj, null, indent);
+            } catch (e) {
+                return `Error: ${e.message}`;
             }
         }
 
-        function switchLanguage(lang) {
-            currentLanguage = lang;
-            // УБРАНО: localStorage - язык не сохраняем
-            document.getElementById('flagRu').classList.remove('active');
-            document.getElementById('flagUz').classList.remove('active');
-            document.getElementById('flag' + (lang === 'ru' ? 'Ru' : 'Uz')).classList.add('active');
-            updateLanguage();
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        // Проверка Telegram ID
+        const userId = tg.initDataUnsafe?.user?.id;
+        const idStatusEl = document.getElementById('idStatus');
+
+        if (userId) {
+            idStatusEl.className = 'status ok';
+            idStatusEl.innerHTML = `✅ SUCCESS<br>Telegram ID: <span class="success">${userId}</span>`;
+        } else {
+            idStatusEl.className = 'status fail';
+            idStatusEl.innerHTML = `❌ FAILED<br><span class="error">Telegram ID not found!</span><br><br>
+                <strong>Possible reasons:</strong><br>
+                • WebApp opened not through bot button<br>
+                • Bot token invalid<br>
+                • Telegram API issue`;
         }
 
-        function updateLanguage() {
-            const t = translations[currentLanguage];
-            Object.keys(t).forEach(key => {
-                const el = document.getElementById(key);
-                if (el) {
-                    if (el.tagName === 'BUTTON' || el.tagName === 'DIV') {
-                        el.textContent = t[key];
-                    } else {
-                        el.innerHTML = t[key];
-                    }
-                }
+        // User Data
+        document.getElementById('userData').textContent = 
+            safeStringify(tg.initDataUnsafe?.user || 'No user data');
+
+        // Full initDataUnsafe
+        document.getElementById('fullData').textContent = 
+            safeStringify(tg.initDataUnsafe || 'No initDataUnsafe');
+
+        // Raw initData
+        document.getElementById('rawData').textContent = 
+            tg.initData || 'No initData (empty string)';
+
+        // WebApp Info
+        const webappInfo = {
+            version: tg.version,
+            colorScheme: tg.colorScheme,
+            isExpanded: tg.isExpanded,
+            viewportHeight: tg.viewportHeight,
+            viewportStableHeight: tg.viewportStableHeight,
+            headerColor: tg.headerColor,
+            backgroundColor: tg.backgroundColor
+        };
+        document.getElementById('webappInfo').textContent = 
+            safeStringify(webappInfo);
+
+        // Platform
+        document.getElementById('platform').textContent = 
+            `Platform: ${tg.platform}\n` +
+            `User Agent: ${navigator.userAgent}\n` +
+            `Language: ${navigator.language}`;
+
+        // Функция копирования
+        function copyDebugInfo() {
+            const debugInfo = `
+=== TELEGRAM WEBAPP DEBUG INFO ===
+Date: ${new Date().toISOString()}
+
+TELEGRAM ID: ${userId || 'NOT FOUND ❌'}
+
+USER DATA:
+${safeStringify(tg.initDataUnsafe?.user)}
+
+FULL initDataUnsafe:
+${safeStringify(tg.initDataUnsafe)}
+
+RAW initData:
+${tg.initData || 'EMPTY'}
+
+WEBAPP INFO:
+${safeStringify(webappInfo)}
+
+PLATFORM:
+${tg.platform}
+
+USER AGENT:
+${navigator.userAgent}
+            `;
+
+            navigator.clipboard.writeText(debugInfo).then(() => {
+                alert('✅ Debug info copied to clipboard!');
+            }).catch(() => {
+                alert('❌ Failed to copy. Please copy manually.');
+                console.log(debugInfo);
             });
         }
 
-        function showScreen(screenId) {
-            if (screenId !== 'adminLoginScreen' && screenId !== 'adminPanel') {
-                previousScreen = Array.from(document.querySelectorAll('.card > div:not(.hidden)')).find(el => !el.classList.contains('hidden'))?.id;
-            }
-            
-            document.querySelectorAll('.card > div').forEach(el => el.classList.add('hidden'));
-            document.getElementById(screenId).classList.remove('hidden');
-            
-            const langFlags = document.getElementById('langFlags');
-            const adminIcon = document.getElementById('adminIcon');
-            
-            if (screenId === 'mainMenu' || screenId === 'visitTypeMenu' || screenId === 'doctorVisitForm' || 
-                screenId === 'helpScreen' || screenId === 'editProfileScreen') {
-                langFlags.style.display = 'flex';
-                adminIcon.style.display = 'flex';
-            } else {
-                langFlags.style.display = 'none';
-                adminIcon.style.display = 'none';
-            }
-            
-            document.getElementById('flagRu').classList.remove('active');
-            document.getElementById('flagUz').classList.remove('active');
-            document.getElementById('flag' + (currentLanguage === 'ru' ? 'Ru' : 'Uz')).classList.add('active');
-            
-            updateLanguage();
-            document.querySelector('.card').scrollTop = 0;
-        }
-
-        function showError(fieldId, message) {
-            const errorEl = document.getElementById(fieldId + 'Error');
-            if (message) {
-                errorEl.textContent = message;
-                errorEl.classList.add('show');
-            } else {
-                errorEl.classList.remove('show');
-            }
-        }
-
-        function hideAllErrors() {
-            document.querySelectorAll('.error').forEach(el => el.classList.remove('show'));
-        }
-
-        async function checkRegistration() {
-            const userId = requireTelegramId('Регистрация');
-            
-            if (!userId) {
-                // Показываем форму регистрации, но она все равно не даст зарегистрироваться без ID
-                showScreen('registrationForm');
-                return;
-            }
-            
-            console.log('🔍 Проверка регистрации пользователя:', userId);
-            
-            try {
-                // Проверяем через API - зарегистрирован ли пользователь
-                const data = await apiRequest(`/api/user/${userId}`);
-                
-                if (data.success && data.registered) {
-                    console.log('✅ Пользователь зарегистрирован:', data.user.name);
-                    // Пользователь зарегистрирован - показываем вход по PIN
-                    showScreen('pinLoginScreen');
-                    document.getElementById('loginPin1').focus();
-                } else {
-                    console.log('📝 Пользователь НЕ зарегистрирован - показываем форму');
-                    showScreen('registrationForm');
-                }
-            } catch (error) {
-                console.error('❌ Ошибка API при проверке регистрации:', error);
-                // Если ошибка API - показываем форму регистрации
-                showScreen('registrationForm');
-            }
-        }
-
-        function isValidEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        }
-
-        function isValidPhone(phone) {
-            return /^[\d\s\+\-\(\)]+$/.test(phone) && phone.replace(/\D/g, '').length >= 9;
-        }
-
-        function setupPinNavigation(prefix) {
-            for (let i = 1; i <= 4; i++) {
-                const input = document.getElementById(prefix + i);
-                if (!input) continue;
-                
-                input.addEventListener('input', (e) => {
-                    e.target.value = e.target.value.replace(/\D/g, '');
-                    if (e.target.value && i < 4) {
-                        document.getElementById(prefix + (i + 1)).focus();
-                    }
-                });
-
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Backspace' && !e.target.value && i > 1) {
-                        document.getElementById(prefix + (i - 1)).focus();
-                    }
-                });
-            }
-        }
-
-        setupPinNavigation('loginPin');
-        setupPinNavigation('pin');
-        setupPinNavigation('confirmPin');
-        setupPinNavigation('adminPin');
-
-        document.getElementById('loginBtn').addEventListener('click', async () => {
-            const pin = ['loginPin1', 'loginPin2', 'loginPin3', 'loginPin4']
-                .map(id => document.getElementById(id).value).join('');
-            
-            if (pin.length !== 4) {
-                showError('loginPin', currentLanguage === 'ru' ? 'Введите PIN-код' : "PIN-kodni kiriting");
-                return;
-            }
-            
-            const userId = tg.initDataUnsafe?.user?.id;
-            
-            try {
-                console.log('🔐 Проверка PIN через API...');
-                
-                // Получаем данные пользователя из БД
-                const data = await apiRequest(`/api/user/${userId}`);
-                
-                if (data.success && data.user && data.user.pin === pin) {
-                    console.log('✅ PIN верный');
-                    hideAllErrors();
-                    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                    showScreen('mainMenu');
-                } else {
-                    console.log('❌ PIN неверный');
-                    showError('loginPin', currentLanguage === 'ru' ? 'Неверный PIN-код' : "Noto'g'ri PIN-kod");
-                    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-                    ['loginPin1', 'loginPin2', 'loginPin3', 'loginPin4'].forEach(id => {
-                        document.getElementById(id).value = '';
-                    });
-                    document.getElementById('loginPin1').focus();
-                }
-            } catch (error) {
-                console.error('❌ Ошибка проверки PIN:', error);
-                showError('loginPin', currentLanguage === 'ru' ? 'Ошибка проверки PIN' : "Xatolik yuz berdi");
-            }
-        });
-
-        document.getElementById('regForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            hideAllErrors();
-
-            const name = document.getElementById('name').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const region = document.getElementById('region').value;
-
-            let isValid = true;
-
-            if (name.length < 2) {
-                showError('name', 'Введите имя');
-                isValid = false;
-            }
-
-            if (!isValidPhone(phone)) {
-                showError('phone', 'Введите номер');
-                isValid = false;
-            }
-
-            if (!isValidEmail(email)) {
-                showError('email', 'Введите email');
-                isValid = false;
-            }
-
-            if (!region) {
-                showError('region', 'Выберите область');
-                isValid = false;
-            }
-
-            if (isValid) {
-                userData = { name, phone, email, region,
-                    telegramId: tg.initDataUnsafe?.user?.id || 'unknown',
-                    username: tg.initDataUnsafe?.user?.username || 'unknown'
-                };
-
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                showScreen('pinSetupScreen');
-                document.getElementById('pin1').focus();
-            } else {
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-            }
-        });
-
-        document.getElementById('setPinBtn').addEventListener('click', () => {
-            const pin = ['pin1', 'pin2', 'pin3', 'pin4']
-                .map(id => document.getElementById(id).value).join('');
-
-            if (pin.length === 4 && /^\d+$/.test(pin)) {
-                userPin = pin;
-                hideAllErrors();
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                showScreen('pinConfirmScreen');
-                document.getElementById('confirmPin1').focus();
-            } else {
-                showError('pin', 'PIN из 4 цифр');
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-            }
-        });
-
-        document.getElementById('confirmPinBtn').addEventListener('click', () => {
-            const confirmPin = ['confirmPin1', 'confirmPin2', 'confirmPin3', 'confirmPin4']
-                .map(id => document.getElementById(id).value).join('');
-
-            if (confirmPin === userPin) {
-                userData.pin = userPin;
-                hideAllErrors();
-                
-                // УБРАНО: localStorage.setItem() - теперь данные только в БД!
-
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-
-                showScreen('languageScreen');
-            } else {
-                showError('confirmPin', 'PIN не совпадает');
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-                ['confirmPin1', 'confirmPin2', 'confirmPin3', 'confirmPin4'].forEach(id => {
-                    document.getElementById(id).value = '';
-                });
-                document.getElementById('confirmPin1').focus();
-            }
-        });
-
-        function openVisitMenu() {
-            showScreen('visitTypeMenu');
-        }
-
-        function openVisitForm(type) {
-            if (type === 'doctor') {
-                showScreen('doctorVisitForm');
-            } else {
-                alert(currentLanguage === 'ru' ? 'В разработке' : 'Ishlab chiqilmoqda');
-            }
-        }
-
-        function backToMainMenu() {
-            showScreen('mainMenu');
-        }
-
-        function backToVisitMenu() {
-            showScreen('visitTypeMenu');
-        }
-
-        document.getElementById('visitResult')?.addEventListener('input', (e) => {
-            document.getElementById('resultCounter').textContent = e.target.value.length;
-        });
-
-        function getLocation() {
-            const btn = document.getElementById('locationBtn');
-            const status = document.getElementById('locationStatus');
-            
-            btn.disabled = true;
-            status.textContent = currentLanguage === 'ru' ? 'Получение координат...' : 'Koordinatalar olinmoqda...';
-            
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        visitLocation = {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude
-                        };
-                        status.textContent = currentLanguage === 'ru' ? '✅ Геолокация получена' : '✅ Joylashuv olindi';
-                        btn.disabled = false;
-                        if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                    },
-                    (error) => {
-                        status.textContent = currentLanguage === 'ru' ? '❌ Ошибка' : '❌ Xato';
-                        btn.disabled = false;
-                        if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-                    }
-                );
-            } else {
-                status.textContent = currentLanguage === 'ru' ? '❌ Не поддерживается' : "❌ Qo'llab-quvvatlanmaydi";
-                btn.disabled = false;
-            }
-        }
-
-        document.getElementById('doctorForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            hideAllErrors();
-
-            const doctorName = document.getElementById('doctorName').value.trim();
-            const doctorPhone = document.getElementById('doctorPhone').value.trim();
-            const organization = document.getElementById('organization').value.trim();
-            const specialty = document.getElementById('specialty').value.trim();
-            const visitTopic = document.getElementById('visitTopic').value.trim();
-            const visitResult = document.getElementById('visitResult').value.trim();
-
-            let isValid = true;
-
-            if (!doctorName) {
-                showError('doctorName', 'Введите ФИО');
-                isValid = false;
-            }
-
-            if (!organization) {
-                showError('organization', 'Введите организацию');
-                isValid = false;
-            }
-
-            if (!specialty) {
-                showError('specialty', 'Введите специальность');
-                isValid = false;
-            }
-
-            if (!visitTopic) {
-                showError('visitTopic', 'Введите тему');
-                isValid = false;
-            }
-
-            if (visitResult.length < 20) {
-                showError('visitResult', 'Минимум 20 символов');
-                isValid = false;
-            }
-
-            if (isValid) {
-                const userId = tg.initDataUnsafe?.user?.id;
-                const userInfo = tg.initDataUnsafe?.user || {};
-
-                const visitData = {
-                    type: 'doctor',
-                    doctorName,
-                    doctorPhone,
-                    organization,
-                    specialty,
-                    visitTopic,
-                    visitResult,
-                    location: visitLocation,
-                    employee: {
-                        id: userId,
-                        name: userInfo.first_name + (userInfo.last_name ? ' ' + userInfo.last_name : ''),
-                        phone: '',  // Будет взято из БД на стороне бота
-                        email: ''   // Будет взято из БД на стороне бота
-                    },
-                    timestamp: new Date().toISOString()
-                };
-
-                tg.sendData(JSON.stringify({
-                    action: 'visit_registration',
-                    data: visitData
-                }));
-
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                
-                alert(currentLanguage === 'ru' ? 'Визит зарегистрирован!' : 'Tashrif ro\'yxatga olindi!');
-                document.getElementById('doctorForm').reset();
-                visitLocation = null;
-                document.getElementById('locationStatus').textContent = '';
-                document.getElementById('resultCounter').textContent = '0';
-                showScreen('mainMenu');
-            } else {
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-            }
-        });
-
-        function openAdminPanel() {
-            showScreen('adminLoginScreen');
-            document.getElementById('adminPin1').focus();
-        }
-
-        function closeAdminPanel() {
-            if (previousScreen) {
-                showScreen(previousScreen);
-            } else {
-                showScreen('mainMenu');
-            }
-        }
-
-        function checkAdminPassword() {
-            const pin = ['adminPin1', 'adminPin2', 'adminPin3', 'adminPin4']
-                .map(id => document.getElementById(id).value).join('');
-            
-            if (pin === '0101') {
-                hideAllErrors();
-                
-                const userInfo = tg.initDataUnsafe?.user || {};
-                const dataToSend = {
-                    action: 'admin_login',
-                    user: {
-                        id: userInfo.id,
-                        first_name: userInfo.first_name,
-                        last_name: userInfo.last_name,
-                        username: userInfo.username,
-                        language_code: userInfo.language_code
-                    }
-                };
-                
-                console.log('📤 Отправка данных входа в админ-панель');
-                tg.sendData(JSON.stringify(dataToSend));
-                
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                
-                showScreen('adminPanel');
-                
-                setTimeout(() => {
-                    alert(currentLanguage === 'ru' 
-                        ? '✅ Вход выполнен!\n\n📧 Письмо отправлено на email администратора.\n\nПроверьте почту (возможно в папке Спам)' 
-                        : '✅ Kirish amalga oshirildi!\n\n📧 Xat administrator emailiga yuborildi.');
-                }, 500);
-                
-            } else {
-                // Неверный пароль - отправляем на сервер для блокировки
-                console.log('❌ Неверный PIN код');
-                
-                const userInfo = tg.initDataUnsafe?.user || {};
-                const dataToSend = {
-                    action: 'failed_admin_login',
-                    user_id: userInfo.id
-                };
-                
-                tg.sendData(JSON.stringify(dataToSend));
-                
-                showError('adminPin', currentLanguage === 'ru' 
-                    ? 'Неверный пароль! Осталось 2 попытки' 
-                    : 'Noto\'g\'ri parol! 2 ta urinish qoldi');
-                
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-                
-                ['adminPin1', 'adminPin2', 'adminPin3', 'adminPin4'].forEach(id => {
-                    document.getElementById(id).value = '';
-                });
-                document.getElementById('adminPin1').focus();
-            }
-        }
-
-        function openSection(section) {
-            if (section === 'help') {
-                showScreen('helpScreen');
-            } else {
-                alert(currentLanguage === 'ru' ? 'В разработке' : 'Ishlab chiqilmoqda');
-            }
-        }
-
-        // === ФУНКЦИИ АДМИН-ПАНЕЛИ ===
-        
-        // API URL - ngrok
-        const API_URL = 'https://burnoused-evan-uncautioned.ngrok-free.dev';
-        
-        // Универсальная функция для всех API запросов (обходит ngrok warning)
-        async function apiRequest(endpoint, options = {}) {
-            const url = API_URL + endpoint;
-            const defaultOptions = {
-                headers: {
-                    'ngrok-skip-browser-warning': 'true',
-                    'Content-Type': 'application/json',
-                    ...options.headers
-                },
-                ...options
-            };
-            
-            const response = await fetch(url, defaultOptions);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-            
-            return await response.json();
-        }
-        
-        function openUsersPanel() {
-            console.log('📂 Открытие панели пользователей');
-            showScreen('usersPanel');
-            
-            const usersList = document.getElementById('usersList');
-            usersList.innerHTML = '<p style="color:#37474f;font-weight:600;text-align:center;">⏳ Загрузка пользователей из базы данных...</p>';
-            
-            // Загружаем пользователей из API с ngrok заголовком
-            apiRequest('/api/users')
-                .then(data => {
-                    console.log('✅ Получено пользователей:', data.count);
-                    
-                    if (!data.success || data.count === 0) {
-                        usersList.innerHTML = `
-                            <div style="text-align:center;padding:30px;">
-                                <div style="font-size:48px;margin-bottom:15px;">👥</div>
-                                <p style="color:#37474f;font-weight:600;margin-bottom:10px;">Пользователей не найдено</p>
-                                <p style="color:#7f8c8d;font-size:13px;">Зарегистрированные пользователи появятся здесь</p>
-                            </div>
-                        `;
-                        return;
-                    }
-                    
-                    let html = '<div style="display:flex;flex-direction:column;gap:12px;">';
-                    
-                    data.users.forEach((user, index) => {
-                        const initial = user.name.charAt(0).toUpperCase();
-                        const regionName = getRegionName(user.region) || 'Не указана';
-                        const phone = user.phone || 'Не указан';
-                        const email = user.email || 'Не указан';
-                        const status = user.is_blocked ? '🚫 Заблокирован' : '✅ Активен';
-                        const statusColor = user.is_blocked ? '#ef5350' : '#66bb6a';
-                        
-                        html += `
-                            <div onclick="showUserDetailsById(${user.user_id})" style="background:rgba(255,255,255,0.5);padding:15px;border-radius:12px;box-shadow:2px 2px 6px rgba(0,0,0,0.1);cursor:pointer;transition:all 0.3s;" 
-                                 onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='3px 3px 8px rgba(0,0,0,0.15)'" 
-                                 onmouseout="this.style.transform='scale(1)';this.style.boxShadow='2px 2px 6px rgba(0,0,0,0.1)'">
-                                <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-                                    <div style="width:50px;height:50px;background:linear-gradient(145deg, #667eea, #764ba2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:22px;flex-shrink:0;">
-                                        ${initial}
-                                    </div>
-                                    <div style="flex:1;min-width:0;">
-                                        <div style="font-weight:600;color:#2c3e50;font-size:16px;margin-bottom:5px;">${user.name}</div>
-                                        <div style="font-size:12px;color:${statusColor};font-weight:600;">${status}</div>
-                                    </div>
-                                </div>
-                                <div style="font-size:12px;color:#546e7a;line-height:1.8;border-top:1px solid rgba(0,0,0,0.05);padding-top:10px;">
-                                    <div><strong>📞 Телефон:</strong> ${phone}</div>
-                                    <div><strong>📧 Email:</strong> ${email}</div>
-                                    <div><strong>📍 Регион:</strong> ${regionName}</div>
-                                    <div><strong>🆔 ID:</strong> ${user.user_id}</div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    
-                    html += '</div>';
-                    usersList.innerHTML = html;
-                })
-                .catch(error => {
-                    console.error('❌ Ошибка загрузки:', error);
-                    usersList.innerHTML = `
-                        <div style="text-align:center;padding:30px;">
-                            <div style="font-size:48px;margin-bottom:15px;">❌</div>
-                            <h3 style="color:#e53935;margin-bottom:10px;">Ошибка подключения</h3>
-                            <p style="color:#7f8c8d;font-size:14px;margin-bottom:20px;">
-                                Не удалось загрузить пользователей из базы данных
-                            </p>
-                            <div style="background:rgba(229,57,53,0.1);padding:15px;border-radius:8px;border-left:4px solid #e53935;text-align:left;">
-                                <p style="color:#37474f;font-size:13px;line-height:1.6;">
-                                    <strong>Возможные причины:</strong><br>
-                                    • API сервер не запущен<br>
-                                    • Неверный URL в коде<br>
-                                    • Проблемы с CORS<br><br>
-                                    <strong>Решение:</strong><br>
-                                    Запустите: <code>python api_server.py</code>
-                                </p>
-                            </div>
-                        </div>
-                    `;
-                });
-        }
-        
-        function showUserDetailsById(userId) {
-            console.log('👤 Загрузка деталей пользователя:', userId);
-            
-            // Загружаем детали пользователя из API с ngrok заголовком
-            apiRequest(`/api/user/${userId}`)
-                .then(data => {
-                    if (!data.success) {
-                        alert('Ошибка загрузки данных пользователя');
-                        return;
-                    }
-                    
-                    const user = data.user;
-                    currentSelectedUser = { user_id: userId, ...user };
-                    
-                    const initial = user.name.charAt(0).toUpperCase();
-                    const regionName = getRegionName(user.region) || 'Не указана';
-                    const status = user.is_blocked ? '🚫 Заблокирован' : '✅ Активен';
-                    const statusColor = user.is_blocked ? '#ef5350' : '#66bb6a';
-                    
-                    document.getElementById('userDetailsContent').innerHTML = `
-                        <div style="text-align:center;margin-bottom:20px;">
-                            <div style="width:80px;height:80px;background:linear-gradient(145deg, #667eea, #764ba2);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:36px;margin-bottom:15px;">
-                                ${initial}
-                            </div>
-                            <h2 style="color:#2c3e50;margin:10px 0;">${user.name}</h2>
-                            <div style="color:${statusColor};font-weight:600;font-size:16px;">${status}</div>
-                        </div>
-                        
-                        <div style="background:rgba(255,255,255,0.4);padding:15px;border-radius:8px;">
-                            <div style="margin-bottom:10px;font-size:14px;"><strong>📱 Телефон:</strong><br>${user.phone || 'Не указан'}</div>
-                            <div style="margin-bottom:10px;font-size:14px;"><strong>📧 Email:</strong><br>${user.email || 'Не указан'}</div>
-                            <div style="margin-bottom:10px;font-size:14px;"><strong>📍 Регион:</strong><br>${regionName}</div>
-                            <div style="margin-bottom:10px;font-size:14px;"><strong>📅 Регистрация:</strong><br>${user.registration_date || 'Не указана'}</div>
-                            <div style="font-size:14px;"><strong>🆔 ID:</strong><br>${userId}</div>
-                        </div>
-                    `;
-                    
-                    // Обновляем кнопку блокировки
-                    const blockBtn = document.getElementById('blockUserBtn');
-                    if (blockBtn) {
-                        if (user.is_blocked) {
-                            blockBtn.innerHTML = '<div class="menu-icon">✅</div><div class="menu-text">Разблокировать</div>';
-                            blockBtn.style.background = 'linear-gradient(145deg, #e8f5e9, #c8e6c9)';
-                        } else {
-                            blockBtn.innerHTML = '<div class="menu-icon">🚫</div><div class="menu-text">Заблокировать</div>';
-                            blockBtn.style.background = 'linear-gradient(145deg, #ffebee, #ffcdd2)';
-                        }
-                    }
-                    
-                    showScreen('userDetailsPanel');
-                })
-                .catch(error => {
-                    console.error('❌ Ошибка:', error);
-                    alert('Ошибка загрузки данных пользователя');
-                });
-        }
-
-        function openVisitsPanel() {
-            alert(currentLanguage === 'ru' ? 'Раздел "Визиты" в разработке' : 'Tashriflar bo\'limi ishlab chiqilmoqda');
-        }
-
-        function openReportsPanel() {
-            alert(currentLanguage === 'ru' ? 'Раздел "Отчеты" в разработке' : 'Hisobotlar bo\'limi ishlab chiqilmoqda');
-        }
-
-        function openSettingsPanel() {
-            alert(currentLanguage === 'ru' ? 'Раздел "Настройки" в разработке' : 'Sozlamalar bo\'limi ishlab chiqilmoqda');
-        }
-
-        function backToAdminPanel() {
-            showScreen('adminPanel');
-        }
-
-        function manageUserById(action) {
-            const userId = document.getElementById('manageUserId').value.trim();
-            
-            if (!userId) {
-                alert('❌ Введите ID пользователя');
-                return;
-            }
-            
-            if (!/^\d+$/.test(userId)) {
-                alert('❌ ID должен содержать только цифры');
-                return;
-            }
-            
-            console.log(`🔧 Действие: ${action} для пользователя ${userId}`);
-            
-            if (action === 'pin') {
-                // Смена PIN
-                currentSelectedUser = { user_id: userId };
-                changeUserPIN();
-            } else if (action === 'block') {
-                // Блокировка
-                if (!confirm(`Заблокировать пользователя ${userId}?`)) return;
-                
-                tg.sendData(JSON.stringify({
-                    action: 'block_user',
-                    user_id: userId,
-                    admin_id: tg.initDataUnsafe?.user?.id
-                }));
-                
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                alert('✅ Пользователь заблокирован!\n\nСмотрите подтверждение в чате.');
-                
-            } else if (action === 'unblock') {
-                // Разблокировка
-                if (!confirm(`Разблокировать пользователя ${userId}?\n\nСнимутся все блокировки (включая PIN).`)) return;
-                
-                tg.sendData(JSON.stringify({
-                    action: 'unblock_user',
-                    user_id: userId,
-                    admin_id: tg.initDataUnsafe?.user?.id
-                }));
-                
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                alert('✅ Пользователь разблокирован!\n\nСмотрите подтверждение в чате.');
-                
-            } else if (action === 'delete') {
-                // Удаление
-                if (!confirm(`⚠️ ВНИМАНИЕ!\n\nУдалить пользователя ${userId}?\n\nЭто НЕОБРАТИМО!`)) return;
-                
-                const confirm2 = prompt('Для подтверждения введите "УДАЛИТЬ"');
-                if (confirm2 !== 'УДАЛИТЬ') {
-                    alert('Отменено');
-                    return;
-                }
-                
-                tg.sendData(JSON.stringify({
-                    action: 'delete_user',
-                    user_id: userId,
-                    admin_id: tg.initDataUnsafe?.user?.id
-                }));
-                
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                alert('✅ Пользователь удалён!\n\nСмотрите подтверждение в чате.');
-                document.getElementById('manageUserId').value = '';
-            }
-        }
-
-
-        function getRegionName(regionCode) {
-            const regions = {
-                'tashkent_city': 'г. Ташкент',
-                'andijan': 'Андижанская обл.',
-                'bukhara': 'Бухарская обл.',
-                'jizzakh': 'Джизакская обл.',
-                'kashkadarya': 'Кашкадарьинская обл.',
-                'navoi': 'Навоийская обл.',
-                'namangan': 'Наманганская обл.',
-                'samarkand': 'Самаркандская обл.',
-                'surkhandarya': 'Сурхандарьинская обл.',
-                'sirdarya': 'Сырдарьинская обл.',
-                'tashkent': 'Ташкентская обл.',
-                'fergana': 'Ферганская обл.',
-                'khorezm': 'Хорезмская обл.',
-                'karakalpakstan': 'Каракалпакстан'
-            };
-            return regions[regionCode] || regionCode;
-        }
-
-        async function openEditProfile() {
-            const userId = tg.initDataUnsafe?.user?.id;
-            
-            try {
-                // Загружаем данные из БД через API
-                const data = await apiRequest(`/api/user/${userId}`);
-                
-                if (data.success && data.user) {
-                    document.getElementById('editName').value = data.user.name || '';
-                    document.getElementById('editPhone').value = data.user.phone || '';
-                    document.getElementById('editEmail').value = data.user.email || '';
-                    document.getElementById('editRegion').value = data.user.region || '';
-                } else {
-                    document.getElementById('editName').value = '';
-                    document.getElementById('editPhone').value = '';
-                    document.getElementById('editEmail').value = '';
-                    document.getElementById('editRegion').value = '';
-                }
-            } catch (error) {
-                console.error('❌ Ошибка загрузки профиля:', error);
-            }
-            
-            showScreen('editProfileScreen');
-        }
-
-        function cancelEditProfile() {
-            showScreen('helpScreen');
-        }
-
-        document.getElementById('editProfileForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            hideAllErrors();
-
-            const name = document.getElementById('editName').value.trim();
-            const phone = document.getElementById('editPhone').value.trim();
-            const email = document.getElementById('editEmail').value.trim();
-            const region = document.getElementById('editRegion').value;
-
-            let isValid = true;
-
-            if (name.length < 2) {
-                showError('editName', 'Введите имя');
-                isValid = false;
-            }
-
-            if (!isValidPhone(phone)) {
-                showError('editPhone', 'Введите номер');
-                isValid = false;
-            }
-
-            if (!isValidEmail(email)) {
-                showError('editEmail', 'Введите email');
-                isValid = false;
-            }
-
-            if (!region) {
-                showError('editRegion', 'Выберите область');
-                isValid = false;
-            }
-
-            if (isValid) {
-                const userId = tg.initDataUnsafe?.user?.id;
-                
-                const updatedData = {
-                    name: name,
-                    phone: phone,
-                    email: email,
-                    region: region
-                };
-                
-                // УБРАНО: localStorage - только отправка в бота
-                
-                tg.sendData(JSON.stringify({
-                    action: 'update_profile',
-                    data: updatedData
-                }));
-
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                
-                alert(currentLanguage === 'ru' ? 'Данные обновлены!' : 'Ma\'lumotlar yangilandi!');
-                showScreen('helpScreen');
-            } else {
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-            }
-        });
-
-        ['name', 'phone', 'email', 'region', 'doctorName', 'organization', 'specialty', 'visitTopic',
-         'editName', 'editPhone', 'editEmail', 'editRegion'].forEach(field => {
-            const el = document.getElementById(field);
-            if (el) {
-                el.addEventListener('input', () => showError(field, null));
-            }
-        });
-
-        // ═════════════════════════════════════════════════════════════
-        // УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ (АДМИН)
-        // ═════════════════════════════════════════════════════════════
-        
-        let currentSelectedUser = null;
-
-
-        function backToUsersList() {
-            currentSelectedUser = null;
-            showScreen('usersPanel');
-        }
-
-        function editUserData() {
-            alert('Редактирование в разработке');
-        }
-
-        function changeUserPIN() {
-            if (!currentSelectedUser) return;
-            document.getElementById('changePinUserName').textContent = `ID: ${currentSelectedUser.user_id}`;
-            ['newPin1', 'newPin2', 'newPin3', 'newPin4'].forEach(id => document.getElementById(id).value = '');
-            hideAllErrors();
-            setTimeout(() => document.getElementById('newPin1').focus(), 300);
-            
-            // Автопереключение между полями PIN
-            for (let i = 1; i <= 4; i++) {
-                const input = document.getElementById('newPin' + i);
-                input.onkeyup = function() {
-                    if (this.value.length === 1 && i < 4) document.getElementById('newPin' + (i + 1)).focus();
-                };
-            }
-            
-            showScreen('changePinPanel');
-        }
-
-        function confirmPinChange() {
-            const newPin = ['newPin1', 'newPin2', 'newPin3', 'newPin4'].map(id => document.getElementById(id).value).join('');
-            if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) { showError('newPin', 'Введите 4 цифры'); return; }
-            
-            tg.sendData(JSON.stringify({ action: 'change_user_pin', user_id: currentSelectedUser.user_id, new_pin: newPin, admin_id: tg.initDataUnsafe?.user?.id }));
-            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            alert('✅ PIN изменён: ' + newPin);
-            showScreen('userDetailsPanel');
-        }
-
-        function cancelPinChange() {
-            showScreen('userDetailsPanel');
-        }
-
-        function toggleBlockUser() {
-            if (!currentSelectedUser) return;
-            const action = currentSelectedUser.is_blocked ? 'разблокировать' : 'заблокировать';
-            if (!confirm(`${action} ${currentSelectedUser.name}?`)) return;
-            
-            tg.sendData(JSON.stringify({ action: currentSelectedUser.is_blocked ? 'unblock_user' : 'block_user', user_id: currentSelectedUser.user_id, admin_id: tg.initDataUnsafe?.user?.id }));
-            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            
-            currentSelectedUser.is_blocked = !currentSelectedUser.is_blocked;
-            // УБРАНО: localStorage - данные в БД
-            alert(`✅ Пользователь ${currentSelectedUser.is_blocked ? 'заблокирован' : 'разблокирован'}!`);
-            backToUsersList();
-        }
-
-        function deleteUserConfirm() {
-            if (!currentSelectedUser) return;
-            if (!confirm(`⚠️ Удалить ${currentSelectedUser.name}?\n\nЭто НЕОБРАТИМО!`)) return;
-            if (prompt('Введите "УДАЛИТЬ"') !== 'УДАЛИТЬ') { alert('Отменено'); return; }
-            
-            tg.sendData(JSON.stringify({ action: 'delete_user', user_id: currentSelectedUser.user_id, admin_id: tg.initDataUnsafe?.user?.id }));
-            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            // УБРАНО: localStorage - данные в БД
-            alert('✅ Удалён!');
-            currentSelectedUser = null;
-            backToUsersList();
-            loadUsersList();
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(checkRegistration, 500);
-        });
+        // Логи в консоль
+        console.log('🔍 TELEGRAM WEBAPP DIAGNOSTICS');
+        console.log('================================');
+        console.log('Telegram ID:', userId);
+        console.log('User:', tg.initDataUnsafe?.user);
+        console.log('Full initDataUnsafe:', tg.initDataUnsafe);
+        console.log('Raw initData:', tg.initData);
+        console.log('Platform:', tg.platform);
+        console.log('Version:', tg.version);
     </script>
 </body>
 </html>
