@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PHS App v2.1 - Smart Login</title>
+    <title>Система управления визитами</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         console.log('🔧 Telegram WebApp API загружен');
@@ -639,11 +639,91 @@
             <div id="adminPanel" class="hidden">
                 <div class="logo"><div class="logo-icon">⚙️</div></div>
                 <h1>Админ-панель</h1>
-                <p class="subtitle">Управление</p>
-                <div style="background:rgba(255,255,255,0.3);padding:20px;border-radius:12px;margin:20px 0;">
-                    <p style="color:#37474f;font-weight:600;">Статистика в разработке</p>
+                <p class="subtitle">Управление системой</p>
+                
+                <div class="menu-grid" style="margin-top:20px;">
+                    <button class="menu-button" onclick="openUsersPanel()">
+                        <div class="menu-icon">👥</div>
+                        <div class="menu-text">Пользователи</div>
+                    </button>
+                    <button class="menu-button" onclick="openVisitsPanel()">
+                        <div class="menu-icon">📊</div>
+                        <div class="menu-text">Визиты</div>
+                    </button>
+                    <button class="menu-button" onclick="openReportsPanel()">
+                        <div class="menu-icon">📈</div>
+                        <div class="menu-text">Отчеты</div>
+                    </button>
+                    <button class="menu-button" onclick="openSettingsPanel()">
+                        <div class="menu-icon">⚙️</div>
+                        <div class="menu-text">Настройки</div>
+                    </button>
                 </div>
-                <button class="btn btn-secondary" onclick="backToMainMenu()">Вернуться</button>
+                
+                <button class="btn btn-secondary" onclick="backToMainMenu()" style="margin-top:20px;">Вернуться</button>
+            </div>
+
+            <!-- Панель пользователей -->
+            <div id="usersPanel" class="hidden">
+                <div class="logo"><div class="logo-icon">👥</div></div>
+                <h1>Пользователи</h1>
+                <p class="subtitle">Зарегистрированные пользователи</p>
+                
+                <div id="usersList" style="background:rgba(255,255,255,0.3);padding:15px;border-radius:12px;margin:20px 0;max-height:450px;overflow-y:auto;">
+                    <p style="color:#37474f;font-weight:600;text-align:center;">Загрузка...</p>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="backToAdminPanel()">Назад к админ-панели</button>
+            </div>
+
+            <!-- Детали пользователя -->
+            <div id="userDetailsPanel" class="hidden">
+                <div class="logo"><div class="logo-icon">👤</div></div>
+                <h1>Управление пользователем</h1>
+                <p class="subtitle">Детали и действия</p>
+                
+                <div id="userDetailsContent" style="background:rgba(255,255,255,0.3);padding:20px;border-radius:12px;margin:20px 0;">
+                    <!-- Здесь будут детали -->
+                </div>
+                
+                <div class="menu-grid">
+                    <button class="menu-button" onclick="editUserData()" style="background:linear-gradient(145deg, #e3f2fd, #bbdefb);">
+                        <div class="menu-icon">✏️</div>
+                        <div class="menu-text">Редактировать</div>
+                    </button>
+                    <button class="menu-button" onclick="changeUserPIN()" style="background:linear-gradient(145deg, #fff3e0, #ffe0b2);">
+                        <div class="menu-icon">🔑</div>
+                        <div class="menu-text">Сменить PIN</div>
+                    </button>
+                    <button class="menu-button" id="blockUserBtn" onclick="toggleBlockUser()" style="background:linear-gradient(145deg, #ffebee, #ffcdd2);">
+                        <div class="menu-icon">🚫</div>
+                        <div class="menu-text">Заблокировать</div>
+                    </button>
+                    <button class="menu-button" onclick="deleteUserConfirm()" style="background:linear-gradient(145deg, #ffcdd2, #ef9a9a);">
+                        <div class="menu-icon">🗑️</div>
+                        <div class="menu-text">Удалить</div>
+                    </button>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="backToUsersList()" style="margin-top:15px;">◀️ К списку</button>
+            </div>
+
+            <!-- Экран смены PIN -->
+            <div id="changePinPanel" class="hidden">
+                <div class="logo"><div class="logo-icon">🔑</div></div>
+                <h1>Смена PIN-кода</h1>
+                <p class="subtitle" id="changePinUserName">Пользователь</p>
+                
+                <div class="pin-input-container">
+                    <input type="password" maxlength="1" class="pin-digit" id="newPin1" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-digit" id="newPin2" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-digit" id="newPin3" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-digit" id="newPin4" inputmode="numeric">
+                </div>
+                <div class="error" id="newPinError">Введите новый PIN</div>
+                
+                <button class="btn btn-success" onclick="confirmPinChange()">✅ Сохранить новый PIN</button>
+                <button class="btn btn-secondary" onclick="cancelPinChange()">❌ Отмена</button>
             </div>
         </div>
     </div>
@@ -768,31 +848,68 @@
             }
         };
 
-        function setLanguage(lang) {
+        async function setLanguage(lang) {
             currentLanguage = lang;
-            localStorage.setItem('appLanguage', lang);
             updateLanguage();
             
-            const userId = tg.initDataUnsafe?.user?.id;
+            // Добавляем язык к данным пользователя
             userData.language = lang;
             
-            // Отправляем данные в бота
-            tg.sendData(JSON.stringify({
-                action: 'registration',
-                data: userData
-            }));
+            // Получаем Telegram ID (если есть)
+            const telegramId = tg.initDataUnsafe?.user?.id;
             
-            // ЗАКРЫВАЕМ WebApp чтобы вернуться в чат
-            // Бот отправит новые кнопки
-            console.log('✅ Данные отправлены, закрываем WebApp');
-            setTimeout(() => {
-                tg.close();
-            }, 500);
+            console.log('📤 Отправка регистрации...');
+            console.log('👤 Telegram ID:', telegramId);
+            console.log('📦 Данные:', userData);
+            
+            // ГИБРИДНЫЙ РЕЖИМ: пробуем tg.sendData, если не работает → API
+            try {
+                if (telegramId && tg.sendData) {
+                    // Режим 1: Через бота (если открыто через кнопку в боте)
+                    console.log('🤖 Отправка через бота...');
+                    tg.sendData(JSON.stringify({
+                        action: 'registration',
+                        data: userData
+                    }));
+                    console.log('✅ Отправлено в бота');
+                    showScreen('mainMenu');
+                } else {
+                    // Режим 2: Напрямую в API (если открыто через "Open App")
+                    console.log('🌐 Отправка напрямую в API...');
+                    
+                    const registerData = {
+                        telegram_id: telegramId || Math.floor(Math.random() * 1000000000),
+                        username: tg.initDataUnsafe?.user?.username || 'unknown',
+                        name: userData.name,
+                        phone: userData.phone,
+                        email: userData.email,
+                        region: userData.region,
+                        pin: userData.pin
+                    };
+                    
+                    const response = await apiRequest('/api/register', {
+                        method: 'POST',
+                        body: JSON.stringify(registerData)
+                    });
+                    
+                    if (response.success) {
+                        console.log('✅ Регистрация успешна!');
+                        alert('✅ Регистрация завершена!\n\nВаш ID: ' + response.user_id);
+                        showScreen('mainMenu');
+                    } else {
+                        console.error('❌ Ошибка:', response.error);
+                        alert('❌ Ошибка регистрации: ' + response.error);
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Ошибка отправки:', error);
+                alert('❌ Ошибка: ' + error.message);
+            }
         }
 
         function switchLanguage(lang) {
             currentLanguage = lang;
-            localStorage.setItem('appLanguage', lang);
+            // УБРАНО: localStorage - язык не сохраняем
             document.getElementById('flagRu').classList.remove('active');
             document.getElementById('flagUz').classList.remove('active');
             document.getElementById('flag' + (lang === 'ru' ? 'Ru' : 'Uz')).classList.add('active');
@@ -860,29 +977,29 @@
             const userId = tg.initDataUnsafe?.user?.id;
             
             if (!userId) {
-                console.error('❌ Telegram ID не найден');
+                console.error('❌ Не удалось получить Telegram ID');
                 showScreen('registrationForm');
                 return;
             }
             
-            console.log('🔍 Проверка регистрации для ID:', userId);
+            console.log('🔍 Проверка регистрации пользователя:', userId);
             
             try {
-                // Проверяем через API
-                const response = await apiRequest(`/api/user/${userId}`);
+                // Проверяем через API - зарегистрирован ли пользователь
+                const data = await apiRequest(`/api/user/${userId}`);
                 
-                if (response.success && response.registered) {
-                    console.log('✅ Пользователь зарегистрирован:', response.user.name);
-                    window.currentUser = response.user;
+                if (data.success && data.user) {
+                    console.log('✅ Пользователь найден в БД');
+                    // Пользователь зарегистрирован - показываем вход по PIN
                     showScreen('pinLoginScreen');
                     document.getElementById('loginPin1').focus();
                 } else {
-                    console.log('📝 Пользователь НЕ зарегистрирован');
+                    console.log('📝 Пользователь не найден - показываем регистрацию');
                     showScreen('registrationForm');
                 }
             } catch (error) {
-                console.error('❌ Ошибка проверки регистрации:', error);
-                // При ошибке API показываем форму регистрации
+                console.log('📝 Пользователь не найден (ошибка API) - показываем регистрацию');
+                // Если пользователь не найден - показываем форму регистрации
                 showScreen('registrationForm');
             }
         }
@@ -930,22 +1047,20 @@
             }
             
             const userId = tg.initDataUnsafe?.user?.id;
-            console.log('🔐 Попытка входа для ID:', userId);
             
             try {
-                const response = await apiRequest('/api/login', {
-                    method: 'POST',
-                    body: JSON.stringify({ user_id: userId, pin: pin })
-                });
+                console.log('🔐 Проверка PIN через API...');
                 
-                if (response.success) {
-                    console.log('✅ PIN верный, вход разрешен');
+                // Получаем данные пользователя из БД
+                const data = await apiRequest(`/api/user/${userId}`);
+                
+                if (data.success && data.user && data.user.pin === pin) {
+                    console.log('✅ PIN верный');
                     hideAllErrors();
                     if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                    window.currentUser = response.user;
                     showScreen('mainMenu');
                 } else {
-                    console.error('❌ Неверный PIN');
+                    console.log('❌ PIN неверный');
                     showError('loginPin', currentLanguage === 'ru' ? 'Неверный PIN-код' : "Noto'g'ri PIN-kod");
                     if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
                     ['loginPin1', 'loginPin2', 'loginPin3', 'loginPin4'].forEach(id => {
@@ -954,8 +1069,8 @@
                     document.getElementById('loginPin1').focus();
                 }
             } catch (error) {
-                console.error('❌ Ошибка входа:', error);
-                showError('loginPin', currentLanguage === 'ru' ? 'Ошибка подключения' : "Ulanish xatosi");
+                console.error('❌ Ошибка проверки PIN:', error);
+                showError('loginPin', currentLanguage === 'ru' ? 'Ошибка проверки PIN' : "Xatolik yuz berdi");
             }
         });
 
@@ -1028,8 +1143,7 @@
                 userData.pin = userPin;
                 hideAllErrors();
                 
-                const userId = tg.initDataUnsafe?.user?.id;
-                localStorage.setItem('user_' + userId, JSON.stringify(userData));
+                // УБРАНО: localStorage.setItem() - теперь данные только в БД!
 
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
 
@@ -1138,7 +1252,7 @@
 
             if (isValid) {
                 const userId = tg.initDataUnsafe?.user?.id;
-                const savedUser = JSON.parse(localStorage.getItem('user_' + userId) || '{}');
+                const userInfo = tg.initDataUnsafe?.user || {};
 
                 const visitData = {
                     type: 'doctor',
@@ -1151,9 +1265,9 @@
                     location: visitLocation,
                     employee: {
                         id: userId,
-                        name: savedUser.name,
-                        phone: savedUser.phone,
-                        email: savedUser.email
+                        name: userInfo.first_name + (userInfo.last_name ? ' ' + userInfo.last_name : ''),
+                        phone: '',  // Будет взято из БД на стороне бота
+                        email: ''   // Будет взято из БД на стороне бота
                     },
                     timestamp: new Date().toISOString()
                 };
@@ -1208,6 +1322,7 @@
                     }
                 };
                 
+                console.log('📤 Отправка данных входа в админ-панель');
                 tg.sendData(JSON.stringify(dataToSend));
                 
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
@@ -1216,13 +1331,28 @@
                 
                 setTimeout(() => {
                     alert(currentLanguage === 'ru' 
-                        ? '✅ Вход выполнен!\n\nПисьмо отправляется на email администратора.' 
-                        : '✅ Kirish amalga oshirildi!\n\nXat administrator emailiga yuborilmoqda.');
+                        ? '✅ Вход выполнен!\n\n📧 Письмо отправлено на email администратора.\n\nПроверьте почту (возможно в папке Спам)' 
+                        : '✅ Kirish amalga oshirildi!\n\n📧 Xat administrator emailiga yuborildi.');
                 }, 500);
                 
             } else {
-                showError('adminPin', 'Неверный пароль');
+                // Неверный пароль - отправляем на сервер для блокировки
+                console.log('❌ Неверный PIN код');
+                
+                const userInfo = tg.initDataUnsafe?.user || {};
+                const dataToSend = {
+                    action: 'failed_admin_login',
+                    user_id: userInfo.id
+                };
+                
+                tg.sendData(JSON.stringify(dataToSend));
+                
+                showError('adminPin', currentLanguage === 'ru' 
+                    ? 'Неверный пароль! Осталось 2 попытки' 
+                    : 'Noto\'g\'ri parol! 2 ta urinish qoldi');
+                
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+                
                 ['adminPin1', 'adminPin2', 'adminPin3', 'adminPin4'].forEach(id => {
                     document.getElementById(id).value = '';
                 });
@@ -1238,14 +1368,297 @@
             }
         }
 
-        function openEditProfile() {
-            const userId = tg.initDataUnsafe?.user?.id;
-            const savedUser = JSON.parse(localStorage.getItem('user_' + userId) || '{}');
+        // === ФУНКЦИИ АДМИН-ПАНЕЛИ ===
+        
+        // API URL - ngrok
+        const API_URL = 'https://burnoused-evan-uncautioned.ngrok-free.dev';
+        
+        // Универсальная функция для всех API запросов (обходит ngrok warning)
+        async function apiRequest(endpoint, options = {}) {
+            const url = API_URL + endpoint;
+            const defaultOptions = {
+                headers: {
+                    'ngrok-skip-browser-warning': 'true',
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                },
+                ...options
+            };
             
-            document.getElementById('editName').value = savedUser.name || '';
-            document.getElementById('editPhone').value = savedUser.phone || '';
-            document.getElementById('editEmail').value = savedUser.email || '';
-            document.getElementById('editRegion').value = savedUser.region || '';
+            const response = await fetch(url, defaultOptions);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+        
+        function openUsersPanel() {
+            console.log('📂 Открытие панели пользователей');
+            showScreen('usersPanel');
+            
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '<p style="color:#37474f;font-weight:600;text-align:center;">⏳ Загрузка пользователей из базы данных...</p>';
+            
+            // Загружаем пользователей из API с ngrok заголовком
+            apiRequest('/api/users')
+                .then(data => {
+                    console.log('✅ Получено пользователей:', data.count);
+                    
+                    if (!data.success || data.count === 0) {
+                        usersList.innerHTML = `
+                            <div style="text-align:center;padding:30px;">
+                                <div style="font-size:48px;margin-bottom:15px;">👥</div>
+                                <p style="color:#37474f;font-weight:600;margin-bottom:10px;">Пользователей не найдено</p>
+                                <p style="color:#7f8c8d;font-size:13px;">Зарегистрированные пользователи появятся здесь</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    let html = '<div style="display:flex;flex-direction:column;gap:12px;">';
+                    
+                    data.users.forEach((user, index) => {
+                        const initial = user.name.charAt(0).toUpperCase();
+                        const regionName = getRegionName(user.region) || 'Не указана';
+                        const phone = user.phone || 'Не указан';
+                        const email = user.email || 'Не указан';
+                        const status = user.is_blocked ? '🚫 Заблокирован' : '✅ Активен';
+                        const statusColor = user.is_blocked ? '#ef5350' : '#66bb6a';
+                        
+                        html += `
+                            <div onclick="showUserDetailsById(${user.user_id})" style="background:rgba(255,255,255,0.5);padding:15px;border-radius:12px;box-shadow:2px 2px 6px rgba(0,0,0,0.1);cursor:pointer;transition:all 0.3s;" 
+                                 onmouseover="this.style.transform='scale(1.02)';this.style.boxShadow='3px 3px 8px rgba(0,0,0,0.15)'" 
+                                 onmouseout="this.style.transform='scale(1)';this.style.boxShadow='2px 2px 6px rgba(0,0,0,0.1)'">
+                                <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                                    <div style="width:50px;height:50px;background:linear-gradient(145deg, #667eea, #764ba2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:22px;flex-shrink:0;">
+                                        ${initial}
+                                    </div>
+                                    <div style="flex:1;min-width:0;">
+                                        <div style="font-weight:600;color:#2c3e50;font-size:16px;margin-bottom:5px;">${user.name}</div>
+                                        <div style="font-size:12px;color:${statusColor};font-weight:600;">${status}</div>
+                                    </div>
+                                </div>
+                                <div style="font-size:12px;color:#546e7a;line-height:1.8;border-top:1px solid rgba(0,0,0,0.05);padding-top:10px;">
+                                    <div><strong>📞 Телефон:</strong> ${phone}</div>
+                                    <div><strong>📧 Email:</strong> ${email}</div>
+                                    <div><strong>📍 Регион:</strong> ${regionName}</div>
+                                    <div><strong>🆔 ID:</strong> ${user.user_id}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    usersList.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('❌ Ошибка загрузки:', error);
+                    usersList.innerHTML = `
+                        <div style="text-align:center;padding:30px;">
+                            <div style="font-size:48px;margin-bottom:15px;">❌</div>
+                            <h3 style="color:#e53935;margin-bottom:10px;">Ошибка подключения</h3>
+                            <p style="color:#7f8c8d;font-size:14px;margin-bottom:20px;">
+                                Не удалось загрузить пользователей из базы данных
+                            </p>
+                            <div style="background:rgba(229,57,53,0.1);padding:15px;border-radius:8px;border-left:4px solid #e53935;text-align:left;">
+                                <p style="color:#37474f;font-size:13px;line-height:1.6;">
+                                    <strong>Возможные причины:</strong><br>
+                                    • API сервер не запущен<br>
+                                    • Неверный URL в коде<br>
+                                    • Проблемы с CORS<br><br>
+                                    <strong>Решение:</strong><br>
+                                    Запустите: <code>python api_server.py</code>
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                });
+        }
+        
+        function showUserDetailsById(userId) {
+            console.log('👤 Загрузка деталей пользователя:', userId);
+            
+            // Загружаем детали пользователя из API с ngrok заголовком
+            apiRequest(`/api/user/${userId}`)
+                .then(data => {
+                    if (!data.success) {
+                        alert('Ошибка загрузки данных пользователя');
+                        return;
+                    }
+                    
+                    const user = data.user;
+                    currentSelectedUser = { user_id: userId, ...user };
+                    
+                    const initial = user.name.charAt(0).toUpperCase();
+                    const regionName = getRegionName(user.region) || 'Не указана';
+                    const status = user.is_blocked ? '🚫 Заблокирован' : '✅ Активен';
+                    const statusColor = user.is_blocked ? '#ef5350' : '#66bb6a';
+                    
+                    document.getElementById('userDetailsContent').innerHTML = `
+                        <div style="text-align:center;margin-bottom:20px;">
+                            <div style="width:80px;height:80px;background:linear-gradient(145deg, #667eea, #764ba2);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:36px;margin-bottom:15px;">
+                                ${initial}
+                            </div>
+                            <h2 style="color:#2c3e50;margin:10px 0;">${user.name}</h2>
+                            <div style="color:${statusColor};font-weight:600;font-size:16px;">${status}</div>
+                        </div>
+                        
+                        <div style="background:rgba(255,255,255,0.4);padding:15px;border-radius:8px;">
+                            <div style="margin-bottom:10px;font-size:14px;"><strong>📱 Телефон:</strong><br>${user.phone || 'Не указан'}</div>
+                            <div style="margin-bottom:10px;font-size:14px;"><strong>📧 Email:</strong><br>${user.email || 'Не указан'}</div>
+                            <div style="margin-bottom:10px;font-size:14px;"><strong>📍 Регион:</strong><br>${regionName}</div>
+                            <div style="margin-bottom:10px;font-size:14px;"><strong>📅 Регистрация:</strong><br>${user.registration_date || 'Не указана'}</div>
+                            <div style="font-size:14px;"><strong>🆔 ID:</strong><br>${userId}</div>
+                        </div>
+                    `;
+                    
+                    // Обновляем кнопку блокировки
+                    const blockBtn = document.getElementById('blockUserBtn');
+                    if (blockBtn) {
+                        if (user.is_blocked) {
+                            blockBtn.innerHTML = '<div class="menu-icon">✅</div><div class="menu-text">Разблокировать</div>';
+                            blockBtn.style.background = 'linear-gradient(145deg, #e8f5e9, #c8e6c9)';
+                        } else {
+                            blockBtn.innerHTML = '<div class="menu-icon">🚫</div><div class="menu-text">Заблокировать</div>';
+                            blockBtn.style.background = 'linear-gradient(145deg, #ffebee, #ffcdd2)';
+                        }
+                    }
+                    
+                    showScreen('userDetailsPanel');
+                })
+                .catch(error => {
+                    console.error('❌ Ошибка:', error);
+                    alert('Ошибка загрузки данных пользователя');
+                });
+        }
+
+        function openVisitsPanel() {
+            alert(currentLanguage === 'ru' ? 'Раздел "Визиты" в разработке' : 'Tashriflar bo\'limi ishlab chiqilmoqda');
+        }
+
+        function openReportsPanel() {
+            alert(currentLanguage === 'ru' ? 'Раздел "Отчеты" в разработке' : 'Hisobotlar bo\'limi ishlab chiqilmoqda');
+        }
+
+        function openSettingsPanel() {
+            alert(currentLanguage === 'ru' ? 'Раздел "Настройки" в разработке' : 'Sozlamalar bo\'limi ishlab chiqilmoqda');
+        }
+
+        function backToAdminPanel() {
+            showScreen('adminPanel');
+        }
+
+        function manageUserById(action) {
+            const userId = document.getElementById('manageUserId').value.trim();
+            
+            if (!userId) {
+                alert('❌ Введите ID пользователя');
+                return;
+            }
+            
+            if (!/^\d+$/.test(userId)) {
+                alert('❌ ID должен содержать только цифры');
+                return;
+            }
+            
+            console.log(`🔧 Действие: ${action} для пользователя ${userId}`);
+            
+            if (action === 'pin') {
+                // Смена PIN
+                currentSelectedUser = { user_id: userId };
+                changeUserPIN();
+            } else if (action === 'block') {
+                // Блокировка
+                if (!confirm(`Заблокировать пользователя ${userId}?`)) return;
+                
+                tg.sendData(JSON.stringify({
+                    action: 'block_user',
+                    user_id: userId,
+                    admin_id: tg.initDataUnsafe?.user?.id
+                }));
+                
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                alert('✅ Пользователь заблокирован!\n\nСмотрите подтверждение в чате.');
+                
+            } else if (action === 'unblock') {
+                // Разблокировка
+                if (!confirm(`Разблокировать пользователя ${userId}?\n\nСнимутся все блокировки (включая PIN).`)) return;
+                
+                tg.sendData(JSON.stringify({
+                    action: 'unblock_user',
+                    user_id: userId,
+                    admin_id: tg.initDataUnsafe?.user?.id
+                }));
+                
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                alert('✅ Пользователь разблокирован!\n\nСмотрите подтверждение в чате.');
+                
+            } else if (action === 'delete') {
+                // Удаление
+                if (!confirm(`⚠️ ВНИМАНИЕ!\n\nУдалить пользователя ${userId}?\n\nЭто НЕОБРАТИМО!`)) return;
+                
+                const confirm2 = prompt('Для подтверждения введите "УДАЛИТЬ"');
+                if (confirm2 !== 'УДАЛИТЬ') {
+                    alert('Отменено');
+                    return;
+                }
+                
+                tg.sendData(JSON.stringify({
+                    action: 'delete_user',
+                    user_id: userId,
+                    admin_id: tg.initDataUnsafe?.user?.id
+                }));
+                
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                alert('✅ Пользователь удалён!\n\nСмотрите подтверждение в чате.');
+                document.getElementById('manageUserId').value = '';
+            }
+        }
+
+
+        function getRegionName(regionCode) {
+            const regions = {
+                'tashkent_city': 'г. Ташкент',
+                'andijan': 'Андижанская обл.',
+                'bukhara': 'Бухарская обл.',
+                'jizzakh': 'Джизакская обл.',
+                'kashkadarya': 'Кашкадарьинская обл.',
+                'navoi': 'Навоийская обл.',
+                'namangan': 'Наманганская обл.',
+                'samarkand': 'Самаркандская обл.',
+                'surkhandarya': 'Сурхандарьинская обл.',
+                'sirdarya': 'Сырдарьинская обл.',
+                'tashkent': 'Ташкентская обл.',
+                'fergana': 'Ферганская обл.',
+                'khorezm': 'Хорезмская обл.',
+                'karakalpakstan': 'Каракалпакстан'
+            };
+            return regions[regionCode] || regionCode;
+        }
+
+        async function openEditProfile() {
+            const userId = tg.initDataUnsafe?.user?.id;
+            
+            try {
+                // Загружаем данные из БД через API
+                const data = await apiRequest(`/api/user/${userId}`);
+                
+                if (data.success && data.user) {
+                    document.getElementById('editName').value = data.user.name || '';
+                    document.getElementById('editPhone').value = data.user.phone || '';
+                    document.getElementById('editEmail').value = data.user.email || '';
+                    document.getElementById('editRegion').value = data.user.region || '';
+                } else {
+                    document.getElementById('editName').value = '';
+                    document.getElementById('editPhone').value = '';
+                    document.getElementById('editEmail').value = '';
+                    document.getElementById('editRegion').value = '';
+                }
+            } catch (error) {
+                console.error('❌ Ошибка загрузки профиля:', error);
+            }
             
             showScreen('editProfileScreen');
         }
@@ -1287,18 +1700,19 @@
 
             if (isValid) {
                 const userId = tg.initDataUnsafe?.user?.id;
-                const savedUser = JSON.parse(localStorage.getItem('user_' + userId) || '{}');
                 
-                savedUser.name = name;
-                savedUser.phone = phone;
-                savedUser.email = email;
-                savedUser.region = region;
+                const updatedData = {
+                    name: name,
+                    phone: phone,
+                    email: email,
+                    region: region
+                };
                 
-                localStorage.setItem('user_' + userId, JSON.stringify(savedUser));
-
+                // УБРАНО: localStorage - только отправка в бота
+                
                 tg.sendData(JSON.stringify({
                     action: 'update_profile',
-                    data: savedUser
+                    data: updatedData
                 }));
 
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
@@ -1317,6 +1731,82 @@
                 el.addEventListener('input', () => showError(field, null));
             }
         });
+
+        // ═════════════════════════════════════════════════════════════
+        // УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ (АДМИН)
+        // ═════════════════════════════════════════════════════════════
+        
+        let currentSelectedUser = null;
+
+
+        function backToUsersList() {
+            currentSelectedUser = null;
+            showScreen('usersPanel');
+        }
+
+        function editUserData() {
+            alert('Редактирование в разработке');
+        }
+
+        function changeUserPIN() {
+            if (!currentSelectedUser) return;
+            document.getElementById('changePinUserName').textContent = `ID: ${currentSelectedUser.user_id}`;
+            ['newPin1', 'newPin2', 'newPin3', 'newPin4'].forEach(id => document.getElementById(id).value = '');
+            hideAllErrors();
+            setTimeout(() => document.getElementById('newPin1').focus(), 300);
+            
+            // Автопереключение между полями PIN
+            for (let i = 1; i <= 4; i++) {
+                const input = document.getElementById('newPin' + i);
+                input.onkeyup = function() {
+                    if (this.value.length === 1 && i < 4) document.getElementById('newPin' + (i + 1)).focus();
+                };
+            }
+            
+            showScreen('changePinPanel');
+        }
+
+        function confirmPinChange() {
+            const newPin = ['newPin1', 'newPin2', 'newPin3', 'newPin4'].map(id => document.getElementById(id).value).join('');
+            if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) { showError('newPin', 'Введите 4 цифры'); return; }
+            
+            tg.sendData(JSON.stringify({ action: 'change_user_pin', user_id: currentSelectedUser.user_id, new_pin: newPin, admin_id: tg.initDataUnsafe?.user?.id }));
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            alert('✅ PIN изменён: ' + newPin);
+            showScreen('userDetailsPanel');
+        }
+
+        function cancelPinChange() {
+            showScreen('userDetailsPanel');
+        }
+
+        function toggleBlockUser() {
+            if (!currentSelectedUser) return;
+            const action = currentSelectedUser.is_blocked ? 'разблокировать' : 'заблокировать';
+            if (!confirm(`${action} ${currentSelectedUser.name}?`)) return;
+            
+            tg.sendData(JSON.stringify({ action: currentSelectedUser.is_blocked ? 'unblock_user' : 'block_user', user_id: currentSelectedUser.user_id, admin_id: tg.initDataUnsafe?.user?.id }));
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            
+            currentSelectedUser.is_blocked = !currentSelectedUser.is_blocked;
+            // УБРАНО: localStorage - данные в БД
+            alert(`✅ Пользователь ${currentSelectedUser.is_blocked ? 'заблокирован' : 'разблокирован'}!`);
+            backToUsersList();
+        }
+
+        function deleteUserConfirm() {
+            if (!currentSelectedUser) return;
+            if (!confirm(`⚠️ Удалить ${currentSelectedUser.name}?\n\nЭто НЕОБРАТИМО!`)) return;
+            if (prompt('Введите "УДАЛИТЬ"') !== 'УДАЛИТЬ') { alert('Отменено'); return; }
+            
+            tg.sendData(JSON.stringify({ action: 'delete_user', user_id: currentSelectedUser.user_id, admin_id: tg.initDataUnsafe?.user?.id }));
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            // УБРАНО: localStorage - данные в БД
+            alert('✅ Удалён!');
+            currentSelectedUser = null;
+            backToUsersList();
+            loadUsersList();
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(checkRegistration, 500);
