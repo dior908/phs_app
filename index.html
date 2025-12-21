@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PHS App - Версия 1.6</title>
+    <title>PHS App - Версия 1.7</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         console.log('🔧 Telegram WebApp API загружен');
@@ -868,7 +868,11 @@
                         data: userData
                     }));
                     console.log('✅ Отправлено в бота');
-                    showScreen('mainMenu');
+                    
+                    // ЗАКРЫВАЕМ WebApp чтобы вернуться в чат и увидеть новые кнопки
+                    setTimeout(() => {
+                        tg.close();
+                    }, 300);
                 } else {
                     // Режим 2: Напрямую в API (если открыто через "Open App")
                     console.log('🌐 Отправка напрямую в API...');
