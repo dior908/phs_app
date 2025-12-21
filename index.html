@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Система управления визитами</title>
+    <title>PHS App - Версия 1.6</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         console.log('🔧 Telegram WebApp API загружен');
@@ -382,13 +382,11 @@
                     </div>
                     <div class="form-group">
                         <label for="phone" id="phoneLabel">Номер телефона <span class="required">*</span></label>
-                        <input type="tel" id="phone" placeholder="+998 90 123 45 67" required>
-                        <div class="error" id="phoneError">Введите номер</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="email" id="emailLabel">Email <span class="required">*</span></label>
-                        <input type="email" id="email" placeholder="example@mail.com" required>
-                        <div class="error" id="emailError">Введите email</div>
+                        <div style="position:relative;">
+                            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#2c3e50;font-weight:500;font-size:16px;pointer-events:none;">+998</span>
+                            <input type="tel" id="phone" placeholder="901234567" maxlength="9" pattern="[0-9]{9}" inputmode="numeric" style="padding-left:65px;" required>
+                        </div>
+                        <div class="error" id="phoneError">Введите 9 цифр номера</div>
                     </div>
                     <div class="form-group">
                         <label for="region" id="regionLabel">Область <span class="required">*</span></label>
@@ -747,7 +745,6 @@
                 regSubtitle: 'Заполните данные',
                 nameLabel: 'Полное имя',
                 phoneLabel: 'Номер телефона',
-                emailLabel: 'Email адрес',
                 regionLabel: 'Область',
                 pinSetupTitle: 'Установите PIN-код',
                 pinSetupSubtitle: 'Введите 4-значный PIN',
@@ -800,7 +797,6 @@
                 regSubtitle: "Ma'lumotlarni to'ldiring",
                 nameLabel: "To'liq ism",
                 phoneLabel: 'Telefon raqami',
-                emailLabel: 'Email manzil',
                 regionLabel: 'Viloyat',
                 pinSetupTitle: "PIN-kod o'rnating",
                 pinSetupSubtitle: '4 xonali PIN kiriting',
@@ -1074,13 +1070,17 @@
             }
         });
 
+        // Телефон: только цифры
+        document.getElementById('phone').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '');
+        });
+        
         document.getElementById('regForm').addEventListener('submit', (e) => {
             e.preventDefault();
             hideAllErrors();
 
             const name = document.getElementById('name').value.trim();
             const phone = document.getElementById('phone').value.trim();
-            const email = document.getElementById('email').value.trim();
             const region = document.getElementById('region').value;
 
             let isValid = true;
@@ -1090,13 +1090,8 @@
                 isValid = false;
             }
 
-            if (!isValidPhone(phone)) {
-                showError('phone', 'Введите номер');
-                isValid = false;
-            }
-
-            if (!isValidEmail(email)) {
-                showError('email', 'Введите email');
+            if (phone.length !== 9) {
+                showError('phone', 'Введите 9 цифр номера');
                 isValid = false;
             }
 
@@ -1106,7 +1101,10 @@
             }
 
             if (isValid) {
-                userData = { name, phone, email, region,
+                userData = { 
+                    name, 
+                    phone: '+998' + phone,  // Автоматически добавляем +998
+                    region,
                     telegramId: tg.initDataUnsafe?.user?.id || 'unknown',
                     username: tg.initDataUnsafe?.user?.username || 'unknown'
                 };
