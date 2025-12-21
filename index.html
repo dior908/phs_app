@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Система управления визитами</title>
+    <title>PHS App v2.2 - FINAL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         console.log('🔧 Telegram WebApp API загружен');
@@ -872,7 +872,12 @@
                         data: userData
                     }));
                     console.log('✅ Отправлено в бота');
-                    showScreen('mainMenu');
+                    
+                    // Закрываем WebApp - бот отправит новые кнопки
+                    setTimeout(() => {
+                        console.log('🔒 Закрываем WebApp...');
+                        tg.close();
+                    }, 500);
                 } else {
                     // Режим 2: Напрямую в API (если открыто через "Open App")
                     console.log('🌐 Отправка напрямую в API...');
@@ -1371,7 +1376,10 @@
         // === ФУНКЦИИ АДМИН-ПАНЕЛИ ===
         
         // API URL - ngrok
-        const API_URL = 'https://burnoused-evan-uncautioned.ngrok-free.dev';
+        // ⚠️ ВАЖНО: Обнови этот URL на свой ngrok URL!
+        // Запусти: ngrok http 5000 --request-header-add 'ngrok-skip-browser-warning:true'
+        // Скопируй URL типа: https://abc123.ngrok-free.dev
+        const API_URL = 'https://burnoused-evan-uncautioned.ngrok-free.dev'; // 👈 ОБНОВИ ЗДЕСЬ!
         
         // Универсальная функция для всех API запросов (обходит ngrok warning)
         async function apiRequest(endpoint, options = {}) {
