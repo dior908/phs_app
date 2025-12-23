@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PHS App v3.0 FINAL</title>
+    <title>PHS App v3.1 FIXED</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         console.log('🔧 Telegram WebApp API загружен');
@@ -962,12 +962,8 @@
                     console.error('❌ tg.sendData недоступен!');
                     alert(
                         currentLanguage === 'ru'
-                        ? 'Ошибка отправки данных.
-
-Пожалуйста, откройте приложение через бота.'
-                        : 'Xatolik!
-
-Iltimos, botdan oching.'
+                        ? 'Ошибка отправки данных.\n\nПожалуйста, откройте приложение через бота.'
+                        : 'Xatolik!\n\nIltimos, botdan oching.'
                     );
                 }
             } catch (error) {
