@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PHS App v2.6 - WORKING</title>
+    <title>PHS App v3.0 FINAL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         console.log('🔧 Telegram WebApp API загружен');
@@ -740,37 +740,68 @@
         let previousScreen = null;
 
         // ═══════════════════════════════════════════════════════════
-        // ФУНКЦИИ ПРОВЕРКИ TELEGRAM ID
+        // ФУНКЦИИ ПРОВЕРКИ TELEGRAM ID (из debug_v2.5.html)
         // ═══════════════════════════════════════════════════════════
         
+        /**
+         * Получить Telegram ID пользователя
+         * @returns {number|null} - ID или null если не найден
+         */
         function getTelegramId() {
             const userId = tg.initDataUnsafe?.user?.id;
+            
             if (userId) {
                 console.log('✅ Telegram ID:', userId);
+                console.log('👤 Username:', tg.initDataUnsafe?.user?.username || 'unknown');
+                console.log('📝 Name:', tg.initDataUnsafe?.user?.first_name, tg.initDataUnsafe?.user?.last_name || '');
             } else {
-                console.error('❌ Telegram ID НЕ НАЙДЕН!');
+                console.error('❌ КРИТИЧЕСКАЯ ОШИБКА: Telegram ID не найден!');
+                console.error('tg.initDataUnsafe:', tg.initDataUnsafe);
+                console.error('tg.initData:', tg.initData);
+                console.error('Platform:', tg.platform);
             }
+            
             return userId || null;
         }
         
+        /**
+         * Требовать наличие Telegram ID, иначе показать ошибку
+         * @param {string} actionName - название действия для сообщения об ошибке
+         * @returns {number|null} - ID или null с показом ошибки
+         */
         function requireTelegramId(actionName = 'действие') {
             const userId = getTelegramId();
+            
             if (!userId) {
-                alert(
-                    currentLanguage === 'ru'
-                    ? `❌ Ошибка!\n\nНе удалось получить ваш Telegram ID.\n\nПожалуйста, откройте приложение ЧЕРЕЗ БОТА (кнопка "${actionName}" в чате).`
-                    : `❌ Xatolik!\n\nTelegram ID topilmadi.\n\nIltimos, botdan oching.`
-                );
+                const errorMsg = currentLanguage === 'ru'
+                    ? `❌ Ошибка!\n\nНе удалось получить ваш Telegram ID.\n\nДля работы приложения необходимо:\n1. Открыть через БОТА (/start)\n2. Нажать кнопку "${actionName}"`
+                    : `❌ Xatolik!\n\nTelegram ID topilmadi.\n\nIltimos:\n1. Botni oching (/start)\n2. "${actionName}" tugmasini bosing`;
+                
+                alert(errorMsg);
+                
+                // Пробуем закрыть WebApp и вернуть в бота
+                try {
+                    tg.close();
+                } catch (e) {
+                    console.error('Не удалось закрыть WebApp:', e);
+                }
+                
                 return null;
             }
+            
             return userId;
         }
         
-        // Проверка при загрузке
-        console.log('🚀 PHS App v2.6 загружен');
-        const initialId = getTelegramId();
-        if (!initialId) {
-            console.warn('⚠️ WebApp открыт БЕЗ Telegram ID!');
+        // ПРОВЕРКА ПРИ ЗАГРУЗКЕ
+        console.log('🚀 PHS App v3.0 FINAL загружен');
+        console.log('📱 Platform:', tg.platform);
+        console.log('📊 WebApp Version:', tg.version);
+        
+        const initialCheck = getTelegramId();
+        if (!initialCheck) {
+            console.warn('⚠️ WebApp открыт БЕЗ Telegram ID! Регистрация будет заблокирована.');
+        } else {
+            console.log('✅ Telegram ID обнаружен при загрузке:', initialCheck);
         }
 
         const translations = {
@@ -887,43 +918,65 @@
             updateLanguage();
             userData.language = lang;
             
+            // ═══════════════════════════════════════════════════════════
             // КРИТИЧЕСКАЯ ПРОВЕРКА: Требуем Telegram ID!
+            // ═══════════════════════════════════════════════════════════
             const telegramId = requireTelegramId('Регистрация');
+            
             if (!telegramId) {
                 console.error('❌ БЛОКИРОВКА: Регистрация невозможна без Telegram ID!');
-                return;
+                console.error('userData:', userData);
+                return; // СТОП! Дальше не идём!
             }
             
             console.log('📤 Отправка регистрации...');
-            console.log('✅ Telegram ID:', telegramId);
-            console.log('📦 Данные:', userData);
+            console.log('✅ Telegram ID проверен:', telegramId);
+            console.log('📦 Данные пользователя:', userData);
             
-            // Добавляем Telegram данные
+            // Добавляем Telegram данные в userData
             userData.telegram_id = telegramId;
             userData.username = tg.initDataUnsafe?.user?.username || 'unknown';
             
-            // ТОЛЬКО ОДИН ПУТЬ: Через бота
+            // ТОЛЬКО ОДИН ПУТЬ: Отправка через бота
             try {
                 if (tg.sendData) {
-                    console.log('🤖 Отправка через бота...');
-                    tg.sendData(JSON.stringify({
+                    console.log('🤖 Отправка через tg.sendData()...');
+                    
+                    const dataToSend = {
                         action: 'registration',
                         data: userData
-                    }));
-                    console.log('✅ Отправлено в бота');
+                    };
                     
-                    // Закрываем WebApp
+                    console.log('📦 Отправляемые данные:', dataToSend);
+                    
+                    tg.sendData(JSON.stringify(dataToSend));
+                    
+                    console.log('✅ Данные отправлены в бота!');
+                    
+                    // Закрываем WebApp - бот обработает и отправит новые кнопки
                     setTimeout(() => {
                         console.log('🔒 Закрываем WebApp...');
                         tg.close();
                     }, 500);
                 } else {
                     console.error('❌ tg.sendData недоступен!');
-                    alert('Ошибка отправки. Пожалуйста, откройте через бота.');
+                    alert(
+                        currentLanguage === 'ru'
+                        ? 'Ошибка отправки данных.
+
+Пожалуйста, откройте приложение через бота.'
+                        : 'Xatolik!
+
+Iltimos, botdan oching.'
+                    );
                 }
             } catch (error) {
-                console.error('❌ Ошибка:', error);
-                alert('❌ Ошибка: ' + error.message);
+                console.error('❌ Ошибка при отправке:', error);
+                alert(
+                    currentLanguage === 'ru'
+                    ? `❌ Ошибка: ${error.message}`
+                    : `❌ Xatolik: ${error.message}`
+                );
             }
         }
 
