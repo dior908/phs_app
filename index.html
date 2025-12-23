@@ -1048,18 +1048,11 @@
                     console.log('✅ Регистрация успешна!');
                     console.log('👤 User ID:', response.user_id);
                     
-                    // Показываем успех
-                    alert(
-                        currentLanguage === 'ru'
-                        ? `✅ Регистрация завершена!\n\nВаш ID: ${response.user_id}\n\nТеперь вы можете использовать систему!`
-                        : `✅ Ro'yxatdan o'tish muvaffaqiyatli!\n\nSizning ID: ${response.user_id}\n\nEndi tizimdan foydalanishingiz mumkin!`
-                    );
+                    // Убираем alert - сразу переходим в меню
+                    console.log('🏠 Переход в главное меню...');
                     
-                    // Закрываем WebApp - пользователь вернётся в чат
-                    setTimeout(() => {
-                        console.log('🔒 Закрываем WebApp...');
-                        tg.close();
-                    }, 1000);
+                    // Переходим в главное меню БЕЗ закрытия WebApp
+                    showScreen('mainMenu');
                     
                 } else {
                     console.error('❌ Ошибка регистрации:', response.error);
@@ -1230,11 +1223,21 @@
             
             try {
                 console.log('🔐 Проверка PIN через API...');
+                console.log('🔢 Введённый PIN:', pin);
                 
                 // Получаем данные пользователя из БД
                 const data = await apiRequest(`/api/user/${userId}`);
                 
-                if (data.success && data.user && data.user.pin === pin) {
+                console.log('📦 Данные из БД:', data);
+                console.log('🔢 PIN из БД:', data.user?.pin, 'Тип:', typeof data.user?.pin);
+                
+                // Приводим оба PIN к строке для сравнения
+                const dbPin = String(data.user?.pin || '');
+                const inputPin = String(pin);
+                
+                console.log('🔍 Сравнение:', inputPin, '===', dbPin, '→', inputPin === dbPin);
+                
+                if (data.success && data.user && inputPin === dbPin) {
                     console.log('✅ PIN верный');
                     hideAllErrors();
                     if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
@@ -1554,7 +1557,7 @@
         // ═══════════════════════════════════════════════════════════
         // API URL - ОБНОВИ НА СВОЙ NGROK URL!
         // ═══════════════════════════════════════════════════════════
-        const API_URL = 'https://burnoused-evan-uncautioned.ngrok-free.dev';  // 👈 ЗАМЕНИ!
+        const API_URL = 'https://YOUR-NGROK-URL.ngrok-free.app';  // 👈 ЗАМЕНИ!
         
         // Универсальная функция для всех API запросов (обходит ngrok warning)
         async function apiRequest(endpoint, options = {}) {
