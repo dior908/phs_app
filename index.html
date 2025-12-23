@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Система управления визитами</title>
+    <title>PHS App v2.4 - NO RANDOM ID</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         console.log('🔧 Telegram WebApp API загружен');
@@ -740,8 +740,14 @@
         let previousScreen = null;
 
         // ═══════════════════════════════════════════════════════════
-        // ФУНКЦИЯ: Проверка наличия Telegram ID
+        // КРИТИЧЕСКАЯ ФУНКЦИЯ: Получение Telegram ID
+        // БЕЗ ID = БЛОКИРОВКА РАБОТЫ!
         // ═══════════════════════════════════════════════════════════
+        
+        /**
+         * Получить Telegram ID пользователя
+         * @returns {number|null} - ID или null если не найден
+         */
         function getTelegramId() {
             const userId = tg.initDataUnsafe?.user?.id;
             
@@ -749,24 +755,49 @@
                 console.error('❌ КРИТИЧЕСКАЯ ОШИБКА: Telegram ID не найден!');
                 console.error('tg.initDataUnsafe:', tg.initDataUnsafe);
                 console.error('tg.initData:', tg.initData);
+                console.error('Platform:', tg.platform);
+            } else {
+                console.log('✅ Telegram ID получен:', userId);
+            }
+            
+            return userId || null;
+        }
+        
+        /**
+         * Требовать наличие Telegram ID, иначе показать ошибку
+         * @param {string} actionName - название действия для сообщения об ошибке
+         * @returns {number|null} - ID или null с показом ошибки
+         */
+        function requireTelegramId(actionName = 'это действие') {
+            const userId = getTelegramId();
+            
+            if (!userId) {
+                const errorMsg = currentLanguage === 'ru'
+                    ? `❌ Ошибка!\n\nНе удалось получить ваш Telegram ID.\n\nДля работы приложения необходимо:\n1. Открыть через БОТА (/start)\n2. Нажать кнопку "${actionName}"`
+                    : `❌ Xatolik!\n\nTelegram ID topilmadi.\n\nIltimos:\n1. Botni oching (/start)\n2. "${actionName}" tugmasini bosing`;
+                
+                alert(errorMsg);
+                
+                // Пробуем закрыть WebApp и вернуть в бота
+                try {
+                    tg.close();
+                } catch (e) {
+                    console.error('Не удалось закрыть WebApp:', e);
+                }
+                
+                return null;
             }
             
             return userId;
         }
         
-        function requireTelegramId(actionName = 'действие') {
-            const userId = getTelegramId();
-            
-            if (!userId) {
-                alert(
-                    currentLanguage === 'ru'
-                    ? `❌ Ошибка!\n\nНе удалось получить ваш Telegram ID.\n\nПожалуйста, откройте приложение ЧЕРЕЗ БОТА (кнопка "${actionName}" в чате).`
-                    : `❌ Xatolik!\n\nTelegram ID topilmadi.\n\nIltimos, botdan oching.`
-                );
-                return null;
-            }
-            
-            return userId;
+        // ПРОВЕРКА ПРИ ЗАГРУЗКЕ
+        console.log('🚀 PHS App загружен');
+        console.log('📱 Platform:', tg.platform);
+        console.log('📊 Version:', tg.version);
+        const initialCheck = getTelegramId();
+        if (!initialCheck) {
+            console.warn('⚠️ WebApp открыт без Telegram ID! Функционал ограничен.');
         }
 
         const translations = {
@@ -885,65 +916,43 @@
             // Добавляем язык к данным пользователя
             userData.language = lang;
             
-            // Получаем Telegram ID (если есть)
-            const telegramId = tg.initDataUnsafe?.user?.id;
+            // ═══════════════════════════════════════════════════════════
+            // КРИТИЧЕСКАЯ ПРОВЕРКА: Требуем Telegram ID!
+            // ═══════════════════════════════════════════════════════════
+            const telegramId = requireTelegramId('Регистрация');
             
-            // ═══════════════════════════════════════════════════════════
-            // КРИТИЧЕСКАЯ ПРОВЕРКА: Telegram ID должен быть!
-            // ═══════════════════════════════════════════════════════════
             if (!telegramId) {
-                console.error('❌ ОШИБКА: Telegram ID не найден!');
-                console.error('tg.initDataUnsafe:', tg.initDataUnsafe);
-                alert(
-                    currentLanguage === 'ru' 
-                    ? '❌ Ошибка!\n\nНе удалось получить ваш Telegram ID.\n\nПожалуйста, откройте приложение ЧЕРЕЗ БОТА (кнопка "Зарегистрироваться" в чате).'
-                    : '❌ Xatolik!\n\nTelegram ID topilmadi.\n\nIltimos, botdan oching ("Ro\'yxatdan o\'tish" tugmasi).'
-                );
-                return;
+                console.error('❌ БЛОКИРОВКА: Регистрация невозможна без Telegram ID!');
+                console.error('userData:', userData);
+                return; // СТОП! Дальше не идём!
             }
             
             console.log('📤 Отправка регистрации...');
-            console.log('👤 Telegram ID:', telegramId);
+            console.log('✅ Telegram ID:', telegramId);
             console.log('📦 Данные:', userData);
             
-            // ГИБРИДНЫЙ РЕЖИМ: пробуем tg.sendData, если не работает → API
+            // Добавляем Telegram ID в userData
+            userData.telegram_id = telegramId;
+            userData.username = tg.initDataUnsafe?.user?.username || 'unknown';
+            
+            // ТОЛЬКО ОДИН ПУТЬ: Через бота
             try {
-                if (telegramId && tg.sendData) {
-                    // Режим 1: Через бота (если открыто через кнопку в боте)
+                if (tg.sendData) {
                     console.log('🤖 Отправка через бота...');
                     tg.sendData(JSON.stringify({
                         action: 'registration',
                         data: userData
                     }));
                     console.log('✅ Отправлено в бота');
-                    showScreen('mainMenu');
+                    
+                    // Закрываем WebApp - бот отправит новые кнопки
+                    setTimeout(() => {
+                        console.log('🔒 Закрываем WebApp...');
+                        tg.close();
+                    }, 500);
                 } else {
-                    // Режим 2: Напрямую в API (если открыто через "Open App")
-                    console.log('🌐 Отправка напрямую в API...');
-                    
-                    const registerData = {
-                        telegram_id: telegramId, // Гарантированно есть после проверки выше
-                        username: tg.initDataUnsafe?.user?.username || 'unknown',
-                        name: userData.name,
-                        phone: userData.phone,
-                        email: userData.email,
-                        region: userData.region,
-                        pin: userData.pin
-                    };
-                    
-                    const response = await apiRequest('/api/register', {
-                        method: 'POST',
-                        body: JSON.stringify(registerData)
-                    });
-                    
-                    if (response.success) {
-                        console.log('✅ Регистрация успешна!');
-                        alert('✅ Регистрация завершена!\n\nВаш ID: ' + response.user_id);
-                        showScreen('mainMenu');
-                    } else {
-                        console.error('❌ Ошибка:', response.error);
-                        alert('❌ Ошибка регистрации: ' + response.error);
-                    }
+                    console.error('❌ tg.sendData недоступен!');
+                    alert('Ошибка отправки данных. Пожалуйста, откройте через бота.');
                 }
             } catch (error) {
                 console.error('❌ Ошибка отправки:', error);
@@ -1018,34 +1027,25 @@
         }
 
         async function checkRegistration() {
-            const userId = requireTelegramId('Регистрация');
+            // Требуем Telegram ID
+            const userId = requireTelegramId('Зарегистрироваться');
             
             if (!userId) {
-                // Показываем форму регистрации, но она все равно не даст зарегистрироваться без ID
+                // Показываем форму регистрации, но она не даст зарегистрироваться без ID
+                console.warn('⚠️ Открыто без Telegram ID - показываем форму с предупреждением');
                 showScreen('registrationForm');
                 return;
             }
             
             console.log('🔍 Проверка регистрации пользователя:', userId);
             
-            try {
-                // Проверяем через API - зарегистрирован ли пользователь
-                const data = await apiRequest(`/api/user/${userId}`);
-                
-                if (data.success && data.registered) {
-                    console.log('✅ Пользователь зарегистрирован:', data.user.name);
-                    // Пользователь зарегистрирован - показываем вход по PIN
-                    showScreen('pinLoginScreen');
-                    document.getElementById('loginPin1').focus();
-                } else {
-                    console.log('📝 Пользователь НЕ зарегистрирован - показываем форму');
-                    showScreen('registrationForm');
-                }
-            } catch (error) {
-                console.error('❌ Ошибка API при проверке регистрации:', error);
-                // Если ошибка API - показываем форму регистрации
-                showScreen('registrationForm');
-            }
+            // Проверяем в БД через бота (используем is_registered)
+            // Если зарегистрирован - бот отправит другие кнопки
+            // Если НЕ зарегистрирован - показываем форму
+            
+            // Пока просто показываем форму регистрации
+            // TODO: Добавить проверку через API если нужно
+            showScreen('registrationForm');
         }
 
         function isValidEmail(email) {
