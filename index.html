@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PHS App v3.1 FIXED</title>
+    <title>PHS App v3.3 ID Indicator</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         console.log('🔧 Telegram WebApp API загружен');
@@ -200,6 +200,53 @@
             display: block;
         }
 
+        /* Красные поля когда нет Telegram ID */
+        .no-telegram-id input,
+        .no-telegram-id select,
+        .no-telegram-id textarea {
+            background: #ffebee !important;
+            box-shadow: inset 3px 3px 6px rgba(211, 47, 47, 0.2), inset -3px -3px 6px rgba(255, 255, 255, 0.5) !important;
+            border: 2px solid #ef5350 !important;
+        }
+
+        .no-telegram-id input:focus,
+        .no-telegram-id select:focus,
+        .no-telegram-id textarea:focus {
+            background: #ffcdd2 !important;
+            box-shadow: inset 2px 2px 5px rgba(211, 47, 47, 0.25), inset -2px -2px 5px rgba(255, 255, 255, 0.7) !important;
+        }
+
+        /* Стили для индикатора ID */
+        #telegramIdIndicator {
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.03);
+            transition: all 0.3s;
+        }
+
+        #telegramIdIndicator.id-found {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        #telegramIdIndicator.id-not-found {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        #telegramIdValue {
+            font-family: 'Courier New', monospace;
+        }
+
+        #telegramIdValue.found {
+            color: #2e7d32;
+        }
+
+        #telegramIdValue.not-found {
+            color: #c62828;
+        }
+        }
+
         .hidden {
             display: none;
         }
@@ -374,6 +421,14 @@
                 <div class="logo"><div class="logo-icon">📋</div></div>
                 <h1 id="regTitle">Регистрация</h1>
                 <p class="subtitle" id="regSubtitle">Заполните данные</p>
+                
+                <!-- Индикатор Telegram ID -->
+                <div id="telegramIdIndicator" style="text-align: center; margin: -10px 0 20px 0;">
+                    <span id="telegramIdText" style="font-size: 13px; color: #666;">
+                        Your Telegram ID: <span id="telegramIdValue" style="font-weight: 600;">проверка...</span>
+                    </span>
+                </div>
+                
                 <form id="regForm">
                     <div class="form-group">
                         <label for="name" id="nameLabel">Полное имя <span class="required">*</span></label>
@@ -793,7 +848,7 @@
         }
         
         // ПРОВЕРКА ПРИ ЗАГРУЗКЕ
-        console.log('🚀 PHS App v3.0 FINAL загружен');
+        console.log('🚀 PHS App v3.3 ID INDICATOR загружен');
         console.log('📱 Platform:', tg.platform);
         console.log('📊 WebApp Version:', tg.version);
         
@@ -802,6 +857,36 @@
             console.warn('⚠️ WebApp открыт БЕЗ Telegram ID! Регистрация будет заблокирована.');
         } else {
             console.log('✅ Telegram ID обнаружен при загрузке:', initialCheck);
+        }
+        
+        // Функция обновления индикатора Telegram ID
+        function updateTelegramIdIndicator() {
+            const telegramId = getTelegramId();
+            const indicator = document.getElementById('telegramIdIndicator');
+            const idValue = document.getElementById('telegramIdValue');
+            const regForm = document.getElementById('regForm');
+            
+            if (telegramId) {
+                // ID найден
+                idValue.textContent = telegramId;
+                idValue.className = 'found';
+                indicator.className = 'id-found';
+                
+                // Убираем красный класс с формы
+                if (regForm) {
+                    regForm.classList.remove('no-telegram-id');
+                }
+            } else {
+                // ID не найден
+                idValue.textContent = 'Не найдено';
+                idValue.className = 'not-found';
+                indicator.className = 'id-not-found';
+                
+                // Добавляем красный класс к форме
+                if (regForm) {
+                    regForm.classList.add('no-telegram-id');
+                }
+            }
         }
 
         const translations = {
@@ -937,41 +1022,63 @@
             userData.telegram_id = telegramId;
             userData.username = tg.initDataUnsafe?.user?.username || 'unknown';
             
-            // ТОЛЬКО ОДИН ПУТЬ: Отправка через бота
+            // ПУТЬ ЧЕРЕЗ API (для InlineKeyboardButton)
             try {
-                if (tg.sendData) {
-                    console.log('🤖 Отправка через tg.sendData()...');
+                console.log('🌐 Отправка через API...');
+                
+                const registerData = {
+                    telegram_id: telegramId,
+                    username: userData.username,
+                    name: userData.name,
+                    phone: userData.phone,
+                    region: userData.region,
+                    pin: userData.pin,
+                    language: userData.language
+                };
+                
+                console.log('📦 Отправляемые данные:', registerData);
+                
+                const response = await apiRequest('/api/register', {
+                    method: 'POST',
+                    body: JSON.stringify(registerData)
+                });
+                
+                console.log('📥 Ответ от API:', response);
+                
+                if (response.success) {
+                    console.log('✅ Регистрация успешна!');
+                    console.log('👤 User ID:', response.user_id);
                     
-                    const dataToSend = {
-                        action: 'registration',
-                        data: userData
-                    };
+                    // Показываем успех
+                    alert(
+                        currentLanguage === 'ru'
+                        ? `✅ Регистрация завершена!\n\nВаш ID: ${response.user_id}\n\nТеперь вы можете использовать систему!`
+                        : `✅ Ro'yxatdan o'tish muvaffaqiyatli!\n\nSizning ID: ${response.user_id}\n\nEndi tizimdan foydalanishingiz mumkin!`
+                    );
                     
-                    console.log('📦 Отправляемые данные:', dataToSend);
-                    
-                    tg.sendData(JSON.stringify(dataToSend));
-                    
-                    console.log('✅ Данные отправлены в бота!');
-                    
-                    // Закрываем WebApp - бот обработает и отправит новые кнопки
+                    // Закрываем WebApp - пользователь вернётся в чат
                     setTimeout(() => {
                         console.log('🔒 Закрываем WebApp...');
                         tg.close();
-                    }, 500);
+                    }, 1000);
+                    
                 } else {
-                    console.error('❌ tg.sendData недоступен!');
+                    console.error('❌ Ошибка регистрации:', response.error);
+                    
                     alert(
                         currentLanguage === 'ru'
-                        ? 'Ошибка отправки данных.\n\nПожалуйста, откройте приложение через бота.'
-                        : 'Xatolik!\n\nIltimos, botdan oching.'
+                        ? `❌ Ошибка регистрации:\n\n${response.error}\n\nПопробуйте снова или обратитесь к администратору.`
+                        : `❌ Ro'yxatdan o'tishda xatolik:\n\n${response.error}\n\nQaytadan urinib ko'ring.`
                     );
                 }
+                
             } catch (error) {
                 console.error('❌ Ошибка при отправке:', error);
+                
                 alert(
                     currentLanguage === 'ru'
-                    ? `❌ Ошибка: ${error.message}`
-                    : `❌ Xatolik: ${error.message}`
+                    ? `❌ Ошибка соединения:\n\n${error.message}\n\nПроверьте интернет и попробуйте снова.`
+                    : `❌ Ulanishda xatolik:\n\n${error.message}\n\nInternetni tekshiring.`
                 );
             }
         }
@@ -1007,6 +1114,11 @@
             
             document.querySelectorAll('.card > div').forEach(el => el.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
+            
+            // Обновить индикатор Telegram ID при показе формы регистрации
+            if (screenId === 'registrationForm') {
+                updateTelegramIdIndicator();
+            }
             
             const langFlags = document.getElementById('langFlags');
             const adminIcon = document.getElementById('adminIcon');
@@ -1440,7 +1552,10 @@
         // === ФУНКЦИИ АДМИН-ПАНЕЛИ ===
         
         // API URL - ngrok
-        const API_URL = 'https://burnoused-evan-uncautioned.ngrok-free.dev';
+        // ═══════════════════════════════════════════════════════════
+        // API URL - ОБНОВИ НА СВОЙ NGROK URL!
+        // ═══════════════════════════════════════════════════════════
+        const API_URL = 'https://YOUR-NGROK-URL.ngrok-free.app';  // 👈 ЗАМЕНИ!
         
         // Универсальная функция для всех API запросов (обходит ngrok warning)
         async function apiRequest(endpoint, options = {}) {
