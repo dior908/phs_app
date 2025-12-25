@@ -525,6 +525,10 @@
                         <div class="menu-icon">📚</div>
                         <div class="menu-text" id="menuDatabase">База</div>
                     </div>
+                    <div class="menu-button" onclick="loadScreen('projects-main')">
+                        <div class="menu-icon">📁</div>
+                        <div class="menu-text" id="menuProjects">Проекты</div>
+                    </div>
                     <div class="menu-button" onclick="alert('В разработке')">
                         <div class="menu-icon">🗺️</div>
                         <div class="menu-text" id="menuMap">Карта визитов</div>
@@ -704,6 +708,10 @@
                     <button class="menu-button" onclick="openUsersPanel()">
                         <div class="menu-icon">👥</div>
                         <div class="menu-text">Пользователи</div>
+                    </button>
+                    <button class="menu-button" onclick="loadScreen('admin-products')">
+                        <div class="menu-icon">💊</div>
+                        <div class="menu-text">Препараты</div>
                     </button>
                     <button class="menu-button" onclick="openVisitsPanel()">
                         <div class="menu-icon">📊</div>
@@ -1174,6 +1182,12 @@
                     // Установить глобальный USER_ID для модулей
                     window.USER_ID = response.user_id;
                     
+                    // Сохранить сессию на 1 час
+                    const userId = tg.initDataUnsafe?.user?.id;
+                    if (userId) {
+                        saveSession(userId);
+                    }
+                    
                     // Убираем alert - сразу переходим в меню
                     console.log('🏠 Переход в главное меню...');
                     
@@ -1283,6 +1297,16 @@
             
             console.log('🔍 Проверка регистрации пользователя:', userId);
             
+            // Проверить активную сессию
+            const sessionValid = checkSession(userId);
+            
+            if (sessionValid) {
+                console.log('✅ Активная сессия найдена - переход в главное меню');
+                window.USER_ID = userId;
+                showScreen('mainMenu');
+                return;
+            }
+            
             try {
                 // Проверяем через API - зарегистрирован ли пользователь
                 const data = await apiRequest(`/api/user/${userId}`);
@@ -1300,6 +1324,76 @@
                 console.log('📝 Пользователь не найден (ошибка API) - показываем регистрацию');
                 // Если пользователь не найден - показываем форму регистрации
                 showScreen('registrationForm');
+            }
+        }
+        
+        function checkSession(userId) {
+            /**
+             * Проверить активную сессию (1 час)
+             * @returns {boolean} - true если сессия активна
+             */
+            try {
+                const sessionData = localStorage.getItem('phs_session');
+                
+                if (!sessionData) {
+                    return false;
+                }
+                
+                const session = JSON.parse(sessionData);
+                
+                // Проверить что это тот же пользователь
+                if (session.userId !== userId) {
+                    localStorage.removeItem('phs_session');
+                    return false;
+                }
+                
+                // Проверить что сессия не истекла (1 час = 3600000 мс)
+                const now = Date.now();
+                const elapsed = now - session.timestamp;
+                const oneHour = 60 * 60 * 1000;
+                
+                if (elapsed > oneHour) {
+                    console.log('⏰ Сессия истекла (прошло больше 1 часа)');
+                    localStorage.removeItem('phs_session');
+                    return false;
+                }
+                
+                console.log(`⏱️  Сессия активна (осталось ${Math.floor((oneHour - elapsed) / 60000)} минут)`);
+                return true;
+                
+            } catch (error) {
+                console.error('Ошибка проверки сессии:', error);
+                return false;
+            }
+        }
+        
+        function saveSession(userId) {
+            /**
+             * Сохранить сессию (при успешном входе)
+             */
+            try {
+                const sessionData = {
+                    userId: userId,
+                    timestamp: Date.now()
+                };
+                
+                localStorage.setItem('phs_session', JSON.stringify(sessionData));
+                console.log('✅ Сессия сохранена');
+                
+            } catch (error) {
+                console.error('Ошибка сохранения сессии:', error);
+            }
+        }
+        
+        function clearSession() {
+            /**
+             * Очистить сессию (при выходе)
+             */
+            try {
+                localStorage.removeItem('phs_session');
+                console.log('🗑️  Сессия очищена');
+            } catch (error) {
+                console.error('Ошибка очистки сессии:', error);
             }
         }
 
@@ -1368,6 +1462,9 @@
                     
                     // Установить глобальный USER_ID для модулей
                     window.USER_ID = data.user.user_id || telegramUserId;
+                    
+                    // Сохранить сессию на 1 час
+                    saveSession(telegramUserId);
                     
                     hideAllErrors();
                     if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
