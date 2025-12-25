@@ -802,6 +802,21 @@
         const screenCache = {};
         const SCREENS_BASE_URL = 'screens/';  // Папка с модулями
         
+        function showLoading() {
+            /**
+             * Показать индикатор загрузки
+             */
+            // Можно добавить спиннер, пока просто логируем
+            console.log('⏳ Загрузка...');
+        }
+        
+        function hideLoading() {
+            /**
+             * Скрыть индикатор загрузки
+             */
+            console.log('✅ Загрузка завершена');
+        }
+        
         async function loadScreen(screenName) {
             /**
              * Загрузить и показать модуль
@@ -890,6 +905,16 @@
         let currentLanguage = 'ru';
         let visitLocation = null;
         let previousScreen = null;
+        
+        // ═══════════════════════════════════════════════════════════
+        // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ДЛЯ МОДУЛЕЙ
+        // ═══════════════════════════════════════════════════════════
+        const API_URL = 'https://burnoused-evan-uncautioned.ngrok-free.dev';  // 👈 ЗАМЕНИ НА СВОЙ!
+        let USER_ID = null;  // Заполнится после авторизации
+        
+        // Установить USER_ID глобально
+        window.API_URL = API_URL;
+        window.USER_ID = null;
 
         // ═══════════════════════════════════════════════════════════
         // ФУНКЦИИ ПРОВЕРКИ TELEGRAM ID (из debug_v2.5.html)
@@ -1146,6 +1171,9 @@
                     console.log('✅ Регистрация успешна!');
                     console.log('👤 User ID:', response.user_id);
                     
+                    // Установить глобальный USER_ID для модулей
+                    window.USER_ID = response.user_id;
+                    
                     // Убираем alert - сразу переходим в меню
                     console.log('🏠 Переход в главное меню...');
                     
@@ -1337,6 +1365,10 @@
                 
                 if (data.success && data.user && inputPin === dbPin) {
                     console.log('✅ PIN верный');
+                    
+                    // Установить глобальный USER_ID для модулей
+                    window.USER_ID = data.user.user_id || telegramUserId;
+                    
                     hideAllErrors();
                     if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
                     showScreen('mainMenu');
@@ -1650,12 +1682,6 @@
         }
 
         // === ФУНКЦИИ АДМИН-ПАНЕЛИ ===
-        
-        // API URL - ngrok
-        // ═══════════════════════════════════════════════════════════
-        // API URL - ОБНОВИ НА СВОЙ NGROK URL!
-        // ═══════════════════════════════════════════════════════════
-        const API_URL = 'https://burnoused-evan-uncautioned.ngrok-free.dev';  // 👈 ЗАМЕНИ!
         
         // Универсальная функция для всех API запросов (обходит ngrok warning)
         async function apiRequest(endpoint, options = {}) {
