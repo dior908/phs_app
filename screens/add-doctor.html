@@ -1,0 +1,253 @@
+<!-- Добавить врача -->
+<div class="logo"><div class="logo-icon">👨‍⚕️</div></div>
+<h1>Добавить врача</h1>
+<p class="subtitle">Заполните данные о враче</p>
+
+<form id="addDoctorForm" onsubmit="submitAddDoctor(event)">
+    <!-- ФИО Врача -->
+    <div class="form-group">
+        <label for="doctorFullName">ФИО Врача <span class="required">*</span></label>
+        <input type="text" id="doctorFullName" placeholder="Иванов Иван Иванович" required>
+        <div class="error" id="fullNameError">Введите ФИО врача</div>
+    </div>
+
+    <!-- Специализируется -->
+    <div class="form-group">
+        <label for="doctorSpecialization">Специализируется <span class="required">*</span></label>
+        <select id="doctorSpecialization" required>
+            <option value="">Выберите направление</option>
+            <option value="Онкология">Онкология</option>
+            <option value="Эндокринология">Эндокринология</option>
+            <option value="Гинекология">Гинекология</option>
+            <option value="Кардиология">Кардиология</option>
+            <option value="Неврология">Неврология</option>
+            <option value="Гастроэнтерология">Гастроэнтерология</option>
+            <option value="Урология">Урология</option>
+            <option value="Пульмонология">Пульмонология</option>
+            <option value="Нефрология">Нефрология</option>
+            <option value="Гематология">Гематология</option>
+            <option value="Ревматология">Ревматология</option>
+            <option value="Другое">Другое</option>
+        </select>
+        <div class="error" id="specializationError">Выберите специализацию</div>
+    </div>
+
+    <!-- Впишите специальность -->
+    <div class="form-group">
+        <label for="doctorSpecialtyDetail">Впишите специальность</label>
+        <input type="text" id="doctorSpecialtyDetail" placeholder="Онколог-уролог, Онколог-маммолог">
+        <small style="color:#78909c;font-size:12px;">Пример: Онколог-уролог, Гинеколог-репродуктолог</small>
+    </div>
+
+    <!-- Должность -->
+    <div class="form-group">
+        <label for="doctorPosition">Должность</label>
+        <input type="text" id="doctorPosition" placeholder="Заведующий отделением, Главный врач">
+        <small style="color:#78909c;font-size:12px;">Пример: Заведующий отделением, Главный врач, Бухгалтер</small>
+    </div>
+
+    <!-- Номер телефона -->
+    <div class="form-group">
+        <label for="doctorPhone">Номер телефона</label>
+        <input type="tel" id="doctorPhone" placeholder="+998 XX XXX XX XX" pattern="\+998\s?\d{2}\s?\d{3}\s?\d{2}\s?\d{2}">
+        <small style="color:#78909c;font-size:12px;">Формат: +998 XX XXX XX XX</small>
+    </div>
+
+    <!-- Место работы -->
+    <div class="form-group">
+        <label for="doctorWorkplace">Место работы</label>
+        <input type="text" id="doctorWorkplace" placeholder="Эндокринологическая больница г. Ташкент">
+        <small style="color:#78909c;font-size:12px;">Пример: Эндокринологическая больница г. Ташкент</small>
+    </div>
+
+    <!-- Дополнительные места работы -->
+    <div class="form-group">
+        <label>Дополнительные места работы</label>
+        <div id="additionalWorkplaces">
+            <!-- Места добавляются динамически -->
+        </div>
+        <button type="button" class="btn" onclick="addWorkplace()" style="margin-top:10px;">
+            + Добавить еще одно место работы
+        </button>
+    </div>
+
+    <!-- Категория врача -->
+    <div class="form-group">
+        <label for="doctorCategory">Категория врача</label>
+        <select id="doctorCategory">
+            <option value="">Не указана</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+        </select>
+        <small style="color:#78909c;font-size:12px;">Классификация по важности</small>
+    </div>
+
+    <!-- Комментарии -->
+    <div class="form-group">
+        <label for="doctorComments">Комментарии (необязательно)</label>
+        <textarea id="doctorComments" placeholder="Дополнительная информация о враче"></textarea>
+    </div>
+
+    <!-- Кнопки -->
+    <button type="submit" class="btn btn-success">✅ Сохранить врача</button>
+    <button type="button" class="btn btn-secondary" onclick="cancelAddDoctor()">❌ Отмена</button>
+</form>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// ИНИЦИАЛИЗАЦИЯ ФОРМЫ ДОБАВЛЕНИЯ ВРАЧА
+// ═══════════════════════════════════════════════════════════
+
+let additionalWorkplacesCount = 0;
+
+function init_add_doctor() {
+    console.log('Инициализация формы добавления врача...');
+    
+    // Форматирование телефона
+    const phoneInput = document.getElementById('doctorPhone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            
+            if (value.startsWith('998')) {
+                value = value.substring(3);
+            }
+            
+            if (value.length > 0) {
+                let formatted = '+998';
+                if (value.length > 0) formatted += ' ' + value.substring(0, 2);
+                if (value.length > 2) formatted += ' ' + value.substring(2, 5);
+                if (value.length > 5) formatted += ' ' + value.substring(5, 7);
+                if (value.length > 7) formatted += ' ' + value.substring(7, 9);
+                
+                e.target.value = formatted.trim();
+            }
+        });
+    }
+}
+
+function addWorkplace() {
+    /**
+     * Добавить поле для дополнительного места работы
+     */
+    additionalWorkplacesCount++;
+    
+    const container = document.getElementById('additionalWorkplaces');
+    
+    const div = document.createElement('div');
+    div.className = 'form-group';
+    div.style.marginBottom = '10px';
+    div.id = `workplace-${additionalWorkplacesCount}`;
+    
+    div.innerHTML = `
+        <div style="display:flex;gap:10px;align-items:center;">
+            <input type="text" 
+                   id="additionalWorkplace${additionalWorkplacesCount}" 
+                   placeholder="Название учреждения"
+                   style="flex:1;">
+            <button type="button" 
+                    class="btn" 
+                    onclick="removeWorkplace(${additionalWorkplacesCount})"
+                    style="padding:12px 16px;min-width:auto;background:linear-gradient(145deg, #ffcdd2, #ef9a9a);">
+                ✕
+            </button>
+        </div>
+    `;
+    
+    container.appendChild(div);
+}
+
+function removeWorkplace(id) {
+    /**
+     * Удалить дополнительное место работы
+     */
+    const element = document.getElementById(`workplace-${id}`);
+    if (element) {
+        element.remove();
+    }
+}
+
+function cancelAddDoctor() {
+    /**
+     * Отменить добавление и вернуться к форме визита
+     */
+    if (confirm('❓ Отменить добавление врача?')) {
+        loadScreen('visit-doctor');
+    }
+}
+
+async function submitAddDoctor(event) {
+    /**
+     * Отправить форму добавления врача
+     */
+    event.preventDefault();
+    
+    const userId = window.USER_ID || tg.initDataUnsafe?.user?.id;
+    
+    if (!userId) {
+        alert('❌ Ошибка: не удалось определить пользователя');
+        return;
+    }
+    
+    // Собрать дополнительные места работы
+    const additionalWorkplaces = [];
+    for (let i = 1; i <= additionalWorkplacesCount; i++) {
+        const input = document.getElementById(`additionalWorkplace${i}`);
+        if (input && input.value.trim()) {
+            additionalWorkplaces.push(input.value.trim());
+        }
+    }
+    
+    // Собрать данные врача
+    const doctorData = {
+        user_id: userId,
+        full_name: document.getElementById('doctorFullName').value.trim(),
+        specialization: document.getElementById('doctorSpecialization').value,
+        specialty_detail: document.getElementById('doctorSpecialtyDetail').value.trim(),
+        position: document.getElementById('doctorPosition').value.trim(),
+        phone: document.getElementById('doctorPhone').value.trim(),
+        workplace: document.getElementById('doctorWorkplace').value.trim(),
+        additional_workplaces: additionalWorkplaces,
+        category: document.getElementById('doctorCategory').value,
+        comments: document.getElementById('doctorComments').value.trim()
+    };
+    
+    console.log('Отправка данных врача:', doctorData);
+    
+    try {
+        // Показать загрузку
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Сохранение...';
+        
+        const response = await fetch(`${API_URL}/api/doctors`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(doctorData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(`✅ Врач "${doctorData.full_name}" успешно добавлен!`);
+            
+            // Вернуться к форме визита и обновить список врачей
+            loadScreen('visit-doctor');
+            
+        } else {
+            throw new Error(result.error || 'Ошибка добавления');
+        }
+        
+    } catch (error) {
+        console.error('Ошибка добавления врача:', error);
+        alert(`❌ Ошибка добавления врача: ${error.message}`);
+        
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '✅ Сохранить врача';
+    }
+}
+</script>
