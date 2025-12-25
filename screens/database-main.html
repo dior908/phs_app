@@ -1,0 +1,36 @@
+<!-- База данных - главное меню -->
+<div class="logo"><div class="logo-icon">📚</div></div>
+<h1>База данных</h1>
+<p class="subtitle">Управление контактами</p>
+
+<div class="menu-grid">
+    <div class="menu-button" onclick="loadScreen('database-doctors')">
+        <div class="menu-icon">👨‍⚕️</div>
+        <div class="menu-text">База врачей</div>
+    </div>
+    
+    <div class="menu-button" onclick="loadScreen('database-pharmacy')">
+        <div class="menu-icon">💊</div>
+        <div class="menu-text">База аптек</div>
+    </div>
+    
+    <div class="menu-button" onclick="loadScreen('database-wholesale')">
+        <div class="menu-icon">📦</div>
+        <div class="menu-text">База оптом</div>
+    </div>
+    
+    <div class="menu-button" onclick="loadScreen('database-all')">
+        <div class="menu-icon">📋</div>
+        <div class="menu-text">Вся база</div>
+    </div>
+</div>
+
+<button class="btn btn-secondary" onclick="backToMainMenu()" style="margin-top:20px;">
+    ◀️ Вернуться в главное меню
+</button>
+
+<script>
+function init_database_main() {
+    console.log('Инициализация главного меню баз данных...');
+}
+</script>
