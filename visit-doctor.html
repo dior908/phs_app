@@ -1,0 +1,273 @@
+<!-- Визит к врачу -->
+<div class="logo"><div class="logo-icon">👨‍⚕️</div></div>
+<h1>Визит к врачу</h1>
+<p class="subtitle">Заполните данные визита</p>
+
+<form id="visitDoctorForm" onsubmit="submitVisitDoctor(event)">
+    <!-- ФИО Врача -->
+    <div class="form-group">
+        <label for="doctorName">ФИО Врача <span class="required">*</span></label>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <select id="doctorName" required style="flex:1;">
+                <option value="">Выберите врача</option>
+                <!-- Список врачей загрузится из БД -->
+            </select>
+            <button type="button" class="btn" onclick="loadScreen('add-doctor')" style="padding:12px 20px;min-width:auto;">
+                <span style="font-size:20px;">+</span>
+            </button>
+        </div>
+        <div class="error" id="doctorNameError">Выберите врача</div>
+    </div>
+
+    <!-- Тема визита -->
+    <div class="form-group">
+        <label for="visitTopic">Тема визита <span class="required">*</span></label>
+        <input type="text" id="visitTopic" placeholder="Консультация по препарату" required>
+        <div class="error" id="visitTopicError">Введите тему визита</div>
+    </div>
+
+    <!-- Выберите препарат -->
+    <div class="form-group">
+        <label for="productSelect">Выберите препарат <span class="required">*</span></label>
+        <select id="productSelect" required>
+            <option value="">Загрузка...</option>
+            <!-- Список препаратов загрузится из БД -->
+        </select>
+        <div class="error" id="productError">Выберите препарат</div>
+    </div>
+
+    <!-- Результат визита -->
+    <div class="form-group">
+        <label for="visitResult">Результат визита <span class="required">*</span></label>
+        <textarea id="visitResult" required minlength="20" placeholder="Опишите результат визита (минимум 20 символов)"></textarea>
+        <div class="char-counter"><span id="resultCounter">0</span>/20 минимум</div>
+        <div class="error" id="visitResultError">Минимум 20 символов</div>
+    </div>
+
+    <!-- Кнопка геолокации -->
+    <button type="button" class="btn location-btn" onclick="getDoctorLocation()" id="locationBtn">
+        📍 Поделиться местоположением
+    </button>
+    <div id="locationStatus" style="text-align:center;margin-top:10px;color:#546e7a;font-size:13px;"></div>
+
+    <!-- Кнопки -->
+    <button type="submit" class="btn btn-success">💾 Сохранить визит</button>
+    <button type="button" class="btn btn-secondary" onclick="backToMainMenu()">◀️ Вернуться в главное меню</button>
+</form>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// ИНИЦИАЛИЗАЦИЯ ФОРМЫ ВИЗИТА К ВРАЧУ
+// ═══════════════════════════════════════════════════════════
+
+let visitDoctorLocation = null;
+let visitDoctorData = {};
+
+async function init_visit_doctor() {
+    console.log('Инициализация формы визита к врачу...');
+    
+    // Загрузить список врачей
+    await loadDoctorsList();
+    
+    // Загрузить список препаратов
+    await loadProductsList();
+    
+    // Счётчик символов
+    const resultTextarea = document.getElementById('visitResult');
+    const counter = document.getElementById('resultCounter');
+    
+    if (resultTextarea && counter) {
+        resultTextarea.addEventListener('input', function() {
+            counter.textContent = this.value.length;
+        });
+    }
+}
+
+async function loadDoctorsList() {
+    /**
+     * Загрузить список врачей из БД
+     */
+    try {
+        const userId = window.USER_ID || tg.initDataUnsafe?.user?.id;
+        
+        if (!userId) {
+            console.error('User ID не найден');
+            return;
+        }
+        
+        const response = await fetch(`${API_URL}/api/doctors?user_id=${userId}`);
+        const data = await response.json();
+        
+        const select = document.getElementById('doctorName');
+        
+        if (data.success && data.doctors && data.doctors.length > 0) {
+            select.innerHTML = '<option value="">Выберите врача</option>';
+            
+            data.doctors.forEach(doctor => {
+                const option = document.createElement('option');
+                option.value = doctor.id;
+                option.textContent = `${doctor.full_name} - ${doctor.specialization}`;
+                option.dataset.doctor = JSON.stringify(doctor);
+                select.appendChild(option);
+            });
+        } else {
+            select.innerHTML = '<option value="">Нет врачей - добавьте первого врача кнопкой +</option>';
+        }
+        
+    } catch (error) {
+        console.error('Ошибка загрузки врачей:', error);
+        document.getElementById('doctorName').innerHTML = '<option value="">Ошибка загрузки</option>';
+    }
+}
+
+async function loadProductsList() {
+    /**
+     * Загрузить список препаратов из БД
+     */
+    try {
+        const response = await fetch(`${API_URL}/api/products?active_only=true`);
+        const data = await response.json();
+        
+        const select = document.getElementById('productSelect');
+        
+        if (data.success && data.products && data.products.length > 0) {
+            select.innerHTML = '<option value="">Выберите препарат</option>';
+            
+            data.products.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.id;
+                option.textContent = product.name;
+                select.appendChild(option);
+            });
+        } else {
+            select.innerHTML = '<option value="">Нет препаратов</option>';
+        }
+        
+    } catch (error) {
+        console.error('Ошибка загрузки препаратов:', error);
+        document.getElementById('productSelect').innerHTML = '<option value="">Ошибка загрузки</option>';
+    }
+}
+
+function getDoctorLocation() {
+    /**
+     * Получить геолокацию пользователя
+     */
+    const btn = document.getElementById('locationBtn');
+    const status = document.getElementById('locationStatus');
+    
+    btn.disabled = true;
+    btn.textContent = '⏳ Получение...';
+    status.textContent = 'Запрос геолокации...';
+    
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                visitDoctorLocation = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                };
+                
+                btn.textContent = '✅ Местоположение получено';
+                btn.style.background = 'linear-gradient(145deg, #c8e6c9, #a5d6a7)';
+                status.textContent = `📍 Координаты: ${visitDoctorLocation.latitude.toFixed(6)}, ${visitDoctorLocation.longitude.toFixed(6)}`;
+                status.style.color = '#2e7d32';
+                
+                console.log('Геолокация получена:', visitDoctorLocation);
+            },
+            (error) => {
+                console.error('Ошибка геолокации:', error);
+                btn.disabled = false;
+                btn.textContent = '❌ Ошибка - попробуйте ещё раз';
+                btn.style.background = 'linear-gradient(145deg, #ffcdd2, #ef9a9a)';
+                status.textContent = 'Не удалось получить местоположение';
+                status.style.color = '#c62828';
+            }
+        );
+    } else {
+        btn.disabled = false;
+        btn.textContent = '❌ Геолокация недоступна';
+        status.textContent = 'Ваш браузер не поддерживает геолокацию';
+        status.style.color = '#c62828';
+    }
+}
+
+async function submitVisitDoctor(event) {
+    /**
+     * Отправить форму визита к врачу
+     */
+    event.preventDefault();
+    
+    const userId = window.USER_ID || tg.initDataUnsafe?.user?.id;
+    
+    if (!userId) {
+        alert('❌ Ошибка: не удалось определить пользователя');
+        return;
+    }
+    
+    // Собрать данные
+    const doctorSelect = document.getElementById('doctorName');
+    const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
+    const doctorData = selectedOption.dataset.doctor ? JSON.parse(selectedOption.dataset.doctor) : null;
+    
+    const productSelect = document.getElementById('productSelect');
+    const selectedProduct = productSelect.options[productSelect.selectedIndex];
+    
+    const visitData = {
+        user_id: userId,
+        visit_type: 'doctor',
+        employee_contact_id: parseInt(doctorSelect.value),
+        contact_type: 'doctor',
+        visit_topic: document.getElementById('visitTopic').value,
+        products: [selectedProduct.textContent], // Массив препаратов
+        visit_result: document.getElementById('visitResult').value,
+        latitude: visitDoctorLocation?.latitude || null,
+        longitude: visitDoctorLocation?.longitude || null,
+        address: '' // Можно добавить reverse geocoding
+    };
+    
+    console.log('Отправка визита:', visitData);
+    
+    try {
+        // Показать загрузку
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Сохранение...';
+        
+        const response = await fetch(`${API_URL}/api/visits`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(visitData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('✅ Визит успешно сохранён!');
+            
+            // Очистить форму
+            document.getElementById('visitDoctorForm').reset();
+            visitDoctorLocation = null;
+            document.getElementById('locationStatus').textContent = '';
+            document.getElementById('locationBtn').textContent = '📍 Поделиться местоположением';
+            document.getElementById('locationBtn').style.background = '';
+            
+            // Вернуться в главное меню
+            backToMainMenu();
+            
+        } else {
+            throw new Error(result.error || 'Ошибка сохранения');
+        }
+        
+    } catch (error) {
+        console.error('Ошибка сохранения визита:', error);
+        alert(`❌ Ошибка сохранения визита: ${error.message}`);
+        
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '💾 Сохранить визит';
+    }
+}
+</script>
