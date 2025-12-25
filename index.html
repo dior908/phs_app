@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PHS App v3.3 ID Indicator</title>
+    <title>PHS App v3.7 Buttons Fixed</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         console.log('🔧 Telegram WebApp API загружен');
@@ -55,6 +55,7 @@
         }
 
         .card {
+            position: relative;  /* Для позиционирования кнопок */
             background: linear-gradient(145deg, #e6e9ed 0%, #c5ccd4 100%);
             border-radius: 24px;
             padding: 30px;
@@ -300,8 +301,8 @@
         }
 
         .lang-flags {
-            position: fixed;
-            top: 20px;
+            position: absolute;
+            top: -60px;  /* Над карточкой */
             left: 20px;
             display: flex;
             gap: 10px;
@@ -328,8 +329,8 @@
         }
 
         .admin-icon {
-            position: fixed;
-            top: 20px;
+            position: absolute;
+            top: -60px;  /* Над карточкой */
             right: 20px;
             width: 40px;
             height: 40px;
@@ -381,17 +382,17 @@
     </style>
 </head>
 <body>
-    <!-- Флаги языков -->
-    <div class="lang-flags" id="langFlags" style="display: none;">
-        <button class="flag-btn" id="flagRu" onclick="switchLanguage('ru')" title="Русский">🇷🇺</button>
-        <button class="flag-btn" id="flagUz" onclick="switchLanguage('uz')" title="O'zbekcha">🇺🇿</button>
-    </div>
-
-    <!-- Админ иконка -->
-    <div class="admin-icon" id="adminIcon" onclick="openAdminPanel()" title="Админ-панель" style="display: none;">⚙️</div>
-
     <div class="container">
         <div class="card">
+            <!-- Флаги языков -->
+            <div class="lang-flags" id="langFlags" style="display: none;">
+                <button class="flag-btn" id="flagRu" onclick="switchLanguage('ru')" title="Русский">🇷🇺</button>
+                <button class="flag-btn" id="flagUz" onclick="switchLanguage('uz')" title="O'zbekcha">🇺🇿</button>
+            </div>
+
+            <!-- Админ иконка -->
+            <div class="admin-icon" id="adminIcon" onclick="openAdminPanel()" title="Админ-панель" style="display: none;">⚙️</div>
+
             <!-- Загрузка -->
             <div id="loadingScreen" class="loading">
                 <div class="spinner"></div>
@@ -1557,7 +1558,7 @@
         // ═══════════════════════════════════════════════════════════
         // API URL - ОБНОВИ НА СВОЙ NGROK URL!
         // ═══════════════════════════════════════════════════════════
-        const API_URL = 'https://burnoused-evan-uncautioned.ngrok-free.dev';  // 👈 ЗАМЕНИ!
+        const API_URL = 'https://YOUR-NGROK-URL.ngrok-free.app';  // 👈 ЗАМЕНИ!
         
         // Универсальная функция для всех API запросов (обходит ngrok warning)
         async function apiRequest(endpoint, options = {}) {
