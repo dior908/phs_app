@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PHS App v3.7 Buttons Fixed</title>
+    <title>PHS App v4.0 Modular</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         console.log('🔧 Telegram WebApp API загружен');
@@ -521,6 +521,10 @@
                         <div class="menu-icon">📝</div>
                         <div class="menu-text" id="menuVisit">Регистрация визита</div>
                     </div>
+                    <div class="menu-button" onclick="loadScreen('database-main')">
+                        <div class="menu-icon">📚</div>
+                        <div class="menu-text" id="menuDatabase">База</div>
+                    </div>
                     <div class="menu-button" onclick="alert('В разработке')">
                         <div class="menu-icon">🗺️</div>
                         <div class="menu-text" id="menuMap">Карта визитов</div>
@@ -550,15 +554,15 @@
                 <h1 id="visitTypeTitle">Тип визита</h1>
                 <p class="subtitle" id="visitTypeSubtitle">Выберите тип</p>
                 <div class="menu-grid">
-                    <div class="menu-button" onclick="openVisitForm('doctor')">
+                    <div class="menu-button" onclick="loadScreen('visit-doctor')">
                         <div class="menu-icon">👨‍⚕️</div>
                         <div class="menu-text" id="visitDoctor">Врач</div>
                     </div>
-                    <div class="menu-button" onclick="alert('В разработке')">
+                    <div class="menu-button" onclick="loadScreen('visit-pharmacy')">
                         <div class="menu-icon">💊</div>
                         <div class="menu-text" id="visitPharmacy">Аптека</div>
                     </div>
-                    <div class="menu-button" onclick="alert('В разработке')">
+                    <div class="menu-button" onclick="loadScreen('visit-wholesale')">
                         <div class="menu-icon">📦</div>
                         <div class="menu-text" id="visitWholesale">Оптом</div>
                     </div>
@@ -780,10 +784,103 @@
                 <button class="btn btn-success" onclick="confirmPinChange()">✅ Сохранить новый PIN</button>
                 <button class="btn btn-secondary" onclick="cancelPinChange()">❌ Отмена</button>
             </div>
+
+            <!-- ========================================== -->
+            <!-- ДИНАМИЧЕСКИЙ КОНТЕНТ (новые модули)        -->
+            <!-- ========================================== -->
+            <div id="dynamicScreen" class="hidden">
+                <div id="dynamicContent"></div>
+            </div>
         </div>
     </div>
 
     <script>
+        // ═══════════════════════════════════════════════════════════
+        // СИСТЕМА ДИНАМИЧЕСКОЙ ЗАГРУЗКИ МОДУЛЕЙ
+        // ═══════════════════════════════════════════════════════════
+        
+        const screenCache = {};
+        const SCREENS_BASE_URL = 'screens/';  // Папка с модулями
+        
+        async function loadScreen(screenName) {
+            /**
+             * Загрузить и показать модуль
+             * @param {string} screenName - имя модуля без .html (например: 'visit-doctor')
+             */
+            try {
+                showLoading();
+                
+                // Проверить кеш
+                if (!screenCache[screenName]) {
+                    const response = await fetch(`${SCREENS_BASE_URL}${screenName}.html`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`Failed to load ${screenName}`);
+                    }
+                    
+                    const html = await response.text();
+                    screenCache[screenName] = html;
+                }
+                
+                // Показать контент
+                document.getElementById('dynamicContent').innerHTML = screenCache[screenName];
+                document.getElementById('dynamicScreen').classList.remove('hidden');
+                
+                // Скрыть все старые экраны
+                hideAllOldScreens();
+                
+                hideLoading();
+                
+                // Вызвать инициализацию модуля (если есть)
+                const initFunctionName = `init_${screenName.replace(/-/g, '_')}`;
+                if (typeof window[initFunctionName] === 'function') {
+                    window[initFunctionName]();
+                }
+                
+            } catch (error) {
+                console.error('Ошибка загрузки модуля:', error);
+                hideLoading();
+                alert('❌ Ошибка загрузки формы. Попробуйте позже.');
+                backToMainMenu();
+            }
+        }
+        
+        function hideAllOldScreens() {
+            /**
+             * Скрыть все основные экраны
+             */
+            const screens = [
+                'mainMenu', 'visitTypeMenu', 'doctorVisitForm', 'helpScreen',
+                'editProfileScreen', 'adminLoginScreen', 'adminPanel',
+                'usersPanel', 'userDetailsPanel', 'changePinPanel'
+            ];
+            
+            screens.forEach(screenId => {
+                const screen = document.getElementById(screenId);
+                if (screen) {
+                    screen.classList.add('hidden');
+                }
+            });
+        }
+        
+        function backToMainMenu() {
+            /**
+             * Вернуться в главное меню
+             */
+            // Скрыть динамический экран
+            document.getElementById('dynamicScreen').classList.add('hidden');
+            
+            // Скрыть все старые экраны
+            hideAllOldScreens();
+            
+            // Показать главное меню
+            document.getElementById('mainMenu').classList.remove('hidden');
+        }
+        
+        // ═══════════════════════════════════════════════════════════
+        // ОСНОВНОЙ КОД (сохранён без изменений!)
+        // ═══════════════════════════════════════════════════════════
+
         let tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
