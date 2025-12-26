@@ -100,19 +100,36 @@ async function loadDoctorsForSearch() {
             return;
         }
         
+        const API_URL = window.API_URL;
+        
+        console.log('📡 Загрузка врачей для поиска...');
+        console.log('   API_URL:', API_URL);
+        console.log('   User ID:', userId);
+        
         const response = await fetch(`${API_URL}/api/doctors?user_id=${userId}`, {
             headers: {'ngrok-skip-browser-warning': 'true'}
         });
+        
+        console.log('📨 Response status:', response.status);
+        
         const data = await response.json();
+        
+        console.log('📦 Данные врачей:', data);
         
         if (data.success && data.doctors) {
             allDoctorsCache = data.doctors;
-            console.log(`✅ Загружено ${allDoctorsCache.length} врачей`);
+            console.log(`✅ Загружено ${allDoctorsCache.length} врачей для поиска:`);
+            
+            // Показать всех врачей
+            allDoctorsCache.forEach(doc => {
+                console.log(`   - ${doc.full_name} (ID: ${doc.id})`);
+            });
         } else {
             allDoctorsCache = [];
+            console.log('ℹ️ Врачей нет в базе');
         }
     } catch (error) {
-        console.error('Ошибка загрузки врачей:', error);
+        console.error('❌ Ошибка загрузки врачей:', error);
         allDoctorsCache = [];
     }
 }
@@ -215,6 +232,38 @@ function getDoctorLocationFixed() {
     
     console.log('🌍 Запрос геолокации...');
     
+    // Попытка 1: Через Telegram WebApp (если доступен)
+    if (window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp;
+        
+        console.log('📱 Попытка через Telegram WebApp...');
+        
+        // Используем showPopup для запроса разрешения
+        tg.showPopup({
+            title: 'Геолокация',
+            message: 'Разрешите доступ к вашему местоположению',
+            buttons: [
+                {id: 'ok', type: 'default', text: 'Разрешить'},
+                {id: 'cancel', type: 'cancel', text: 'Отмена'}
+            ]
+        }, function(buttonId) {
+            if (buttonId === 'ok') {
+                tryNavigatorGeolocation(btn, status);
+            } else {
+                btn.disabled = false;
+                btn.textContent = '📍 Поделиться местоположением';
+                status.textContent = 'Отменено';
+                status.style.color = '#78909c';
+            }
+        });
+    } else {
+        // Попытка 2: Напрямую через navigator
+        console.log('🌐 Попытка через navigator.geolocation...');
+        tryNavigatorGeolocation(btn, status);
+    }
+}
+
+function tryNavigatorGeolocation(btn, status) {
     if (!navigator.geolocation) {
         console.error('❌ navigator.geolocation недоступен');
         btn.disabled = false;
@@ -253,22 +302,22 @@ function getDoctorLocationFixed() {
             console.error('   Message:', error.message);
             
             btn.disabled = false;
-            btn.textContent = '📍 Поделиться местоположением';
+            btn.textContent = '📍 Попробовать ещё раз';
             btn.style.background = '';
             
             let errorMsg = 'Не удалось получить местоположение';
             
             switch(error.code) {
                 case 1: // PERMISSION_DENIED
-                    errorMsg = 'Доступ запрещён. Разрешите в настройках.';
-                    console.error('   → Пользователь запретил доступ');
+                    errorMsg = 'Доступ запрещён. Включите геолокацию в настройках телефона.';
+                    console.error('   → Пользователь запретил доступ или GPS выключен');
                     break;
                 case 2: // POSITION_UNAVAILABLE
-                    errorMsg = 'Местоположение недоступно';
+                    errorMsg = 'GPS недоступен. Выйдите на улицу или к окну.';
                     console.error('   → GPS недоступен');
                     break;
                 case 3: // TIMEOUT
-                    errorMsg = 'Время ожидания истекло';
+                    errorMsg = 'Время ожидания истекло. Попробуйте ещё раз.';
                     console.error('   → Timeout');
                     break;
                 default:
@@ -287,7 +336,7 @@ function getDoctorLocationFixed() {
         // Options
         {
             enableHighAccuracy: true,
-            timeout: 15000,
+            timeout: 20000,
             maximumAge: 0
         }
     );
