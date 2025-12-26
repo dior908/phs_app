@@ -4,39 +4,41 @@
 <p class="subtitle">Заполните данные визита</p>
 
 <form id="visitDoctorForm" onsubmit="submitVisitDoctor(event)">
-    <!-- ФИО Врача - ПОИСК -->
+    <!-- Выбор врача - КНОПКА -->
     <div class="form-group">
-        <label for="doctorSearch">ФИО Врача <span class="required">*</span></label>
-        <input type="text" 
-               id="doctorSearch" 
-               placeholder="Начните вводить ФИО врача..." 
-               autocomplete="off"
-               oninput="searchDoctorsByName()"
-               required>
-        <div class="error" id="doctorSearchError">Введите ФИО врача</div>
+        <label>Врач <span class="required">*</span></label>
         
-        <!-- Результаты поиска -->
-        <div id="doctorSearchResults" style="display:none;background:#fff;border:1px solid #ddd;border-radius:8px;margin-top:5px;max-height:200px;overflow-y:auto;"></div>
-        
-        <!-- Сообщение если врач не найден -->
-        <div id="doctorNotFound" style="display:none;background:#fff3cd;padding:10px;border-radius:8px;margin-top:10px;color:#856404;font-size:14px;">
-            ⚠️ Врач не найден. Пожалуйста, добавьте нового врача.
+        <!-- Выбранный врач -->
+        <div id="selectedDoctorDisplay" style="display:none;background:rgba(25,118,210,0.1);padding:15px;border-radius:8px;margin-bottom:10px;border-left:4px solid #1976d2;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <div style="font-weight:600;color:#1976d2;font-size:15px;" id="selectedDoctorName"></div>
+                    <div style="color:#546e7a;font-size:13px;margin-top:3px;" id="selectedDoctorInfo"></div>
+                </div>
+                <button type="button" onclick="clearSelectedDoctor()" style="background:#ef5350;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;">
+                    ✖️
+                </button>
+            </div>
         </div>
         
-        <!-- Скрытое поле с ID выбранного врача -->
+        <!-- Кнопки выбора -->
+        <div id="doctorSelectButtons" style="display:grid;gap:10px;">
+            <button type="button" class="btn" onclick="openDoctorSelector()" style="background:linear-gradient(145deg, #e3f2fd, #bbdefb);">
+                🔍 Выбрать врача из базы
+            </button>
+            <button type="button" class="btn" onclick="loadScreen('add-doctor')" style="background:linear-gradient(145deg, #e8f5e9, #c8e6c9);">
+                ➕ Добавить нового врача
+            </button>
+        </div>
+        
         <input type="hidden" id="selectedDoctorId" required>
+        <div class="error" id="doctorError">Выберите врача</div>
     </div>
-
-    <!-- Кнопка добавления нового врача -->
-    <button type="button" class="btn" onclick="loadScreen('add-doctor')" style="width:100%;margin-bottom:20px;background:linear-gradient(145deg, #e3f2fd, #bbdefb);">
-        ➕ Добавить нового врача
-    </button>
 
     <!-- Тема визита -->
     <div class="form-group">
         <label for="visitTopic">Тема визита <span class="required">*</span></label>
         <input type="text" id="visitTopic" placeholder="Консультация по препарату" required>
-        <div class="error" id="visitTopicError">Введите тему визита</div>
     </div>
 
     <!-- Выберите препарат -->
@@ -45,7 +47,6 @@
         <select id="productSelect" required>
             <option value="">Загрузка...</option>
         </select>
-        <div class="error" id="productError">Выберите препарат</div>
     </div>
 
     <!-- Результат визита -->
@@ -53,7 +54,6 @@
         <label for="visitResult">Результат визита <span class="required">*</span></label>
         <textarea id="visitResult" required minlength="20" placeholder="Опишите результат визита (минимум 20 символов)"></textarea>
         <div class="char-counter"><span id="resultCounter">0</span>/20 минимум</div>
-        <div class="error" id="visitResultError">Минимум 20 символов</div>
     </div>
 
     <!-- Кнопка геолокации -->
@@ -67,18 +67,39 @@
     <button type="button" class="btn btn-secondary" onclick="backToMainMenu()">◀️ Вернуться в главное меню</button>
 </form>
 
-<script>
-// ═══════════════════════════════════════════════════════════
-// ИНИЦИАЛИЗАЦИЯ ФОРМЫ ВИЗИТА К ВРАЧУ
-// ═══════════════════════════════════════════════════════════
+<!-- МОДАЛЬНОЕ ОКНО ВЫБОРА ВРАЧА -->
+<div id="doctorSelectorModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;padding:20px;overflow-y:auto;">
+    <div style="background:white;border-radius:12px;max-width:600px;margin:20px auto;padding:20px;">
+        <h2 style="margin:0 0 15px 0;">Выбор врача</h2>
+        
+        <!-- Поиск -->
+        <div style="position:relative;margin-bottom:15px;">
+            <input type="text" 
+                   id="doctorSearchInput" 
+                   placeholder="🔍 Поиск по ФИО..." 
+                   oninput="filterDoctorsList()"
+                   style="width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:15px;">
+        </div>
+        
+        <!-- Список врачей -->
+        <div id="doctorsListContainer" style="max-height:400px;overflow-y:auto;">
+            <p style="text-align:center;color:#78909c;">⏳ Загрузка врачей...</p>
+        </div>
+        
+        <!-- Кнопка закрытия -->
+        <button type="button" class="btn btn-secondary" onclick="closeDoctorSelector()" style="width:100%;margin-top:15px;">
+            ✖️ Закрыть
+        </button>
+    </div>
+</div>
 
+<script>
 let visitDoctorLocation = null;
 let allDoctorsCache = [];
-let searchTimeout = null;
 
 async function init_visit_doctor() {
     console.log('Инициализация формы визита к врачу...');
-    await loadDoctorsForSearch();
+    
     await loadProductsList();
     
     const resultTextarea = document.getElementById('visitResult');
@@ -91,18 +112,28 @@ async function init_visit_doctor() {
     }
 }
 
-async function loadDoctorsForSearch() {
+async function openDoctorSelector() {
+    console.log('📂 Открытие выбора врача...');
+    
+    document.getElementById('doctorSelectorModal').style.display = 'block';
+    document.getElementById('doctorSearchInput').value = '';
+    
+    await loadDoctorsList();
+}
+
+function closeDoctorSelector() {
+    document.getElementById('doctorSelectorModal').style.display = 'none';
+}
+
+async function loadDoctorsList() {
+    const container = document.getElementById('doctorsListContainer');
+    container.innerHTML = '<p style="text-align:center;color:#78909c;">⏳ Загрузка врачей...</p>';
+    
     try {
         const userId = window.USER_ID || tg.initDataUnsafe?.user?.id;
-        
-        if (!userId) {
-            console.error('User ID не найден');
-            return;
-        }
-        
         const API_URL = window.API_URL;
         
-        console.log('📡 Загрузка врачей для поиска...');
+        console.log('📡 Загрузка врачей...');
         console.log('   API_URL:', API_URL);
         console.log('   User ID:', userId);
         
@@ -116,66 +147,55 @@ async function loadDoctorsForSearch() {
         
         console.log('📦 Данные врачей:', data);
         
-        if (data.success && data.doctors) {
+        if (data.success && data.doctors && data.doctors.length > 0) {
             allDoctorsCache = data.doctors;
-            console.log(`✅ Загружено ${allDoctorsCache.length} врачей для поиска:`);
-            
-            // Показать всех врачей
+            console.log(`✅ Загружено ${allDoctorsCache.length} врачей:`);
             allDoctorsCache.forEach(doc => {
                 console.log(`   - ${doc.full_name} (ID: ${doc.id})`);
             });
+            
+            displayDoctorsList(allDoctorsCache);
         } else {
             allDoctorsCache = [];
-            console.log('ℹ️ Врачей нет в базе');
+            container.innerHTML = `
+                <div style="text-align:center;padding:40px;color:#78909c;">
+                    <div style="font-size:40px;margin-bottom:15px;">👨‍⚕️</div>
+                    <p>У вас пока нет врачей в базе</p>
+                    <button type="button" class="btn" onclick="closeDoctorSelector(); loadScreen('add-doctor');" style="margin-top:15px;">
+                        ➕ Добавить первого врача
+                    </button>
+                </div>
+            `;
         }
     } catch (error) {
         console.error('❌ Ошибка загрузки врачей:', error);
-        allDoctorsCache = [];
+        container.innerHTML = `
+            <div style="text-align:center;padding:40px;color:#c62828;">
+                <p>❌ Ошибка загрузки врачей</p>
+                <button class="btn" onclick="loadDoctorsList()" style="margin-top:10px;">🔄 Попробовать ещё раз</button>
+            </div>
+        `;
     }
 }
 
-function searchDoctorsByName() {
-    const searchInput = document.getElementById('doctorSearch');
-    const searchText = searchInput.value.trim().toLowerCase();
+function displayDoctorsList(doctors) {
+    const container = document.getElementById('doctorsListContainer');
     
-    if (searchTimeout) clearTimeout(searchTimeout);
-    
-    document.getElementById('selectedDoctorId').value = '';
-    
-    if (searchText.length === 0) {
-        document.getElementById('doctorSearchResults').style.display = 'none';
-        document.getElementById('doctorNotFound').style.display = 'none';
+    if (doctors.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:#78909c;padding:20px;">Врачи не найдены</p>';
         return;
     }
     
-    searchTimeout = setTimeout(() => performDoctorSearch(searchText), 300);
-}
-
-function performDoctorSearch(searchText) {
-    const resultsContainer = document.getElementById('doctorSearchResults');
-    const notFoundDiv = document.getElementById('doctorNotFound');
+    let html = '<div style="display:grid;gap:10px;">';
     
-    const filteredDoctors = allDoctorsCache.filter(doctor => 
-        doctor.full_name.toLowerCase().includes(searchText)
-    );
-    
-    if (filteredDoctors.length === 0) {
-        resultsContainer.style.display = 'none';
-        notFoundDiv.style.display = 'block';
-        return;
-    }
-    
-    notFoundDiv.style.display = 'none';
-    
-    let html = '';
-    filteredDoctors.forEach(doctor => {
+    doctors.forEach(doctor => {
         html += `
-            <div style="padding:12px;border-bottom:1px solid #eee;cursor:pointer;transition:background 0.2s;"
-                 onclick="selectDoctor(${doctor.id}, '${doctor.full_name.replace(/'/g, "\\'")}')"
-                 onmouseover="this.style.background='#f5f5f5'"
-                 onmouseout="this.style.background='#fff'">
+            <div onclick="selectDoctorFromList(${doctor.id}, '${doctor.full_name.replace(/'/g, "\\'")}', '${doctor.specialization}', '${doctor.workplace || ''}')"
+                 style="background:#f5f5f5;padding:15px;border-radius:8px;cursor:pointer;transition:all 0.2s;border-left:4px solid #1976d2;"
+                 onmouseover="this.style.background='#e3f2fd'"
+                 onmouseout="this.style.background='#f5f5f5'">
                 <div style="font-weight:600;color:#1976d2;font-size:15px;">${doctor.full_name}</div>
-                <div style="color:#546e7a;font-size:13px;margin-top:3px;">
+                <div style="color:#546e7a;font-size:13px;margin-top:5px;">
                     🏥 ${doctor.specialization}
                     ${doctor.workplace ? ` • ${doctor.workplace}` : ''}
                 </div>
@@ -183,20 +203,56 @@ function performDoctorSearch(searchText) {
         `;
     });
     
-    resultsContainer.innerHTML = html;
-    resultsContainer.style.display = 'block';
+    html += '</div>';
+    container.innerHTML = html;
 }
 
-function selectDoctor(doctorId, doctorName) {
-    document.getElementById('doctorSearch').value = doctorName;
-    document.getElementById('selectedDoctorId').value = doctorId;
-    document.getElementById('doctorSearchResults').style.display = 'none';
-    document.getElementById('doctorNotFound').style.display = 'none';
-    console.log(`✅ Выбран врач: ${doctorName} (ID: ${doctorId})`);
+function filterDoctorsList() {
+    const searchText = document.getElementById('doctorSearchInput').value.toLowerCase().trim();
+    
+    console.log('🔍 Поиск:', searchText);
+    
+    if (searchText === '') {
+        displayDoctorsList(allDoctorsCache);
+        return;
+    }
+    
+    const filtered = allDoctorsCache.filter(doctor => 
+        doctor.full_name.toLowerCase().includes(searchText)
+    );
+    
+    console.log(`   Найдено: ${filtered.length} врачей`);
+    
+    displayDoctorsList(filtered);
+}
+
+function selectDoctorFromList(id, fullName, specialization, workplace) {
+    console.log(`✅ Выбран врач: ${fullName} (ID: ${id})`);
+    
+    // Установить ID
+    document.getElementById('selectedDoctorId').value = id;
+    
+    // Показать выбранного врача
+    document.getElementById('selectedDoctorName').textContent = fullName;
+    document.getElementById('selectedDoctorInfo').textContent = `🏥 ${specialization}${workplace ? ' • ' + workplace : ''}`;
+    
+    document.getElementById('selectedDoctorDisplay').style.display = 'block';
+    document.getElementById('doctorSelectButtons').style.display = 'none';
+    
+    // Закрыть модальное окно
+    closeDoctorSelector();
+}
+
+function clearSelectedDoctor() {
+    document.getElementById('selectedDoctorId').value = '';
+    document.getElementById('selectedDoctorDisplay').style.display = 'none';
+    document.getElementById('doctorSelectButtons').style.display = 'grid';
 }
 
 async function loadProductsList() {
     try {
+        const API_URL = window.API_URL;
+        
         const response = await fetch(`${API_URL}/api/products?active_only=true`, {
             headers: {'ngrok-skip-browser-warning': 'true'}
         });
@@ -213,7 +269,7 @@ async function loadProductsList() {
                 select.appendChild(option);
             });
         } else {
-            select.innerHTML = '<option value="">Нет препаратов</option>';
+            select.innerHTML = '<option value="">Нет препаратов (добавьте в админ-панели)</option>';
         }
     } catch (error) {
         console.error('Ошибка загрузки препаратов:', error);
@@ -232,13 +288,11 @@ function getDoctorLocationFixed() {
     
     console.log('🌍 Запрос геолокации...');
     
-    // Попытка 1: Через Telegram WebApp (если доступен)
     if (window.Telegram && window.Telegram.WebApp) {
         const tg = window.Telegram.WebApp;
         
         console.log('📱 Попытка через Telegram WebApp...');
         
-        // Используем showPopup для запроса разрешения
         tg.showPopup({
             title: 'Геолокация',
             message: 'Разрешите доступ к вашему местоположению',
@@ -257,7 +311,6 @@ function getDoctorLocationFixed() {
             }
         });
     } else {
-        // Попытка 2: Напрямую через navigator
         console.log('🌐 Попытка через navigator.geolocation...');
         tryNavigatorGeolocation(btn, status);
     }
@@ -276,7 +329,6 @@ function tryNavigatorGeolocation(btn, status) {
     console.log('✅ navigator.geolocation доступен');
     
     navigator.geolocation.getCurrentPosition(
-        // Success
         (position) => {
             visitDoctorLocation = {
                 latitude: position.coords.latitude,
@@ -295,11 +347,9 @@ function tryNavigatorGeolocation(btn, status) {
                 window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
         },
-        // Error
         (error) => {
             console.error('❌ Ошибка геолокации:', error);
             console.error('   Code:', error.code);
-            console.error('   Message:', error.message);
             
             btn.disabled = false;
             btn.textContent = '📍 Попробовать ещё раз';
@@ -308,20 +358,15 @@ function tryNavigatorGeolocation(btn, status) {
             let errorMsg = 'Не удалось получить местоположение';
             
             switch(error.code) {
-                case 1: // PERMISSION_DENIED
+                case 1:
                     errorMsg = 'Доступ запрещён. Включите геолокацию в настройках телефона.';
-                    console.error('   → Пользователь запретил доступ или GPS выключен');
                     break;
-                case 2: // POSITION_UNAVAILABLE
+                case 2:
                     errorMsg = 'GPS недоступен. Выйдите на улицу или к окну.';
-                    console.error('   → GPS недоступен');
                     break;
-                case 3: // TIMEOUT
+                case 3:
                     errorMsg = 'Время ожидания истекло. Попробуйте ещё раз.';
-                    console.error('   → Timeout');
                     break;
-                default:
-                    console.error('   → Неизвестная ошибка');
             }
             
             status.textContent = `❌ ${errorMsg}`;
@@ -333,12 +378,7 @@ function tryNavigatorGeolocation(btn, status) {
                 window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
             }
         },
-        // Options
-        {
-            enableHighAccuracy: true,
-            timeout: 20000,
-            maximumAge: 0
-        }
+        {enableHighAccuracy: true, timeout: 20000, maximumAge: 0}
     );
 }
 
@@ -355,8 +395,7 @@ async function submitVisitDoctor(event) {
     const selectedDoctorId = document.getElementById('selectedDoctorId').value;
     
     if (!selectedDoctorId) {
-        alert('❌ Пожалуйста, выберите врача из списка или добавьте нового');
-        document.getElementById('doctorSearch').focus();
+        alert('❌ Пожалуйста, выберите врача');
         return;
     }
     
@@ -383,6 +422,8 @@ async function submitVisitDoctor(event) {
         submitBtn.disabled = true;
         submitBtn.textContent = '⏳ Сохранение...';
         
+        const API_URL = window.API_URL;
+        
         const response = await fetch(`${API_URL}/api/visits`, {
             method: 'POST',
             headers: {
@@ -398,13 +439,11 @@ async function submitVisitDoctor(event) {
             alert('✅ Визит успешно сохранён!');
             
             document.getElementById('visitDoctorForm').reset();
-            document.getElementById('selectedDoctorId').value = '';
+            clearSelectedDoctor();
             visitDoctorLocation = null;
             document.getElementById('locationStatus').textContent = '';
             document.getElementById('locationBtn').textContent = '📍 Поделиться местоположением';
             document.getElementById('locationBtn').style.background = '';
-            document.getElementById('doctorSearchResults').style.display = 'none';
-            document.getElementById('doctorNotFound').style.display = 'none';
             
             backToMainMenu();
         } else {
