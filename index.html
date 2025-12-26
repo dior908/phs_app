@@ -845,8 +845,43 @@
                     screenCache[screenName] = html;
                 }
                 
-                // Показать контент
-                document.getElementById('dynamicContent').innerHTML = screenCache[screenName];
+                // Получить контейнер
+                const container = document.getElementById('dynamicContent');
+                
+                // ВАЖНО: Очистить старый контент
+                container.innerHTML = '';
+                
+                // Создать временный div для парсинга HTML
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = screenCache[screenName];
+                
+                // Извлечь все не-script элементы
+                const nonScriptElements = Array.from(tempDiv.children).filter(el => el.tagName !== 'SCRIPT');
+                nonScriptElements.forEach(el => container.appendChild(el));
+                
+                // Извлечь и выполнить все script теги
+                const scripts = Array.from(tempDiv.querySelectorAll('script'));
+                
+                console.log(`📜 Найдено ${scripts.length} скриптов в модуле ${screenName}`);
+                
+                scripts.forEach((oldScript, index) => {
+                    const newScript = document.createElement('script');
+                    
+                    // Копировать атрибуты
+                    Array.from(oldScript.attributes).forEach(attr => {
+                        newScript.setAttribute(attr.name, attr.value);
+                    });
+                    
+                    // Копировать код
+                    newScript.textContent = oldScript.textContent;
+                    
+                    // Добавить в документ (это выполнит скрипт)
+                    container.appendChild(newScript);
+                    
+                    console.log(`  ✅ Скрипт ${index + 1} выполнен`);
+                });
+                
+                // Показать экран
                 document.getElementById('dynamicScreen').classList.remove('hidden');
                 
                 // Скрыть все старые экраны
@@ -855,13 +890,22 @@
                 hideLoading();
                 
                 // Вызвать инициализацию модуля (если есть)
-                const initFunctionName = `init_${screenName.replace(/-/g, '_')}`;
-                if (typeof window[initFunctionName] === 'function') {
-                    window[initFunctionName]();
-                }
+                // Небольшая задержка чтобы скрипты успели выполниться
+                setTimeout(() => {
+                    const initFunctionName = `init_${screenName.replace(/-/g, '_')}`;
+                    
+                    console.log(`🔍 Поиск функции: ${initFunctionName}`);
+                    
+                    if (typeof window[initFunctionName] === 'function') {
+                        console.log(`✅ Функция ${initFunctionName} найдена - вызов...`);
+                        window[initFunctionName]();
+                    } else {
+                        console.log(`ℹ️  Функция ${initFunctionName} не найдена`);
+                    }
+                }, 100);
                 
             } catch (error) {
-                console.error('Ошибка загрузки модуля:', error);
+                console.error('❌ Ошибка загрузки модуля:', error);
                 hideLoading();
                 alert('❌ Ошибка загрузки формы. Попробуйте позже.');
                 backToMainMenu();
