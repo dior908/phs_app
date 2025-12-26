@@ -213,13 +213,18 @@ function getDoctorLocationFixed() {
     status.textContent = 'Запрос геолокации...';
     status.style.color = '#546e7a';
     
+    console.log('🌍 Запрос геолокации...');
+    
     if (!navigator.geolocation) {
+        console.error('❌ navigator.geolocation недоступен');
         btn.disabled = false;
         btn.textContent = '❌ Геолокация недоступна';
         status.textContent = 'Ваш браузер не поддерживает геолокацию';
         status.style.color = '#c62828';
         return;
     }
+    
+    console.log('✅ navigator.geolocation доступен');
     
     navigator.geolocation.getCurrentPosition(
         // Success
@@ -232,10 +237,10 @@ function getDoctorLocationFixed() {
             btn.disabled = false;
             btn.textContent = '✅ Местоположение получено';
             btn.style.background = 'linear-gradient(145deg, #c8e6c9, #a5d6a7)';
-            status.textContent = '✅ Геолокация получена';
+            status.textContent = `✅ Координаты получены`;
             status.style.color = '#2e7d32';
             
-            console.log('Геолокация получена:', visitDoctorLocation);
+            console.log('✅ Геолокация получена:', visitDoctorLocation);
             
             if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
                 window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
@@ -243,12 +248,34 @@ function getDoctorLocationFixed() {
         },
         // Error
         (error) => {
-            console.error('Ошибка геолокации:', error);
+            console.error('❌ Ошибка геолокации:', error);
+            console.error('   Code:', error.code);
+            console.error('   Message:', error.message);
             
             btn.disabled = false;
             btn.textContent = '📍 Поделиться местоположением';
             btn.style.background = '';
-            status.textContent = '❌ Не удалось получить местоположение. Попробуйте ещё раз.';
+            
+            let errorMsg = 'Не удалось получить местоположение';
+            
+            switch(error.code) {
+                case 1: // PERMISSION_DENIED
+                    errorMsg = 'Доступ запрещён. Разрешите в настройках.';
+                    console.error('   → Пользователь запретил доступ');
+                    break;
+                case 2: // POSITION_UNAVAILABLE
+                    errorMsg = 'Местоположение недоступно';
+                    console.error('   → GPS недоступен');
+                    break;
+                case 3: // TIMEOUT
+                    errorMsg = 'Время ожидания истекло';
+                    console.error('   → Timeout');
+                    break;
+                default:
+                    console.error('   → Неизвестная ошибка');
+            }
+            
+            status.textContent = `❌ ${errorMsg}`;
             status.style.color = '#c62828';
             
             visitDoctorLocation = null;
@@ -259,8 +286,8 @@ function getDoctorLocationFixed() {
         },
         // Options
         {
-            enableHighAccuracy: false,
-            timeout: 5000,
+            enableHighAccuracy: true,
+            timeout: 15000,
             maximumAge: 0
         }
     );
