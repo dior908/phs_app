@@ -213,7 +213,9 @@ async function submitAddDoctor(event) {
         comments: document.getElementById('doctorComments').value.trim()
     };
     
-    console.log('Отправка данных врача:', doctorData);
+    console.log('📤 Отправка данных врача:', doctorData);
+    console.log('📡 API URL:', API_URL);
+    console.log('📡 Endpoint:', `${API_URL}/api/doctors`);
     
     try {
         // Показать загрузку
@@ -221,28 +223,40 @@ async function submitAddDoctor(event) {
         submitBtn.disabled = true;
         submitBtn.textContent = '⏳ Сохранение...';
         
+        console.log('🌐 Отправка POST запроса...');
+        
         const response = await fetch(`${API_URL}/api/doctors`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
             },
             body: JSON.stringify(doctorData)
         });
         
+        console.log('📨 Response status:', response.status);
+        console.log('📨 Response OK:', response.ok);
+        
         const result = await response.json();
         
+        console.log('📦 Response data:', result);
+        
         if (result.success) {
+            console.log('✅ Врач успешно добавлен! ID:', result.doctor_id);
             alert(`✅ Врач "${doctorData.full_name}" успешно добавлен!`);
             
             // Вернуться к форме визита и обновить список врачей
             loadScreen('visit-doctor');
             
         } else {
+            console.error('❌ Ошибка от сервера:', result.error);
             throw new Error(result.error || 'Ошибка добавления');
         }
         
     } catch (error) {
-        console.error('Ошибка добавления врача:', error);
+        console.error('❌ Ошибка добавления врача:', error);
+        console.error('   Тип ошибки:', error.name);
+        console.error('   Сообщение:', error.message);
         alert(`❌ Ошибка добавления врача: ${error.message}`);
         
         const submitBtn = event.target.querySelector('button[type="submit"]');
