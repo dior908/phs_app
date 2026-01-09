@@ -379,125 +379,111 @@
         .location-btn {
             background: linear-gradient(145deg, #42a5f5, #1e88e5);
         }
-/* ═══════════════════════════════════════════════════════════════════════════
-   ПАТЧ ДЛЯ ИСПРАВЛЕНИЯ SAFE AREA И УДАЛЕНИЯ ОСТРОВКА
-   
-   Добавьте эти стили в конец секции <style> в index.html (перед </style>)
-   ═══════════════════════════════════════════════════════════════════════════ */
 
-/* 1. УБИРАЕМ ОСТРОВОК - ФОН НА ВЕСЬ ЭКРАН */
-body {
-    background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%) !important;
-    /* Добавляем отступы для safe area */
-    padding-top: env(safe-area-inset-top) !important;
-    padding-bottom: env(safe-area-inset-bottom) !important;
-    padding-left: env(safe-area-inset-left) !important;
-    padding-right: env(safe-area-inset-right) !important;
-}
+        /* ═══════════════════════════════════════════════════════════════════════════
+           ПАТЧ ДЛЯ SAFE AREA - ИСПРАВЛЕНИЕ ОСТРОВКА И DYNAMIC ISLAND
+           ═══════════════════════════════════════════════════════════════════════════ */
 
-/* 2. КОНТЕЙНЕР БЕЗ КАРТОЧКИ */
-.container {
-    padding-top: calc(env(safe-area-inset-top) + 20px) !important;
-    padding-bottom: calc(env(safe-area-inset-bottom) + 20px) !important;
-    align-items: flex-start !important; /* Прижать к верху */
-    padding-left: 20px !important;
-    padding-right: 20px !important;
-}
+        /* 1. УБИРАЕМ ОСТРОВОК - ФОН НА ВЕСЬ ЭКРАН */
+        body {
+            background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%) !important;
+            padding-top: env(safe-area-inset-top) !important;
+            padding-bottom: env(safe-area-inset-bottom) !important;
+            padding-left: env(safe-area-inset-left) !important;
+            padding-right: env(safe-area-inset-right) !important;
+        }
 
-/* 3. КАРТОЧКА - ТЕПЕРЬ ПРОЗРАЧНАЯ НА ВЕСЬ ЭКРАН */
-.card {
-    background: rgba(230, 233, 237, 0.95) !important; /* Полупрозрачный фон */
-    max-height: none !important;
-    min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px) !important;
-    margin-top: 60px !important; /* Отступ от Dynamic Island */
-}
+        /* 2. КОНТЕЙНЕР БЕЗ ОСТРОВКА */
+        .container {
+            padding-top: calc(env(safe-area-inset-top) + 20px) !important;
+            padding-bottom: calc(env(safe-area-inset-bottom) + 20px) !important;
+            align-items: flex-start !important;
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+        }
 
-/* 4. ДЛЯ iOS С DYNAMIC ISLAND ДОПОЛНИТЕЛЬНЫЙ ОТСТУП */
-@media (min-height: 800px) {
-    .card {
-        margin-top: 80px !important; /* Больше отступ для iPhone 14 Pro+ */
-    }
-}
+        /* 3. КАРТОЧКА - ПОЛУПРОЗРАЧНАЯ С ОТСТУПОМ ОТ DYNAMIC ISLAND */
+        .card {
+            background: rgba(230, 233, 237, 0.95) !important;
+            max-height: none !important;
+            min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px) !important;
+            margin-top: 60px !important;
+        }
 
-/* 5. МОДАЛЬНЫЕ ОКНА - ОТСТУП ОТ КНОПКИ ЗАКРЫТЬ */
-.modal {
-    padding-top: calc(env(safe-area-inset-top) + 50px) !important;
-}
+        /* 4. ДЛЯ iPhone 14 Pro / 15 Pro (DYNAMIC ISLAND) */
+        @media (min-height: 800px) {
+            .card {
+                margin-top: 80px !important;
+            }
+        }
 
-.modal-content {
-    margin-top: 60px !important; /* Отступ от кнопки [×] */
-    max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 120px) !important;
-}
+        /* 5. ДЛЯ iPhone 15 Pro Max И ВЫШЕ */
+        @media screen and (min-height: 900px) {
+            .card {
+                margin-top: 100px !important;
+            }
+        }
 
-/* 6. ДЛЯ СПИСКА ВРАЧЕЙ В МОДАЛЬНОМ ОКНЕ */
-#doctorsList {
-    margin-top: 20px !important;
-}
+        /* 6. ПОДДЕРЖКА max() ДЛЯ НАДЕЖНОСТИ */
+        @supports (padding: max(0px)) {
+            body {
+                padding-top: max(env(safe-area-inset-top), 20px) !important;
+                padding-bottom: max(env(safe-area-inset-bottom), 20px) !important;
+            }
+            
+            .card {
+                margin-top: max(calc(env(safe-area-inset-top) + 60px), 80px) !important;
+            }
+        }
 
-/* 7. ЗАГОЛОВКИ В МОДАЛЬНЫХ ОКНАХ */
-.modal-content h3:first-child {
-    margin-top: 10px !important; /* Меньше прилипает к верху */
-}
+        /* 7. МОДАЛЬНЫЕ ОКНА */
+        .modal {
+            padding-top: calc(env(safe-area-inset-top) + 50px) !important;
+        }
 
-/* 8. ДИНАМИЧЕСКИЙ ЭКРАН */
-#dynamicScreen {
-    padding-top: calc(env(safe-area-inset-top) + 20px) !important;
-}
+        .modal-content {
+            margin-top: 60px !important;
+            max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 120px) !important;
+        }
 
-#dynamicScreen .card {
-    margin-top: 60px !important;
-}
+        /* 8. ЗАГОЛОВКИ В МОДАЛЬНЫХ ОКНАХ */
+        .modal-content h3:first-child {
+            margin-top: 10px !important;
+        }
 
-/* 9. ДЛЯ АЙФОНОВ С ВЫСОКИМ РАЗРЕШЕНИЕМ */
-@supports (padding: max(0px)) {
-    body {
-        padding-top: max(env(safe-area-inset-top), 20px) !important;
-        padding-bottom: max(env(safe-area-inset-bottom), 20px) !important;
-    }
-    
-    .card {
-        margin-top: max(calc(env(safe-area-inset-top) + 60px), 80px) !important;
-    }
-    
-    .modal-content {
-        margin-top: max(calc(env(safe-area-inset-top) + 50px), 70px) !important;
-    }
-}
+        /* 9. СПИСОК ВРАЧЕЙ В МОДАЛЬНОМ ОКНЕ */
+        #doctorsList {
+            margin-top: 20px !important;
+        }
 
-/* 10. ФИКС ДЛЯ IPHONE 15 PRO MAX И ВЫШЕ */
-@media screen and (min-height: 900px) {
-    .card {
-        margin-top: 100px !important;
-    }
-    
-    .modal-content {
-        margin-top: 80px !important;
-    }
-}
+        /* 10. ДИНАМИЧЕСКИЙ ЭКРАН */
+        #dynamicScreen {
+            padding-top: calc(env(safe-area-inset-top) + 20px) !important;
+        }
 
-/* 11. УБИРАЕМ ТЕНЬ У КАРТОЧКИ (ОПЦИОНАЛЬНО - ЕСЛИ ХОТИТЕ ПОЛНОСТЬЮ ПЛОСКИЙ ВИД) */
-/* Раскомментируйте если нужно:
-.card {
-    box-shadow: none !important;
-}
-*/
+        #dynamicScreen .card {
+            margin-top: 60px !important;
+        }
 
-/* 12. АЛЬТЕРНАТИВА - СДЕЛАТЬ КАРТОЧКУ ПОЛНОСТЬЮ ПРОЗРАЧНОЙ */
-/* Раскомментируйте если хотите убрать карточку совсем:
-.card {
-    background: transparent !important;
-    box-shadow: none !important;
-    padding: 20px 10px !important;
-}
+        @media (min-height: 800px) {
+            .modal-content {
+                margin-top: 70px !important;
+            }
+            
+            #dynamicScreen .card {
+                margin-top: 80px !important;
+            }
+        }
 
-.menu-button {
-    background: rgba(255, 255, 255, 0.9) !important;
-}
-
-input, select, textarea {
-    background: rgba(255, 255, 255, 0.9) !important;
-}
-*/
+        @media screen and (min-height: 900px) {
+            .modal-content {
+                margin-top: 80px !important;
+            }
+            
+            #dynamicScreen .card {
+                margin-top: 100px !important;
+            }
+        }
     </style>
 </head>
 <body>
