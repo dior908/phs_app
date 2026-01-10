@@ -380,12 +380,10 @@
             background: linear-gradient(145deg, #42a5f5, #1e88e5);
         }
     
-/* ═══════════════════════════════════════════════════════════════════════════
-   ПАТЧ: УБРАТЬ ОСТРОВОК И ДОБАВИТЬ ОТСТУПЫ
-   Добавить в конец <style> перед </style>
-   ═══════════════════════════════════════════════════════════════════════════ */
 
-/* 1. УБРАТЬ ОСТРОВОК - СДЕЛАТЬ ПРОЗРАЧНЫМ */
+/* ПАТЧ: УБРАТЬ ОСТРОВОК И ДОБАВИТЬ ОТСТУПЫ */
+
+/* 1. Убрать островок */
 .card {
     background: transparent !important;
     box-shadow: none !important;
@@ -395,25 +393,15 @@
     margin: 0 !important;
 }
 
-/* 2. КОНТЕЙНЕР - ОТСТУПЫ ОТ DYNAMIC ISLAND И КНОПОК TELEGRAM */
+/* 2. Отступы от Dynamic Island и кнопок Telegram */
 .container {
-    padding-top: calc(env(safe-area-inset-top) + 60px) !important; /* Отступ от Dynamic Island */
+    padding-top: calc(env(safe-area-inset-top) + 60px) !important;
     padding-bottom: calc(env(safe-area-inset-bottom) + 20px) !important;
     padding-left: 20px !important;
     padding-right: 20px !important;
 }
 
-/* 3. ЛОГОТИП - ОТСТУП ОТ ВЕРХА */
-#mainMenu .logo {
-    margin-top: 10px !important;
-}
-
-/* 4. ЗАГОЛОВОК */
-#mainMenu h1 {
-    margin-top: 15px !important;
-}
-
-/* 5. КНОПКИ МЕНЮ - НА ВСЮ ШИРИНУ */
+/* 3. Кнопки на всю ширину */
 .menu-grid {
     width: 100% !important;
     padding: 0 !important;
@@ -424,31 +412,25 @@
     width: 100% !important;
 }
 
-/* 6. ДЛЯ ВЫСОКИХ iPhone (Dynamic Island) */
+/* 4. Для высоких iPhone */
 @media (min-height: 844px) {
     .container {
         padding-top: calc(env(safe-area-inset-top) + 70px) !important;
     }
 }
 
-/* 7. ГЛАВНЫЙ ЭКРАН БЕЗ СКРОЛЛА */
+/* 5. Убрать скролл */
 body {
     overflow: hidden !important;
 }
 
 #mainMenu {
     overflow-y: auto !important;
-    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    -webkit-overflow-scrolling: touch !important;
 }
 
-/* 8. УБРАТЬ СКРОЛЛ ДЛЯ ГЛАВНОГО МЕНЮ */
 #mainMenu::-webkit-scrollbar {
     display: none !important;
-}
-
-#mainMenu {
-    -ms-overflow-style: none !important;
-    scrollbar-width: none !important;
 }
 
     </style>
