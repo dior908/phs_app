@@ -433,6 +433,147 @@ body {
     display: none !important;
 }
 
+    
+/* ═══════════════════════════════════════════════════════════════════════════
+   ПАТЧ: ИСПРАВИТЬ МОДАЛЬНЫЕ ОКНА И ФОРМЫ
+   Добавить в конец существующего патча
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 1. МОДАЛЬНЫЕ ОКНА - ОТСТУП ОТ DYNAMIC ISLAND */
+/* Все модальные окна, диалоги, попапы */
+[id*="Modal"],
+[id*="modal"],
+[class*="modal"],
+[class*="popup"],
+[class*="dialog"] {
+    padding-top: calc(env(safe-area-inset-top) + 80px) !important;
+}
+
+/* 2. ФОРМЫ ВНУТРИ КАРТОЧКИ - ОТСТУП СНИЗУ ДЛЯ КНОПОК */
+.card form {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 80px) !important;
+}
+
+/* 3. КНОПКИ ВНИЗУ ФОРМ - ПОДНЯТЬ ВЫШЕ */
+.card form .btn,
+.card form button[type="submit"],
+.card form button[type="button"] {
+    margin-bottom: 15px !important;
+}
+
+/* Последняя кнопка - больший отступ */
+.card form .btn:last-of-type,
+.card form button:last-of-type {
+    margin-bottom: calc(env(safe-area-inset-bottom) + 20px) !important;
+}
+
+/* 4. СПЕЦИФИЧНО ДЛЯ ОКНА ВЫБОРА ВРАЧА */
+#doctorsList,
+[id*="doctor"][id*="list"],
+[class*="doctor"][class*="list"] {
+    margin-top: calc(env(safe-area-inset-top) + 20px) !important;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 20px) !important;
+}
+
+/* 5. ОКНА С ПРОКРУТКОЙ - ОТСТУПЫ */
+.card {
+    padding-top: 20px !important;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 80px) !important;
+}
+
+/* 6. ДИНАМИЧЕСКИЕ ЭКРАНЫ */
+#dynamicScreen {
+    padding-top: calc(env(safe-area-inset-top) + 20px) !important;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 80px) !important;
+}
+
+/* 7. КНОПКА ОТМЕНЫ ВНИЗУ - ФИКСИРОВАННАЯ */
+.btn-secondary:last-child,
+button[onclick*="back"]:last-of-type {
+    position: sticky !important;
+    bottom: calc(env(safe-area-inset-bottom) + 20px) !important;
+    margin-top: 20px !important;
+    z-index: 10 !important;
+}
+
+/* 8. ДЛЯ ВЫСОКИХ iPhone - БОЛЬШЕ ОТСТУПОВ */
+@media (min-height: 844px) {
+    [id*="Modal"],
+    [id*="modal"],
+    [class*="modal"] {
+        padding-top: calc(env(safe-area-inset-top) + 100px) !important;
+    }
+}
+
+/* 9. ЗАГОЛОВКИ МОДАЛЬНЫХ ОКОН - НЕ ПОД DYNAMIC ISLAND */
+.card h1,
+.card h2,
+.card h3 {
+    margin-top: 15px !important;
+    padding-top: 0 !important;
+}
+
+/* Первый заголовок */
+.card > h1:first-child,
+.card > h2:first-child,
+.card > h3:first-child {
+    margin-top: calc(env(safe-area-inset-top) + 10px) !important;
+}
+
+/* 10. СПИСОК ВРАЧЕЙ - СКРОЛЛ С ОТСТУПАМИ */
+div[id*="List"],
+div[class*="list"] {
+    max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 250px) !important;
+    overflow-y: auto !important;
+    padding-bottom: 20px !important;
+}
+
+    
+/* ═══════════════════════════════════════════════════════════════════════════
+   ПАТЧ: УБРАТЬ ВСЕ SCROLLBAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 1. УБРАТЬ SCROLLBAR ВЕЗДЕ - WEBKIT (Safari, Chrome) */
+*::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* 2. УБРАТЬ SCROLLBAR - FIREFOX */
+* {
+    scrollbar-width: none !important;
+}
+
+/* 3. УБРАТЬ SCROLLBAR - IE/EDGE */
+* {
+    -ms-overflow-style: none !important;
+}
+
+/* 4. КОНКРЕТНЫЕ ЭЛЕМЕНТЫ */
+body::-webkit-scrollbar,
+.container::-webkit-scrollbar,
+.card::-webkit-scrollbar,
+#mainMenu::-webkit-scrollbar,
+#dynamicScreen::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 5. СПИСКИ И МОДАЛЬНЫЕ ОКНА */
+div[id*="List"]::-webkit-scrollbar,
+div[class*="list"]::-webkit-scrollbar,
+div[class*="modal"]::-webkit-scrollbar,
+div[id*="Modal"]::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 6. ФОРМЫ */
+form::-webkit-scrollbar,
+textarea::-webkit-scrollbar,
+select::-webkit-scrollbar {
+    display: none !important;
+}
+
     </style>
 </head>
 <body>
