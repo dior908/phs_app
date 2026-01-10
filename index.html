@@ -9,353 +9,376 @@
         console.log('🔧 Telegram WebApp API загружен');
     </script>
     <style>
-/* ═══════════════════════════════════════════════════════════════════════════
-   PHARMASYNTEZAPP - ИСПРАВЛЕННАЯ ВЕРСИЯ
-   ═══════════════════════════════════════════════════════════════════════════ */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* 1. СВЕТЛЫЙ ФОН */
-body {
-    background: linear-gradient(135deg, #e0e5ec 0%, #c5ccd3 100%) !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-    height: 100vh !important;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-/* 2. КОНТЕЙНЕР */
-.container {
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100vh !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-}
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            position: fixed;
+            touch-action: pan-y;
+            -webkit-user-select: none;
+            user-select: none;
+        }
 
-/* 3. УБРАТЬ СТАРЫЕ ЭЛЕМЕНТЫ */
-.card {
-    background: transparent !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-    overflow: visible !important;
-}
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%);
+            height: 100vh;
+            height: -webkit-fill-available;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
 
-#mainMenu .logo {
-    display: none !important;
-}
+        .container {
+            width: 100%;
+            max-width: 400px;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-#mainMenu > h1,
-#mainMenu > .subtitle,
-#mainMenu > .app-header {
-    display: none !important;
-}
+        .card {
+            position: relative;  /* Для позиционирования кнопок */
+            background: linear-gradient(145deg, #e6e9ed 0%, #c5ccd4 100%);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.2), -8px -8px 16px rgba(255, 255, 255, 0.5);
+            animation: slideUp 0.5s ease;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
 
-/* 4. ВЕРХНЯЯ ШАПКА */
-.header-top {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    padding-top: calc(env(safe-area-inset-top) + 15px) !important;
-    padding-left: 20px !important;
-    padding-right: 20px !important;
-    padding-bottom: 15px !important;
-    background: rgba(224, 229, 236, 0.95) !important;
-    backdrop-filter: blur(20px) !important;
-    z-index: 1000 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 15px !important;
-}
+        .card::-webkit-scrollbar {
+            width: 6px;
+        }
 
-/* Верхний ряд - кнопки закрыть и меню */
-.header-row-1 {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-}
+        .card::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
 
-.btn-close-app {
-    background: linear-gradient(145deg, rgba(180, 195, 210, 0.8), rgba(160, 175, 190, 0.8)) !important;
-    backdrop-filter: blur(10px) !important;
-    border: none !important;
-    border-radius: 50px !important;
-    padding: 12px 20px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    font-size: 15px !important;
-    color: #2c3e50 !important;
-    font-weight: 600 !important;
-    box-shadow: 
-        4px 4px 8px rgba(150, 165, 180, 0.4),
-        -2px -2px 6px rgba(255, 255, 255, 0.6) !important;
-}
+        .card::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
 
-.btn-menu-top {
-    background: linear-gradient(145deg, rgba(180, 195, 210, 0.8), rgba(160, 175, 190, 0.8)) !important;
-    backdrop-filter: blur(10px) !important;
-    border: none !important;
-    border-radius: 50% !important;
-    width: 50px !important;
-    height: 50px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 20px !important;
-    color: #2c3e50 !important;
-    box-shadow: 
-        4px 4px 8px rgba(150, 165, 180, 0.4),
-        -2px -2px 6px rgba(255, 255, 255, 0.6) !important;
-}
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-/* Название приложения */
-.header-title {
-    text-align: center !important;
-    font-size: 24px !important;
-    font-weight: 700 !important;
-    color: #2c3e50 !important;
-    margin: 0 !important;
-    text-shadow: 
-        1px 1px 2px rgba(255, 255, 255, 0.8),
-        -1px -1px 2px rgba(150, 165, 180, 0.3) !important;
-}
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-/* Нижний ряд - языки и админ */
-.header-row-3 {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-}
+        .logo-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(145deg, #95a5a6, #7f8c8d);
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            margin-bottom: 10px;
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.5);
+        }
 
-.lang-buttons {
-    display: flex !important;
-    gap: 10px !important;
-}
+        h1 {
+            color: #2c3748;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 8px;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+        }
 
-.lang-flag {
-    width: 44px !important;
-    height: 44px !important;
-    background: linear-gradient(145deg, #ffffff, #e8ecf1) !important;
-    border: none !important;
-    border-radius: 50% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 24px !important;
-    box-shadow: 
-        3px 3px 6px rgba(150, 165, 180, 0.4),
-        -2px -2px 4px rgba(255, 255, 255, 0.8) !important;
-    transition: all 0.3s ease !important;
-}
+        .subtitle {
+            text-align: center;
+            color: #546e7a;
+            font-size: 13px;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
 
-.lang-flag.active {
-    box-shadow: 
-        inset 2px 2px 4px rgba(150, 165, 180, 0.5),
-        inset -1px -1px 2px rgba(255, 255, 255, 0.5) !important;
-}
+        .form-group {
+            margin-bottom: 18px;
+        }
 
-.btn-admin {
-    width: 44px !important;
-    height: 44px !important;
-    background: linear-gradient(145deg, #ffffff, #e8ecf1) !important;
-    border: none !important;
-    border-radius: 50% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 20px !important;
-    box-shadow: 
-        3px 3px 6px rgba(150, 165, 180, 0.4),
-        -2px -2px 4px rgba(255, 255, 255, 0.8) !important;
-}
+        label {
+            display: block;
+            color: #37474f;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
 
-/* 5. ОСНОВНОЙ КОНТЕНТ */
-.main-content {
-    flex: 1 !important;
-    overflow-y: auto !important;
-    padding: 20px !important;
-    padding-top: calc(env(safe-area-inset-top) + 180px) !important;
-    padding-bottom: calc(env(safe-area-inset-bottom) + 100px) !important;
-}
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+            background: #d1d9e0;
+            box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.1), inset -3px -3px 6px rgba(255, 255, 255, 0.5);
+            color: #2c3e50;
+        }
 
-/* 6. СЕТКА КНОПОК */
-.menu-grid {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 15px !important;
-    margin-bottom: 20px !important;
-}
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            background: #dfe6ed;
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.15), inset -2px -2px 5px rgba(255, 255, 255, 0.7);
+        }
 
-.menu-button {
-    background: linear-gradient(145deg, rgba(200, 210, 220, 0.6), rgba(180, 190, 200, 0.6)) !important;
-    backdrop-filter: blur(10px) !important;
-    border: 2px solid rgba(180, 195, 210, 0.4) !important;
-    border-radius: 25px !important;
-    padding: 25px 20px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 12px !important;
-    min-height: 130px !important;
-    box-shadow: 
-        6px 6px 12px rgba(150, 165, 180, 0.3),
-        -4px -4px 10px rgba(255, 255, 255, 0.5),
-        inset 0 0 0 rgba(255, 255, 255, 0) !important;
-    transition: all 0.3s ease !important;
-}
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
 
-.menu-button:active {
-    box-shadow: 
-        inset 3px 3px 6px rgba(150, 165, 180, 0.4),
-        inset -2px -2px 4px rgba(255, 255, 255, 0.3) !important;
-}
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(145deg, #95a5a6, #7f8c8d);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.3);
+            font-family: 'Inter', sans-serif;
+        }
 
-.menu-icon {
-    font-size: 48px !important;
-    filter: drop-shadow(2px 2px 4px rgba(150, 165, 180, 0.3)) !important;
-}
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.2), inset -3px -3px 6px rgba(255, 255, 255, 0.3);
+        }
 
-.menu-text {
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    color: #2c3e50 !important;
-    text-align: center !important;
-    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.6) !important;
-}
+        .btn-secondary {
+            background: linear-gradient(145deg, #b0bec5, #90a4ae);
+        }
 
-/* 7. ПРОГРЕСС-БАРЫ */
-.progress-section {
-    background: linear-gradient(145deg, rgba(200, 210, 220, 0.6), rgba(180, 190, 200, 0.6)) !important;
-    backdrop-filter: blur(10px) !important;
-    border: 2px solid rgba(180, 195, 210, 0.4) !important;
-    border-radius: 20px !important;
-    padding: 20px !important;
-    margin-bottom: 20px !important;
-    box-shadow: 
-        6px 6px 12px rgba(150, 165, 180, 0.3),
-        -4px -4px 10px rgba(255, 255, 255, 0.5) !important;
-}
+        .btn-success {
+            background: linear-gradient(145deg, #66bb6a, #4caf50);
+        }
 
-.progress-item {
-    margin-bottom: 15px !important;
-}
+        .error {
+            color: #d32f2f;
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+            background: rgba(244, 67, 54, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 3px solid #d32f2f;
+        }
 
-.progress-item:last-child {
-    margin-bottom: 0 !important;
-}
+        .error.show {
+            display: block;
+        }
 
-.progress-label {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    margin-bottom: 8px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    color: #2c3e50 !important;
-}
+        /* Красные поля когда нет Telegram ID */
+        .no-telegram-id input,
+        .no-telegram-id select,
+        .no-telegram-id textarea {
+            background: #ffebee !important;
+            box-shadow: inset 3px 3px 6px rgba(211, 47, 47, 0.2), inset -3px -3px 6px rgba(255, 255, 255, 0.5) !important;
+            border: 2px solid #ef5350 !important;
+        }
 
-.progress-details {
-    font-size: 13px !important;
-    color: #546e7a !important;
-}
+        .no-telegram-id input:focus,
+        .no-telegram-id select:focus,
+        .no-telegram-id textarea:focus {
+            background: #ffcdd2 !important;
+            box-shadow: inset 2px 2px 5px rgba(211, 47, 47, 0.25), inset -2px -2px 5px rgba(255, 255, 255, 0.7) !important;
+        }
 
-.progress-bar-container {
-    width: 100% !important;
-    height: 8px !important;
-    background: rgba(150, 165, 180, 0.3) !important;
-    border-radius: 10px !important;
-    overflow: hidden !important;
-    box-shadow: inset 2px 2px 4px rgba(150, 165, 180, 0.4) !important;
-}
+        /* Стили для индикатора ID */
+        #telegramIdIndicator {
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.03);
+            transition: all 0.3s;
+        }
 
-.progress-bar {
-    height: 100% !important;
-    background: linear-gradient(90deg, #90b4ce, #7a9bb5) !important;
-    border-radius: 10px !important;
-    box-shadow: 0 0 8px rgba(122, 155, 181, 0.5) !important;
-}
+        #telegramIdIndicator.id-found {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
 
-/* 8. НИЖНЯЯ НАВИГАЦИЯ */
-.bottom-nav {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    background: linear-gradient(145deg, rgba(200, 210, 220, 0.9), rgba(180, 190, 200, 0.9)) !important;
-    backdrop-filter: blur(20px) !important;
-    border-top: 2px solid rgba(180, 195, 210, 0.4) !important;
-    padding: 15px 0 !important;
-    padding-bottom: calc(env(safe-area-inset-bottom) + 15px) !important;
-    display: flex !important;
-    justify-content: space-around !important;
-    box-shadow: 
-        0 -6px 20px rgba(150, 165, 180, 0.2),
-        inset 0 2px 4px rgba(255, 255, 255, 0.3) !important;
-    z-index: 999 !important;
-}
+        #telegramIdIndicator.id-not-found {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
 
-.nav-item {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 5px !important;
-    position: relative !important;
-    padding: 8px 15px !important;
-    border-radius: 15px !important;
-    transition: all 0.3s ease !important;
-}
+        #telegramIdValue {
+            font-family: 'Courier New', monospace;
+        }
 
-.nav-item:active {
-    background: rgba(150, 165, 180, 0.2) !important;
-}
+        #telegramIdValue.found {
+            color: #2e7d32;
+        }
 
-.nav-icon {
-    font-size: 24px !important;
-    filter: drop-shadow(1px 1px 2px rgba(150, 165, 180, 0.3)) !important;
-}
+        #telegramIdValue.not-found {
+            color: #c62828;
+        }
 
-.nav-text {
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    color: #2c3e50 !important;
-    text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.6) !important;
-}
+        .hidden {
+            display: none;
+        }
 
-.nav-badge {
-    position: absolute !important;
-    top: 4px !important;
-    right: 8px !important;
-    background: linear-gradient(145deg, #e74c3c, #c0392b) !important;
-    color: white !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 2px 6px !important;
-    border-radius: 10px !important;
-    box-shadow: 
-        2px 2px 4px rgba(231, 76, 60, 0.4),
-        0 0 8px rgba(231, 76, 60, 0.3) !important;
-    min-width: 18px !important;
-    text-align: center !important;
-}
+        .pin-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+        }
 
-/* 9. СКРЫТЬ ЭЛЕМЕНТЫ */
-.robot-container,
-.app-header-controls,
-.app-header-top,
-.header-controls {
-    display: none !important;
-}
+        .pin-digit {
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+        }
 
-/* 10. АДАПТАЦИЯ ПОД iOS */
-@supports (padding: max(0px)) {
-    body {
-        padding-top: max(env(safe-area-inset-top), 0px) !important;
-    }
-}
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
 
+        .menu-button {
+            padding: 20px;
+            background: linear-gradient(145deg, #e6e9ed, #cfd8dc);
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.15), -4px -4px 8px rgba(255, 255, 255, 0.5);
+        }
+
+        .menu-button:active {
+            transform: translateY(0);
+            box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.1), inset -3px -3px 6px rgba(255, 255, 255, 0.5);
+        }
+
+        .menu-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .menu-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: #37474f;
+        }
+
+        .lang-flags {
+            position: absolute;
+            top: 10px;  /* Внутри карточки сверху */
+            left: 10px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .flag-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2), -3px -3px 6px rgba(255, 255, 255, 0.3);
+            background: linear-gradient(145deg, #e6e9ed, #cfd8dc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flag-btn.active {
+            box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.2), inset -3px -3px 6px rgba(255, 255, 255, 0.3);
+            transform: scale(0.95);
+        }
+
+        .admin-icon {
+            position: absolute;
+            top: 10px;  /* Внутри карточки сверху */
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(145deg, #ffa726, #ff9800);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2), -3px -3px 6px rgba(255, 255, 255, 0.3);
+            z-index: 1000;
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 12px;
+            color: #78909c;
+            margin-top: 4px;
+        }
+
+        .required {
+            color: #d32f2f;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid rgba(0,0,0,0.1);
+            border-top: 3px solid #7f8c8d;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .location-btn {
+            background: linear-gradient(145deg, #42a5f5, #1e88e5);
+        }
     </style>
 </head>
 <body>
@@ -490,88 +513,41 @@ body {
 
             <!-- Главное меню -->
             <div id="mainMenu" class="hidden">
-                <!-- Верхняя шапка -->
-                <div class="header-top">
-                    <!-- Кнопки закрыть и меню -->
-                    <div class="header-row-1">
-                        <button class="btn-close-app" onclick="if(window.Telegram && window.Telegram.WebApp) window.Telegram.WebApp.close()">
-                            ✕ <span>Закрыть</span>
-                        </button>
-                        <button class="btn-menu-top" onclick="alert('Меню')">⋮</button>
+                <div class="logo"><div class="logo-icon">🏠</div></div>
+                <h1 id="menuTitle">Главное меню</h1>
+                <p class="subtitle" id="menuSubtitle">Выберите действие</p>
+                <div class="menu-grid">
+                    <div class="menu-button" onclick="openVisitMenu()">
+                        <div class="menu-icon">📝</div>
+                        <div class="menu-text" id="menuVisit">Регистрация визита</div>
                     </div>
-                    
-                    <!-- Название -->
-                    <h1 class="header-title">PharmaSyntezApp</h1>
-                    
-                    <!-- Языки и админ -->
-                    <div class="header-row-3">
-                        <div class="lang-buttons">
-                            <button class="lang-flag active" onclick="setLanguage('ru')">🇷🇺</button>
-                            <button class="lang-flag" onclick="setLanguage('uz')">🇺🇿</button>
-                        </div>
-                        <button class="btn-admin" onclick="alert('Админ панель')">⚙️</button>
+                    <div class="menu-button" onclick="loadScreen('database-main')">
+                        <div class="menu-icon">📚</div>
+                        <div class="menu-text" id="menuDatabase">База</div>
                     </div>
-                </div>
-                
-                <!-- Основной контент -->
-                <div class="main-content">
-                    <!-- Кнопки меню -->
-                    <div class="menu-grid">
-                        <div class="menu-button" onclick="openVisitMenu()">
-                            <div class="menu-icon">📝</div>
-                            <div class="menu-text" id="menuVisit">Регистрация визита</div>
-                        </div>
-                        <div class="menu-button" onclick="alert('В разработке')">
-                            <div class="menu-icon">📊</div>
-                            <div class="menu-text" id="menuReports">Отчёты</div>
-                        </div>
-                        <div class="menu-button" onclick="loadScreen('projects-main')">
-                            <div class="menu-icon">📁</div>
-                            <div class="menu-text" id="menuProjects">Проекты</div>
-                        </div>
-                        <div class="menu-button" onclick="loadScreen('database-main')">
-                            <div class="menu-icon">📄</div>
-                            <div class="menu-text" id="menuDatabase">База</div>
-                        </div>
-                        <div class="menu-button" onclick="alert('В разработке')">
-                            <div class="menu-icon">🗺️</div>
-                            <div class="menu-text" id="menuMap">Карта визитов</div>
-                        </div>
-                        <div class="menu-button" onclick="alert('В разработке')">
-                            <div class="menu-icon">🗓️</div>
-                            <div class="menu-text" id="menuTour">Тур план</div>
-                        </div>
+                    <div class="menu-button" onclick="loadScreen('projects-main')">
+                        <div class="menu-icon">📁</div>
+                        <div class="menu-text" id="menuProjects">Проекты</div>
                     </div>
-                    
-                    <!-- Прогресс-бары -->
-                    <div class="progress-section">
-                        <div class="progress-item">
-                            <div class="progress-label">
-                                <span>За день:</span>
-                                <span class="progress-details">100% <span style="opacity: 0.7;">(8 врачей, 6 аптек)</span></span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 100%;"></div>
-                            </div>
-                        </div>
-                        <div class="progress-item">
-                            <div class="progress-label">
-                                <span>За неделю:</span>
-                                <span class="progress-details">100% <span style="opacity: 0.7;">(40 врачей, 30 аптек)</span></span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 100%;"></div>
-                            </div>
-                        </div>
-                        <div class="progress-item">
-                            <div class="progress-label">
-                                <span>За месяц:</span>
-                                <span class="progress-details">100% <span style="opacity: 0.7;">(176 врачей, 132 аптеки)</span></span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 100%;"></div>
-                            </div>
-                        </div>
+                    <div class="menu-button" onclick="alert('В разработке')">
+                        <div class="menu-icon">🗺️</div>
+                        <div class="menu-text" id="menuMap">Карта визитов</div>
+                    </div>
+                    <div class="menu-button" onclick="alert('В разработке')">
+                        <div class="menu-icon">📊</div>
+                        <div class="menu-text" id="menuReports">Отчеты</div>
+                    </div>
+                    <div class="menu-button" onclick="alert('В разработке')">
+                        <div class="menu-icon">🗓️</div>
+                        <div class="menu-text" id="menuTour">Тур план</div>
+                    </div>
+                    <div class="menu-button" onclick="alert('В разработке')">
+                        <div class="menu-icon">📚</div>
+                        <div class="menu-text" id="menuMaterials">Материалы</div>
+                    </div>
+                    <div class="menu-button" onclick="openSection('help')">
+                        <div class="menu-icon">❓</div>
+                        <div class="menu-text" id="menuHelp">Помощь</div>
                     </div>
                 </div>
             </div>
@@ -2311,23 +2287,5 @@ body {
             setTimeout(checkRegistration, 500);
         });
     </script>
-
-    <!-- Нижняя навигация -->
-    <div class="bottom-nav">
-        <div class="nav-item" onclick="backToMainMenu()">
-            <div class="nav-icon">🏠</div>
-            <div class="nav-text">Главная</div>
-        </div>
-        <div class="nav-item" onclick="alert('Уведомления')">
-            <div class="nav-icon">🔔</div>
-            <div class="nav-text">Уведомления</div>
-            <div class="nav-badge">3</div>
-        </div>
-        <div class="nav-item" onclick="openEditProfile()">
-            <div class="nav-icon">👤</div>
-            <div class="nav-text">Профиль</div>
-        </div>
-    </div>
-
 </body>
 </html>
