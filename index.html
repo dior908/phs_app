@@ -222,23 +222,7 @@
             font-weight: bold;
         }
 
-        .menu-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
 
-        .menu-button {
-            padding: 20px;
-            background: linear-gradient(145deg, #e6e9ed, #cfd8dc);
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.15), -4px -4px 8px rgba(255, 255, 255, 0.5);
-        }
 
         .menu-button:active {
             transform: translateY(0);
@@ -335,6 +319,8 @@
         .location-btn {
             background: linear-gradient(145deg, #42a5f5, #1e88e5);
         }
+    
+
         /* ═══════════════════════════════════════════════════════════════════════════
            КОСМИЧЕСКИЙ/ФУТУРИСТИЧЕСКИЙ СТИЛЬ - PHARMASYNTEZAPP
            ═══════════════════════════════════════════════════════════════════════════ */
@@ -748,221 +734,368 @@
             }
         }
 
-    
-    
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   ДОПОЛНЕНИЯ ДЛЯ PHARMASYNTEZAPP - РОБОТ И МАКЕТ 1 В 1
+   PHARMASYNTEZAPP - ПРАВИЛЬНЫЙ МАКЕТ БЕЗ СКРОЛЛА
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ДОБАВИТЬ К КОСМИЧЕСКОМУ ПАТЧУ */
-
-/* 1. РОБОТ СПРАВА */
-.robot-container {
-    position: fixed !important;
-    right: 20px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    z-index: 100 !important;
-    pointer-events: none !important;
+/* 1. КОСМИЧЕСКИЙ ФОН */
+body {
+    background: linear-gradient(135deg, #e0e5ec 0%, #c5ccd3 100%) !important;
+    padding-top: env(safe-area-inset-top) !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+    padding-left: env(safe-area-inset-left) !important;
+    padding-right: env(safe-area-inset-right) !important;
+    position: relative !important;
+    overflow: hidden !important;
 }
 
-.robot-image {
-    width: 200px !important;
-    height: auto !important;
-    filter: drop-shadow(0 0 30px rgba(52, 152, 219, 0.8)) drop-shadow(0 0 50px rgba(41, 128, 185, 0.6)) !important;
-    animation: float 3s ease-in-out infinite !important;
-    object-fit: contain !important;
+/* 2. КОНТЕЙНЕР - СТАТИЧНЫЙ БЕЗ СКРОЛЛА */
+.container {
+    padding-top: calc(env(safe-area-inset-top) + 20px) !important;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 80px) !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    position: relative !important;
+    z-index: 1 !important;
+    overflow: hidden !important; /* Без скролла */
+    height: 100vh !important;
 }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+/* 3. КАРТОЧКА - БЕЗ СКРОЛЛА */
+.card {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    max-height: none !important;
+    margin-top: 0 !important;
+    overflow-y: visible !important;
 }
 
-/* 2. СЕТКА КНОПОК 3x2 (3 РЯДА ПО 2 КНОПКИ) */
-.menu-grid {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    grid-template-rows: repeat(3, 1fr) !important;
-    gap: 15px !important;
-    margin-top: 30px !important;
-    margin-bottom: 20px !important;
-}
-
-/* Скрыть лишние кнопки (оставить только 6) */
-.menu-grid .menu-button:nth-child(n+7) {
-    display: none !important;
-}
-
-/* 3. ПРОГРЕСС-БАРЫ ВНИЗУ */
-.progress-section {
-    background: linear-gradient(135deg, rgba(41, 128, 185, 0.2), rgba(26, 35, 50, 0.4)) !important;
-    backdrop-filter: blur(10px) !important;
-    border: 2px solid rgba(52, 152, 219, 0.4) !important;
-    border-radius: 20px !important;
-    padding: 20px !important;
-    margin-top: 20px !important;
-    box-shadow: 
-        0 8px 32px 0 rgba(31, 38, 135, 0.37),
-        inset 0 0 20px rgba(255, 255, 255, 0.05) !important;
-}
-
-.progress-item {
-    margin-bottom: 15px !important;
-}
-
-.progress-item:last-child {
-    margin-bottom: 0 !important;
-}
-
-.progress-label {
+/* 4. ВЕРХНЯЯ ПАНЕЛЬ */
+.top-bar {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    margin-bottom: 8px !important;
-    color: #ffffff !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
+    padding: 15px 20px !important;
+    margin-top: calc(env(safe-area-inset-top) + 10px) !important;
 }
 
-.progress-bar-container {
-    width: 100% !important;
-    height: 8px !important;
-    background: rgba(0, 0, 0, 0.3) !important;
-    border-radius: 10px !important;
-    overflow: hidden !important;
-    position: relative !important;
-}
-
-.progress-bar {
-    height: 100% !important;
-    background: linear-gradient(90deg, #3498db, #2ecc71) !important;
-    border-radius: 10px !important;
-    transition: width 0.3s ease !important;
-    box-shadow: 0 0 10px rgba(52, 152, 219, 0.8) !important;
-}
-
-.progress-details {
-    color: #b8d4e8 !important;
-    font-size: 12px !important;
-}
-
-/* 4. НИЖНЯЯ НАВИГАЦИЯ */
-.bottom-nav {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    background: linear-gradient(135deg, rgba(26, 35, 50, 0.95), rgba(10, 25, 41, 0.95)) !important;
-    backdrop-filter: blur(20px) !important;
-    border-top: 2px solid rgba(52, 152, 219, 0.4) !important;
-    padding: 15px 0 calc(env(safe-area-inset-bottom) + 10px) 0 !important;
+.close-btn-top {
+    background: linear-gradient(135deg, rgba(220, 224, 232, 0.95), rgba(200, 206, 214, 0.95)) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 2px solid rgba(200, 210, 220, 0.5) !important;
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+    border-radius: 20px !important;
+    width: 50px !important;
+    height: 50px !important;
     display: flex !important;
-    justify-content: space-around !important;
     align-items: center !important;
-    z-index: 1000 !important;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5) !important;
-}
-
-.nav-item {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 5px !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    padding: 10px 20px !important;
-    border-radius: 15px !important;
-    position: relative !important;
-}
-
-.nav-item:active {
-    background: rgba(52, 152, 219, 0.2) !important;
-    transform: scale(0.95) !important;
-}
-
-.nav-icon {
+    justify-content: center !important;
     font-size: 24px !important;
-    filter: drop-shadow(0 0 5px rgba(52, 152, 219, 0.5)) !important;
+    color: #546e7a !important;
+    position: fixed !important;
+    top: calc(env(safe-area-inset-top) + 15px) !important;
+    left: 15px !important;
+    z-index: 1000 !important;
+    border: none !important;
+    cursor: pointer !important;
 }
 
-.nav-text {
-    color: #ffffff !important;
-    font-size: 12px !important;
-    font-weight: 600 !important;
-    text-shadow: 0 0 5px rgba(52, 152, 219, 0.5) !important;
-}
-
-.nav-badge {
-    position: absolute !important;
-    top: 5px !important;
-    right: 15px !important;
-    background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
-    color: white !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 3px 7px !important;
+.admin-btn {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 50px !important;
+    height: 50px !important;
+    background: linear-gradient(145deg, #e8ecf1, #d5dce5) !important;
+    box-shadow: 
+        6px 6px 12px rgba(163, 177, 198, 0.6),
+        -6px -6px 12px rgba(255, 255, 255, 0.9) !important;
     border-radius: 50% !important;
-    box-shadow: 0 0 10px rgba(231, 76, 60, 0.8) !important;
-    min-width: 20px !important;
-    text-align: center !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 24px !important;
+    cursor: pointer !important;
+    z-index: 1000 !important;
 }
 
-/* 5. ОТСТУП ОТ НИЖНЕЙ НАВИГАЦИИ */
-.container {
-    padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+.admin-icon:active {
+    box-shadow: inset 3px 3px 6px rgba(163, 177, 198, 0.6), 
+               inset -3px -3px 6px rgba(255, 255, 255, 0.9) !important;
 }
 
-/* 6. ЗАГОЛОВОК PHARMASYNTEZAPP */
+/* Заголовок приложения */
 .app-header {
     text-align: center !important;
-    margin-bottom: 30px !important;
-    margin-top: -10px !important;
+    margin-bottom: 25px !important;
+    margin-top: 15px !important;
 }
 
 .app-title {
-    font-size: 28px !important;
+    font-size: 24px !important;
     font-weight: 700 !important;
-    color: #ffffff !important;
-    text-shadow: 
-        0 0 20px rgba(52, 152, 219, 1),
-        0 0 40px rgba(41, 128, 185, 0.8),
-        2px 2px 8px rgba(0, 0, 0, 0.8) !important;
-    letter-spacing: 1px !important;
+    color: #2c3e50 !important;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5) !important;
+    letter-spacing: 0.5px !important;
     margin: 0 !important;
 }
 
-/* 7. СКРЫТЬ СТАРЫЙ ЛОГОТИП */
+/* КНОПКИ СВЕРХУ */
+.top-buttons {
+    position: fixed !important;
+    top: calc(env(safe-area-inset-top) + 15px) !important;
+    left: 20px !important;
+    right: 20px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    z-index: 1000 !important;
+}
+
+.close-app-btn {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 24px !important;
+    color: #5a6c7d !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.close-btn:active {
+    background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.settings-btn {
+    background: linear-gradient(145deg, #e8ecf1, #d5dce5) !important;
+    box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), 
+               -6px -6px 12px rgba(255, 255, 255, 0.9) !important;
+    border: none !important;
+    border-radius: 50% !important;
+    width: 44px !important;
+    height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 20px !important;
+}
+
+.app-header-controls {
+    position: absolute !important;
+    top: calc(env(safe-area-inset-top) + 20px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0 20px !important;
+    z-index: 200 !important;
+}
+
+.header-left {
+    display: flex !important;
+    gap: 10px !important;
+}
+
+.header-right {
+    display: flex !important;
+    gap: 10px !important;
+}
+
+.close-btn-header {
+    width: 50px !important;
+    height: 50px !important;
+    background: linear-gradient(135deg, rgba(41, 128, 185, 0.3), rgba(26, 35, 50, 0.4)) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 2px solid rgba(52, 152, 219, 0.4) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #ffffff !important;
+    font-size: 24px !important;
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.3) !important;
+}
+
+.menu-btn-header {
+    width: 50px !important;
+    height: 50px !important;
+    background: linear-gradient(135deg, rgba(41, 128, 185, 0.3), rgba(26, 35, 50, 0.4)) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 2px solid rgba(52, 152, 219, 0.4) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #ffffff !important;
+    font-size: 20px !important;
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.3) !important;
+}
+
+/* 3. НАЗВАНИЕ ПРИЛОЖЕНИЯ В ШАПКЕ */
+.app-header-top {
+    position: fixed !important;
+    top: calc(env(safe-area-inset-top) + 70px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    text-align: center !important;
+    z-index: 150 !important;
+    padding: 0 20px !important;
+}
+
+.app-title-top {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: #2c3e50 !important;
+    text-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        0 0 10px rgba(52, 152, 219, 0.3) !important;
+    margin: 0 !important;
+}
+
+/* 4. ЯЗЫКИ И АДМИН ПОД ЗАГОЛОВКОМ */
+.header-controls {
+    position: fixed !important;
+    top: calc(env(safe-area-inset-top) + 110px) !important;
+    left: 20px !important;
+    right: 20px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    z-index: 150 !important;
+}
+
+.language-selector {
+    display: flex !important;
+    gap: 8px !important;
+}
+
+.lang-flag {
+    width: 40px !important;
+    height: 40px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 244, 248, 0.95)) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 2px solid rgba(52, 152, 219, 0.3) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 22px !important;
+    box-shadow: 
+        4px 4px 8px rgba(163, 177, 198, 0.4),
+        -2px -2px 6px rgba(255, 255, 255, 0.8) !important;
+    transition: all 0.3s ease !important;
+}
+
+.lang-flag.active {
+    border-color: rgba(52, 152, 219, 0.8) !important;
+    box-shadow: 
+        inset 2px 2px 4px rgba(163, 177, 198, 0.4),
+        0 0 15px rgba(52, 152, 219, 0.6) !important;
+}
+
+.admin-btn {
+    width: 40px !important;
+    height: 40px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 244, 248, 0.95)) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 2px solid rgba(52, 152, 219, 0.3) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 20px !important;
+    box-shadow: 
+        4px 4px 8px rgba(163, 177, 198, 0.4),
+        -2px -2px 6px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* 5. КОНТЕНТ НАЧИНАЕТСЯ НИЖЕ */
+.container {
+    padding-top: calc(env(safe-area-inset-top) + 170px) !important;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom) + 20px) !important;
+    overflow-y: visible !important;
+    height: auto !important;
+}
+
+/* 6. УБРАТЬ СКРОЛЛ ГЛАВНОГО ЭКРАНА */
+body {
+    overflow: hidden !important;
+}
+
+#mainMenu {
+    overflow: visible !important;
+    height: auto !important;
+}
+
+/* 7. КОМПАКТНАЯ СЕТКА КНОПОК */
+.menu-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.menu-button {
+    padding: 20px 15px !important;
+    height: auto !important;
+    min-height: 110px !important;
+}
+
+.menu-icon {
+    font-size: 40px !important;
+    margin-bottom: 8px !important;
+}
+
+.menu-text {
+    font-size: 13px !important;
+}
+
+/* 8. ПРОГРЕСС БАР НИЖЕ КНОПОК */
+.progress-section {
+    margin-top: 15px !important;
+    margin-bottom: 0 !important;
+}
+
+/* 9. НИЖНЯЯ НАВИГАЦИЯ ФИКСИРОВАННАЯ */
+.bottom-nav {
+    position: fixed !important;
+    bottom: env(safe-area-inset-bottom) !important;
+    left: 0 !important;
+    right: 0 !important;
+}
+
+/* 10. УБРАТЬ РОБОТА С ГЛАВНОГО ЭКРАНА */
+.robot-container {
+    display: none !important;
+}
+
+/* 11. СТАРЫЙ ЛОГОТИП СКРЫТЬ */
 #mainMenu .logo {
     display: none !important;
 }
 
-/* 8. АДАПТАЦИЯ ДЛЯ РОБОТА НА МОБИЛЬНЫХ */
-@media (max-width: 400px) {
-    .robot-container {
-        display: none !important;
-    }
+#mainMenu .app-header {
+    display: none !important;
 }
-
-@media (min-width: 401px) and (max-width: 600px) {
-    .robot-image {
-        width: 140px !important;
-        height: 140px !important;
-    }
-    
-    .robot-container {
-        right: 10px !important;
-    }
-}
-
-    </style>
+</style>
 </head>
 <body>
-    <!-- Робот -->
-    <div class="robot-container">
-        <img src="phs_app.png" alt="PharmaSyntezApp Robot" class="robot-image">
-    </div>
-
     <div class="container">
         <div class="card">
             <!-- Флаги языков -->
@@ -1094,46 +1227,59 @@
 
             <!-- Главное меню -->
             <div id="mainMenu" class="hidden">
-                <div class="logo"><div class="logo-icon">🏠</div></div>
-                <div class="app-header">
-                    <h1 class="app-title" id="menuTitle">PharmaSyntezApp</h1>
+                <!-- Верхние кнопки -->
+                <div class="app-header-controls">
+                    <div class="header-left">
+                        <button class="close-btn-header" onclick="closeTelegramApp()">✕</button>
+                    </div>
+                    <div class="header-right">
+                        <button class="menu-btn-header">⋮</button>
+                    </div>
                 </div>
-                <p class="subtitle" id="menuSubtitle">Выберите действие</p>
+                
+                <!-- Название приложения -->
+                <div class="app-header-top">
+                    <h1 class="app-title-top">PharmaSyntezApp</h1>
+                </div>
+                
+                <!-- Языки и Админ -->
+                <div class="header-controls">
+                    <div class="language-selector">
+                        <button class="lang-flag active" onclick="setLanguage('ru')">🇷🇺</button>
+                        <button class="lang-flag" onclick="setLanguage('uz')">🇺🇿</button>
+                    </div>
+                    <button class="admin-btn" onclick="openAdminPanel()">⚙️</button>
+                </div>
+                
+                <!-- Кнопки меню -->
                 <div class="menu-grid">
                     <div class="menu-button" onclick="openVisitMenu()">
                         <div class="menu-icon">📝</div>
                         <div class="menu-text" id="menuVisit">Регистрация визита</div>
                     </div>
                     <div class="menu-button" onclick="loadScreen('database-main')">
-                        <div class="menu-icon">📚</div>
-                        <div class="menu-text" id="menuDatabase">База</div>
+                        <div class="menu-icon">📊</div>
+                        <div class="menu-text" id="menuReports">Отчёты</div>
                     </div>
                     <div class="menu-button" onclick="loadScreen('projects-main')">
                         <div class="menu-icon">📁</div>
                         <div class="menu-text" id="menuProjects">Проекты</div>
+                    </div>
+                    <div class="menu-button" onclick="loadScreen('database-main')">
+                        <div class="menu-icon">📄</div>
+                        <div class="menu-text" id="menuDatabase">База</div>
                     </div>
                     <div class="menu-button" onclick="alert('В разработке')">
                         <div class="menu-icon">🗺️</div>
                         <div class="menu-text" id="menuMap">Карта визитов</div>
                     </div>
                     <div class="menu-button" onclick="alert('В разработке')">
-                        <div class="menu-icon">📊</div>
-                        <div class="menu-text" id="menuReports">Отчеты</div>
-                    </div>
-                    <div class="menu-button" onclick="alert('В разработке')">
                         <div class="menu-icon">🗓️</div>
-                        <div class="menu-text" id="menuTour">Тур план</div>
-                    </div>
-                    <div class="menu-button" onclick="alert('В разработке')">
-                        <div class="menu-icon">📚</div>
-                        <div class="menu-text" id="menuMaterials">Материалы</div>
-                    </div>
-                    <div class="menu-button" onclick="openSection('help')">
-                        <div class="menu-icon">❓</div>
-                        <div class="menu-text" id="menuHelp">Помощь</div>
+                        <div class="menu-text" id="menuTour">Тур-план</div>
                     </div>
                 </div>
-            </div>
+                
+                <!-- Прогресс бары -->
                 <div class="progress-section">
                     <div class="progress-item">
                         <div class="progress-label">
@@ -1163,7 +1309,7 @@
                         </div>
                     </div>
                 </div>
-
+            </div>
 
             <!-- Меню типов визитов -->
             <div id="visitTypeMenu" class="hidden">
