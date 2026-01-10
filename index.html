@@ -379,6 +379,78 @@
         .location-btn {
             background: linear-gradient(145deg, #42a5f5, #1e88e5);
         }
+    
+/* ═══════════════════════════════════════════════════════════════════════════
+   ПАТЧ: УБРАТЬ ОСТРОВОК И ДОБАВИТЬ ОТСТУПЫ
+   Добавить в конец <style> перед </style>
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 1. УБРАТЬ ОСТРОВОК - СДЕЛАТЬ ПРОЗРАЧНЫМ */
+.card {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+}
+
+/* 2. КОНТЕЙНЕР - ОТСТУПЫ ОТ DYNAMIC ISLAND И КНОПОК TELEGRAM */
+.container {
+    padding-top: calc(env(safe-area-inset-top) + 60px) !important; /* Отступ от Dynamic Island */
+    padding-bottom: calc(env(safe-area-inset-bottom) + 20px) !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+}
+
+/* 3. ЛОГОТИП - ОТСТУП ОТ ВЕРХА */
+#mainMenu .logo {
+    margin-top: 10px !important;
+}
+
+/* 4. ЗАГОЛОВОК */
+#mainMenu h1 {
+    margin-top: 15px !important;
+}
+
+/* 5. КНОПКИ МЕНЮ - НА ВСЮ ШИРИНУ */
+.menu-grid {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 20px 0 !important;
+}
+
+.menu-button {
+    width: 100% !important;
+}
+
+/* 6. ДЛЯ ВЫСОКИХ iPhone (Dynamic Island) */
+@media (min-height: 844px) {
+    .container {
+        padding-top: calc(env(safe-area-inset-top) + 70px) !important;
+    }
+}
+
+/* 7. ГЛАВНЫЙ ЭКРАН БЕЗ СКРОЛЛА */
+body {
+    overflow: hidden !important;
+}
+
+#mainMenu {
+    overflow-y: auto !important;
+    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+}
+
+/* 8. УБРАТЬ СКРОЛЛ ДЛЯ ГЛАВНОГО МЕНЮ */
+#mainMenu::-webkit-scrollbar {
+    display: none !important;
+}
+
+#mainMenu {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+}
+
     </style>
 </head>
 <body>
