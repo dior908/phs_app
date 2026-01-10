@@ -749,9 +749,220 @@
         }
 
     
+    
+/* ═══════════════════════════════════════════════════════════════════════════
+   ДОПОЛНЕНИЯ ДЛЯ PHARMASYNTEZAPP - РОБОТ И МАКЕТ 1 В 1
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ДОБАВИТЬ К КОСМИЧЕСКОМУ ПАТЧУ */
+
+/* 1. РОБОТ СПРАВА */
+.robot-container {
+    position: fixed !important;
+    right: 20px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 100 !important;
+    pointer-events: none !important;
+}
+
+.robot-image {
+    width: 200px !important;
+    height: auto !important;
+    filter: drop-shadow(0 0 30px rgba(52, 152, 219, 0.8)) drop-shadow(0 0 50px rgba(41, 128, 185, 0.6)) !important;
+    animation: float 3s ease-in-out infinite !important;
+    object-fit: contain !important;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* 2. СЕТКА КНОПОК 3x2 (3 РЯДА ПО 2 КНОПКИ) */
+.menu-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: repeat(3, 1fr) !important;
+    gap: 15px !important;
+    margin-top: 30px !important;
+    margin-bottom: 20px !important;
+}
+
+/* Скрыть лишние кнопки (оставить только 6) */
+.menu-grid .menu-button:nth-child(n+7) {
+    display: none !important;
+}
+
+/* 3. ПРОГРЕСС-БАРЫ ВНИЗУ */
+.progress-section {
+    background: linear-gradient(135deg, rgba(41, 128, 185, 0.2), rgba(26, 35, 50, 0.4)) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 2px solid rgba(52, 152, 219, 0.4) !important;
+    border-radius: 20px !important;
+    padding: 20px !important;
+    margin-top: 20px !important;
+    box-shadow: 
+        0 8px 32px 0 rgba(31, 38, 135, 0.37),
+        inset 0 0 20px rgba(255, 255, 255, 0.05) !important;
+}
+
+.progress-item {
+    margin-bottom: 15px !important;
+}
+
+.progress-item:last-child {
+    margin-bottom: 0 !important;
+}
+
+.progress-label {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 8px !important;
+    color: #ffffff !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+.progress-bar-container {
+    width: 100% !important;
+    height: 8px !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+.progress-bar {
+    height: 100% !important;
+    background: linear-gradient(90deg, #3498db, #2ecc71) !important;
+    border-radius: 10px !important;
+    transition: width 0.3s ease !important;
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.8) !important;
+}
+
+.progress-details {
+    color: #b8d4e8 !important;
+    font-size: 12px !important;
+}
+
+/* 4. НИЖНЯЯ НАВИГАЦИЯ */
+.bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: linear-gradient(135deg, rgba(26, 35, 50, 0.95), rgba(10, 25, 41, 0.95)) !important;
+    backdrop-filter: blur(20px) !important;
+    border-top: 2px solid rgba(52, 152, 219, 0.4) !important;
+    padding: 15px 0 calc(env(safe-area-inset-bottom) + 10px) 0 !important;
+    display: flex !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    z-index: 1000 !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+.nav-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 5px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    padding: 10px 20px !important;
+    border-radius: 15px !important;
+    position: relative !important;
+}
+
+.nav-item:active {
+    background: rgba(52, 152, 219, 0.2) !important;
+    transform: scale(0.95) !important;
+}
+
+.nav-icon {
+    font-size: 24px !important;
+    filter: drop-shadow(0 0 5px rgba(52, 152, 219, 0.5)) !important;
+}
+
+.nav-text {
+    color: #ffffff !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-shadow: 0 0 5px rgba(52, 152, 219, 0.5) !important;
+}
+
+.nav-badge {
+    position: absolute !important;
+    top: 5px !important;
+    right: 15px !important;
+    background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+    color: white !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 3px 7px !important;
+    border-radius: 50% !important;
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.8) !important;
+    min-width: 20px !important;
+    text-align: center !important;
+}
+
+/* 5. ОТСТУП ОТ НИЖНЕЙ НАВИГАЦИИ */
+.container {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+}
+
+/* 6. ЗАГОЛОВОК PHARMASYNTEZAPP */
+.app-header {
+    text-align: center !important;
+    margin-bottom: 30px !important;
+    margin-top: -10px !important;
+}
+
+.app-title {
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    text-shadow: 
+        0 0 20px rgba(52, 152, 219, 1),
+        0 0 40px rgba(41, 128, 185, 0.8),
+        2px 2px 8px rgba(0, 0, 0, 0.8) !important;
+    letter-spacing: 1px !important;
+    margin: 0 !important;
+}
+
+/* 7. СКРЫТЬ СТАРЫЙ ЛОГОТИП */
+#mainMenu .logo {
+    display: none !important;
+}
+
+/* 8. АДАПТАЦИЯ ДЛЯ РОБОТА НА МОБИЛЬНЫХ */
+@media (max-width: 400px) {
+    .robot-container {
+        display: none !important;
+    }
+}
+
+@media (min-width: 401px) and (max-width: 600px) {
+    .robot-image {
+        width: 140px !important;
+        height: 140px !important;
+    }
+    
+    .robot-container {
+        right: 10px !important;
+    }
+}
+
     </style>
 </head>
 <body>
+    <!-- Робот -->
+    <div class="robot-container">
+        <img src="phs_app.png" alt="PharmaSyntezApp Robot" class="robot-image">
+    </div>
+
     <div class="container">
         <div class="card">
             <!-- Флаги языков -->
@@ -884,7 +1095,9 @@
             <!-- Главное меню -->
             <div id="mainMenu" class="hidden">
                 <div class="logo"><div class="logo-icon">🏠</div></div>
-                <h1 id="menuTitle">Главное меню</h1>
+                <div class="app-header">
+                    <h1 class="app-title" id="menuTitle">PharmaSyntezApp</h1>
+                </div>
                 <p class="subtitle" id="menuSubtitle">Выберите действие</p>
                 <div class="menu-grid">
                     <div class="menu-button" onclick="openVisitMenu()">
@@ -921,6 +1134,36 @@
                     </div>
                 </div>
             </div>
+                <div class="progress-section">
+                    <div class="progress-item">
+                        <div class="progress-label">
+                            <span>За день:</span>
+                            <span class="progress-details">100% <span style="opacity: 0.7;">(8 врачей, 6 аптек)</span></span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label">
+                            <span>За неделю:</span>
+                            <span class="progress-details">100% <span style="opacity: 0.7;">(40 врачей, 30 аптек)</span></span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-label">
+                            <span>За месяц:</span>
+                            <span class="progress-details">100% <span style="opacity: 0.7;">(176 врачей, 132 аптеки)</span></span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+
 
             <!-- Меню типов визитов -->
             <div id="visitTypeMenu" class="hidden">
@@ -2657,5 +2900,23 @@
             setTimeout(checkRegistration, 500);
         });
     </script>
+
+    <!-- Нижняя навигация -->
+    <div class="bottom-nav">
+        <div class="nav-item" onclick="backToMainMenu()">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-text">Главная</div>
+        </div>
+        <div class="nav-item" onclick="alert('Уведомления')">
+            <div class="nav-icon">🔔</div>
+            <div class="nav-text">Уведомления</div>
+            <div class="nav-badge">3</div>
+        </div>
+        <div class="nav-item" onclick="openEditProfile()">
+            <div class="nav-icon">👤</div>
+            <div class="nav-text">Профиль</div>
+        </div>
+    </div>
+
 </body>
 </html>
