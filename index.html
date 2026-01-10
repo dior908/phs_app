@@ -379,111 +379,321 @@
         .location-btn {
             background: linear-gradient(145deg, #42a5f5, #1e88e5);
         }
-
-        /* ═══════════════════════════════════════════════════════════════════════════
-           ПАТЧ ДЛЯ SAFE AREA - ИСПРАВЛЕНИЕ ОСТРОВКА И DYNAMIC ISLAND
-           ═══════════════════════════════════════════════════════════════════════════ */
-
-        /* 1. УБИРАЕМ ОСТРОВОК - ФОН НА ВЕСЬ ЭКРАН */
+    
+        /* 1. ФОН - СВЕТЛЫЙ ГРАДИЕНТ */
         body {
-            background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%) !important;
+            background: linear-gradient(135deg, #e8ecf1 0%, #d5dce5 100%) !important;
             padding-top: env(safe-area-inset-top) !important;
             padding-bottom: env(safe-area-inset-bottom) !important;
             padding-left: env(safe-area-inset-left) !important;
             padding-right: env(safe-area-inset-right) !important;
         }
 
-        /* 2. КОНТЕЙНЕР БЕЗ ОСТРОВКА */
+        /* 2. КОНТЕЙНЕР */
         .container {
-            padding-top: calc(env(safe-area-inset-top) + 20px) !important;
+            padding-top: calc(env(safe-area-inset-top) + 80px) !important;
             padding-bottom: calc(env(safe-area-inset-bottom) + 20px) !important;
             align-items: flex-start !important;
+            justify-content: flex-start !important;
             padding-left: 20px !important;
             padding-right: 20px !important;
         }
 
-        /* 3. КАРТОЧКА - ПОЛУПРОЗРАЧНАЯ С ОТСТУПОМ ОТ DYNAMIC ISLAND */
+        /* 3. УБИРАЕМ ОСТРОВОК - ДЕЛАЕМ ПРОЗРАЧНЫМ */
         .card {
-            background: rgba(230, 233, 237, 0.95) !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            padding: 20px 10px !important;
             max-height: none !important;
-            min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px) !important;
-            margin-top: 60px !important;
+            margin-top: 0 !important;
+            overflow-y: visible !important;
         }
 
-        /* 4. ДЛЯ iPhone 14 Pro / 15 Pro (DYNAMIC ISLAND) */
+        /* 4. ЛОГОТИП - NEUMORPHIC СТИЛЬ */
+        .logo-icon {
+            background: linear-gradient(145deg, #e8ecf1, #d5dce5) !important;
+            box-shadow: 8px 8px 16px rgba(163, 177, 198, 0.6), 
+                       -8px -8px 16px rgba(255, 255, 255, 0.9) !important;
+            border-radius: 25px !important;
+        }
+
+        /* 5. ЗАГОЛОВКИ */
+        h1 {
+            color: #2c3e50 !important;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8) !important;
+        }
+
+        .subtitle {
+            color: #5a6c7d !important;
+        }
+
+        /* 6. КНОПКИ МЕНЮ - NEUMORPHIC КАРТОЧКИ */
+        .menu-button {
+            background: linear-gradient(145deg, #e8ecf1, #d5dce5) !important;
+            box-shadow: 8px 8px 16px rgba(163, 177, 198, 0.6), 
+                       -8px -8px 16px rgba(255, 255, 255, 0.9) !important;
+            border: none !important;
+            padding: 25px 20px !important;
+            border-radius: 20px !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .menu-button:active {
+            box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), 
+                       inset -4px -4px 8px rgba(255, 255, 255, 0.9) !important;
+            transform: scale(0.98) !important;
+        }
+
+        .menu-icon {
+            font-size: 48px !important;
+            margin-bottom: 12px !important;
+            filter: drop-shadow(2px 2px 4px rgba(163, 177, 198, 0.4));
+        }
+
+        .menu-text {
+            color: #2c3e50 !important;
+            font-weight: 600 !important;
+            font-size: 15px !important;
+        }
+
+        /* 7. ФОРМ-ГРУППЫ - NEUMORPHIC */
+        .form-group {
+            background: transparent !important;
+            padding: 0 !important;
+            margin-bottom: 20px !important;
+            box-shadow: none !important;
+        }
+
+        /* 8. ИНПУТЫ И СЕЛЕКТЫ - ВДАВЛЕННЫЕ */
+        input, select, textarea {
+            background: linear-gradient(145deg, #d5dce5, #e8ecf1) !important;
+            box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), 
+                       inset -4px -4px 8px rgba(255, 255, 255, 0.5) !important;
+            border: none !important;
+            border-radius: 15px !important;
+            color: #2c3e50 !important;
+            padding: 16px 18px !important;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            background: linear-gradient(145deg, #d5dce5, #e8ecf1) !important;
+            box-shadow: inset 3px 3px 6px rgba(163, 177, 198, 0.7), 
+                       inset -3px -3px 6px rgba(255, 255, 255, 0.6) !important;
+            outline: none !important;
+        }
+
+        /* 9. КНОПКИ - ВЫПУКЛЫЕ */
+        .btn {
+            background: linear-gradient(145deg, #e8ecf1, #d5dce5) !important;
+            box-shadow: 8px 8px 16px rgba(163, 177, 198, 0.6), 
+                       -8px -8px 16px rgba(255, 255, 255, 0.9) !important;
+            color: #2c3e50 !important;
+            border: none !important;
+            border-radius: 15px !important;
+            padding: 16px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .btn:active {
+            box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), 
+                       inset -4px -4px 8px rgba(255, 255, 255, 0.9) !important;
+            transform: scale(0.98) !important;
+        }
+
+        .btn-success {
+            background: linear-gradient(145deg, #66bb6a, #4caf50) !important;
+            color: white !important;
+            box-shadow: 8px 8px 16px rgba(76, 175, 80, 0.4), 
+                       -8px -8px 16px rgba(102, 187, 106, 0.4) !important;
+        }
+
+        .btn-success:active {
+            box-shadow: inset 4px 4px 8px rgba(56, 142, 60, 0.6), 
+                       inset -4px -4px 8px rgba(129, 199, 132, 0.4) !important;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(145deg, #b0bec5, #90a4ae) !important;
+            color: white !important;
+            box-shadow: 8px 8px 16px rgba(120, 144, 156, 0.4), 
+                       -8px -8px 16px rgba(176, 190, 197, 0.4) !important;
+        }
+
+        .btn-secondary:active {
+            box-shadow: inset 4px 4px 8px rgba(84, 110, 122, 0.6), 
+                       inset -4px -4px 8px rgba(144, 164, 174, 0.4) !important;
+        }
+
+        /* 10. ФЛАГИ И АДМИН ИКОНКА */
+        .flag-btn, .admin-icon {
+            background: linear-gradient(145deg, #e8ecf1, #d5dce5) !important;
+            box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), 
+                       -6px -6px 12px rgba(255, 255, 255, 0.9) !important;
+            border: none !important;
+        }
+
+        .flag-btn:active, .admin-icon:active {
+            box-shadow: inset 3px 3px 6px rgba(163, 177, 198, 0.6), 
+                       inset -3px -3px 6px rgba(255, 255, 255, 0.9) !important;
+        }
+
+        .flag-btn.active {
+            box-shadow: inset 3px 3px 6px rgba(163, 177, 198, 0.6), 
+                       inset -3px -3px 6px rgba(255, 255, 255, 0.9) !important;
+        }
+
+        /* 11. МОДАЛЬНОЕ ОКНО */
+        .modal {
+            padding-top: calc(env(safe-area-inset-top) + 80px) !important;
+            z-index: 10000 !important;
+            background: rgba(163, 177, 198, 0.3) !important;
+        }
+
+        .modal-content {
+            margin-top: 0 !important;
+            background: linear-gradient(145deg, #e8ecf1, #d5dce5) !important;
+            border-radius: 25px !important;
+            padding: 30px !important;
+            max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 160px) !important;
+            overflow-y: auto !important;
+            box-shadow: 12px 12px 24px rgba(163, 177, 198, 0.6), 
+                       -12px -12px 24px rgba(255, 255, 255, 0.9) !important;
+        }
+
+        .modal-content h3 {
+            color: #2c3e50 !important;
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8) !important;
+        }
+
+        /* 12. КНОПКА ЗАКРЫТЬ В МОДАЛЬНОМ ОКНЕ */
+        .close-btn {
+            background: linear-gradient(145deg, #e8ecf1, #d5dce5) !important;
+            box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), 
+                       -6px -6px 12px rgba(255, 255, 255, 0.9) !important;
+            border-radius: 50% !important;
+            width: 40px !important;
+            height: 40px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: #2c3e50 !important;
+            font-size: 20px !important;
+            border: none !important;
+            top: 15px !important;
+            right: 15px !important;
+            z-index: 10001 !important;
+        }
+
+        .close-btn:active {
+            box-shadow: inset 3px 3px 6px rgba(163, 177, 198, 0.6), 
+                       inset -3px -3px 6px rgba(255, 255, 255, 0.9) !important;
+        }
+
+        /* 13. СПИСОК ВРАЧЕЙ В МОДАЛЬНОМ ОКНЕ */
+        #doctorsList {
+            margin-top: 20px !important;
+            padding-top: 0 !important;
+        }
+
+        #doctorsList > div {
+            background: linear-gradient(145deg, #e8ecf1, #d5dce5) !important;
+            box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.5), 
+                       -6px -6px 12px rgba(255, 255, 255, 0.8) !important;
+            border-radius: 18px !important;
+            padding: 18px !important;
+            margin-bottom: 12px !important;
+            transition: all 0.3s ease !important;
+        }
+
+        #doctorsList > div:active {
+            box-shadow: inset 3px 3px 6px rgba(163, 177, 198, 0.5), 
+                       inset -3px -3px 6px rgba(255, 255, 255, 0.8) !important;
+            transform: scale(0.98) !important;
+        }
+
+        /* 14. ДИНАМИЧЕСКИЙ ЭКРАН */
+        #dynamicScreen {
+            padding-top: calc(env(safe-area-inset-top) + 80px) !important;
+        }
+
+        #dynamicScreen .card {
+            background: transparent !important;
+            box-shadow: none !important;
+            margin-top: 0 !important;
+        }
+
+        /* 15. PIN ИНПУТЫ */
+        .pin-digit {
+            background: linear-gradient(145deg, #d5dce5, #e8ecf1) !important;
+            box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), 
+                       inset -4px -4px 8px rgba(255, 255, 255, 0.5) !important;
+            border: none !important;
+            border-radius: 15px !important;
+            color: #2c3e50 !important;
+            font-weight: 700 !important;
+        }
+
+        .pin-digit:focus {
+            box-shadow: inset 3px 3px 6px rgba(163, 177, 198, 0.7), 
+                       inset -3px -3px 6px rgba(255, 255, 255, 0.6) !important;
+        }
+
+        /* 16. ЛЕЙБЛЫ */
+        label {
+            color: #2c3e50 !important;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5) !important;
+        }
+
+        /* 17. ДЛЯ ВЫСОКИХ iPhone */
         @media (min-height: 800px) {
-            .card {
-                margin-top: 80px !important;
+            .container {
+                padding-top: calc(env(safe-area-inset-top) + 100px) !important;
+            }
+            
+            .modal {
+                padding-top: calc(env(safe-area-inset-top) + 100px) !important;
+            }
+            
+            #dynamicScreen {
+                padding-top: calc(env(safe-area-inset-top) + 100px) !important;
             }
         }
 
-        /* 5. ДЛЯ iPhone 15 Pro Max И ВЫШЕ */
+        /* 18. ДЛЯ ОЧЕНЬ ВЫСОКИХ iPhone */
         @media screen and (min-height: 900px) {
-            .card {
-                margin-top: 100px !important;
+            .container {
+                padding-top: calc(env(safe-area-inset-top) + 120px) !important;
+            }
+            
+            .modal {
+                padding-top: calc(env(safe-area-inset-top) + 120px) !important;
+            }
+            
+            #dynamicScreen {
+                padding-top: calc(env(safe-area-inset-top) + 120px) !important;
             }
         }
 
-        /* 6. ПОДДЕРЖКА max() ДЛЯ НАДЕЖНОСТИ */
+        /* 19. ПОДДЕРЖКА max() */
         @supports (padding: max(0px)) {
             body {
                 padding-top: max(env(safe-area-inset-top), 20px) !important;
                 padding-bottom: max(env(safe-area-inset-bottom), 20px) !important;
             }
             
-            .card {
-                margin-top: max(calc(env(safe-area-inset-top) + 60px), 80px) !important;
-            }
-        }
-
-        /* 7. МОДАЛЬНЫЕ ОКНА */
-        .modal {
-            padding-top: calc(env(safe-area-inset-top) + 50px) !important;
-        }
-
-        .modal-content {
-            margin-top: 60px !important;
-            max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 120px) !important;
-        }
-
-        /* 8. ЗАГОЛОВКИ В МОДАЛЬНЫХ ОКНАХ */
-        .modal-content h3:first-child {
-            margin-top: 10px !important;
-        }
-
-        /* 9. СПИСОК ВРАЧЕЙ В МОДАЛЬНОМ ОКНЕ */
-        #doctorsList {
-            margin-top: 20px !important;
-        }
-
-        /* 10. ДИНАМИЧЕСКИЙ ЭКРАН */
-        #dynamicScreen {
-            padding-top: calc(env(safe-area-inset-top) + 20px) !important;
-        }
-
-        #dynamicScreen .card {
-            margin-top: 60px !important;
-        }
-
-        @media (min-height: 800px) {
-            .modal-content {
-                margin-top: 70px !important;
+            .container {
+                padding-top: max(calc(env(safe-area-inset-top) + 80px), 100px) !important;
             }
             
-            #dynamicScreen .card {
-                margin-top: 80px !important;
+            .modal {
+                padding-top: max(calc(env(safe-area-inset-top) + 80px), 100px) !important;
             }
         }
 
-        @media screen and (min-height: 900px) {
-            .modal-content {
-                margin-top: 80px !important;
-            }
-            
-            #dynamicScreen .card {
-                margin-top: 100px !important;
-            }
-        }
     </style>
 </head>
 <body>
