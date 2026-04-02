@@ -18,6 +18,8 @@ from telegram.ext import (
     ConversationHandler, ContextTypes
 )
 
+from analytics import generate_analytics_excel
+
 # ─── КОНФИГ ───────────────────────────────────────────────────────────────────
 ADMIN_BOT_TOKEN = "8341249968:AAG55xcFQdl-54d30fvE9OLVX-bhI8FiUsU"  # ← замени на новый токен
 
@@ -28,8 +30,8 @@ ALLOWED_IDS = [6669377232]
 MAIN_BOT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
 # Пути к базам данных основного бота
-USERS_DB  = os.path.join(MAIN_BOT_DIR, "databases", "users.db")
-VISITS_DB = os.path.join(MAIN_BOT_DIR, "databases", "visits.db")
+USERS_DB    = os.path.join(MAIN_BOT_DIR, "databases", "users.db")
+VISITS_DB   = os.path.join(MAIN_BOT_DIR, "databases", "visits.db")
 TOURPLAN_DB = os.path.join(MAIN_BOT_DIR, "databases", "tourplan.db")
 
 # Папка для временных файлов отчётов
@@ -37,7 +39,7 @@ REPORTS_DIR = os.path.join(MAIN_BOT_DIR, "admin_reports")
 os.makedirs(REPORTS_DIR, exist_ok=True)
 
 # Шрифты (берём из основного бота)
-FONTS_DIR = os.path.join(MAIN_BOT_DIR, "fonts")
+FONTS_DIR  = os.path.join(MAIN_BOT_DIR, "fonts")
 NOTO_SANS  = os.path.join(FONTS_DIR, "NotoSans-Regular.ttf")
 NOTO_EMOJI = os.path.join(FONTS_DIR, "NotoEmoji-Regular.ttf")
 
@@ -52,7 +54,8 @@ if os.path.exists(NOTO_SANS) and os.path.exists(NOTO_EMOJI):
     SUMMARY_PERIOD, SUMMARY_START, SUMMARY_END,
     EXCEL_PERIOD, EXCEL_START, EXCEL_END,
     TOURPLAN_EMPLOYEE,
-) = range(12)
+    ANALYTICS_PERIOD, ANALYTICS_START, ANALYTICS_END,
+) = range(15)
 
 TZ = pytz.timezone("Asia/Tashkent")
 
@@ -101,7 +104,6 @@ def get_tourplan(telegram_id):
 
 
 def period_bounds(period: str):
-    """Возвращает (start_dt, end_dt, period_name) для стандартных периодов."""
     today = datetime.now(TZ)
     if period == "🗓 За текущий день":
         s = today.replace(hour=0, minute=1, second=0, microsecond=0)
@@ -126,23 +128,23 @@ def calculate_plan_percentage(visits, period_name, start_dt, end_dt):
             if (start_dt + timedelta(days=d)).weekday() < 5
         )
 
-    doctor_visits   = len([v for v in visits if v[3] == "🩺 Врач"])
-    pharm_visits    = len([v for v in visits if v[3] in ["💊 Аптека", "🚚 Дистрибьютор"]])
-    absences        = len([v for v in visits if v[3] == "Не вышел"])
-    working_days    = max(days - absences, 1) if period_name != "день" else 1
+    doctor_visits = len([v for v in visits if v[3] == "🩺 Врач"])
+    pharm_visits  = len([v for v in visits if v[3] in ["💊 Аптека", "🚚 Дистрибьютор"]])
+    absences      = len([v for v in visits if v[3] == "Не вышел"])
+    working_days  = max(days - absences, 1) if period_name != "день" else 1
 
-    min_doc, max_doc   = 8 * working_days, 12 * working_days
-    min_ph,  max_ph    = 6 * working_days, 10 * working_days
+    min_doc, max_doc = 8 * working_days, 12 * working_days
+    min_ph,  max_ph  = 6 * working_days, 10 * working_days
 
     def pct(val, total): return val / total * 100 if total else 0
 
     return (
         f"\n📊 Выполнение плана за {period_name}:\n"
-        f"👨 Врачи:          Min {doctor_visits}/{min_doc} — {pct(doctor_visits, min_doc):.1f}%,"
+        f"👨 Врачи:        Min {doctor_visits}/{min_doc} — {pct(doctor_visits, min_doc):.1f}%,"
         f" Max {doctor_visits}/{max_doc} — {pct(doctor_visits, max_doc):.1f}%\n"
-        f"🏢 Аптеки/Оптом:   Min {pharm_visits}/{min_ph} — {pct(pharm_visits, min_ph):.1f}%,"
+        f"🏢 Аптеки/Оптом: Min {pharm_visits}/{min_ph} — {pct(pharm_visits, min_ph):.1f}%,"
         f" Max {pharm_visits}/{max_ph} — {pct(pharm_visits, max_ph):.1f}%\n"
-        f"📈 Итого:           Min {doctor_visits+pharm_visits}/{min_doc+min_ph} —"
+        f"📈 Итого:         Min {doctor_visits+pharm_visits}/{min_doc+min_ph} —"
         f" {pct(doctor_visits+pharm_visits, min_doc+min_ph):.1f}%,"
         f" Max {doctor_visits+pharm_visits}/{max_doc+max_ph} —"
         f" {pct(doctor_visits+pharm_visits, max_doc+max_ph):.1f}%\n"
@@ -210,21 +212,18 @@ def build_report_text(user_info, visits, period_name, start_dt, end_dt):
     return header + body
 
 
-# ─── ГЕНЕРАЦИЯ EXCEL ──────────────────────────────────────────────────────────
+# ─── ГЕНЕРАЦИЯ EXCEL (сводная выгрузка) ───────────────────────────────────────
 
 def generate_excel(users, all_visits_by_user, period_name, start_dt, end_dt, filename):
     wb = openpyxl.Workbook()
 
-    # Стили
-    header_font   = Font(name="Arial", bold=True, color="FFFFFF", size=11)
-    header_fill   = PatternFill("solid", start_color="1F4E79")
-    sub_fill      = PatternFill("solid", start_color="BDD7EE")
-    center        = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    left          = Alignment(horizontal="left",   vertical="center", wrap_text=True)
-    thin          = Side(style="thin", color="AAAAAA")
-    border        = Border(left=thin, right=thin, top=thin, bottom=thin)
+    header_font = Font(name="Arial", bold=True, color="FFFFFF", size=11)
+    header_fill = PatternFill("solid", start_color="1F4E79")
+    center      = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    left        = Alignment(horizontal="left",   vertical="center", wrap_text=True)
+    thin        = Side(style="thin", color="AAAAAA")
+    border      = Border(left=thin, right=thin, top=thin, bottom=thin)
 
-    # ── Лист 1: Все визиты ──────────────────────────────────────────────────
     ws = wb.active
     ws.title = "Все визиты"
 
@@ -236,25 +235,18 @@ def generate_excel(users, all_visits_by_user, period_name, start_dt, end_dt, fil
     ]
     ws.append(title_row)
     for col, cell in enumerate(ws[1], 1):
-        cell.font      = header_font
-        cell.fill      = header_fill
-        cell.alignment = center
-        cell.border    = border
+        cell.font = header_font; cell.fill = header_fill
+        cell.alignment = center; cell.border = border
 
-    row_num = 2
+    row_num  = 2
     user_map = {u[0]: u for u in users}
     for uid, visits in all_visits_by_user.items():
         uinfo = user_map.get(uid, (uid, "—", "—", "—"))
         for i, v in enumerate(visits, 1):
-            ws.append([
-                i, v[4], uinfo[1], uinfo[2],
-                v[3], v[5], v[6], v[7], v[8], v[9],
-                v[10], v[11]
-            ])
+            ws.append([i, v[4], uinfo[1], uinfo[2], v[3], v[5], v[6], v[7], v[8], v[9], v[10], v[11]])
             for cell in ws[row_num]:
-                cell.font      = Font(name="Arial", size=10)
-                cell.alignment = left
-                cell.border    = border
+                cell.font = Font(name="Arial", size=10)
+                cell.alignment = left; cell.border = border
             row_num += 1
 
     col_widths = [4, 18, 25, 15, 18, 25, 25, 20, 30, 30, 12, 12]
@@ -262,7 +254,6 @@ def generate_excel(users, all_visits_by_user, period_name, start_dt, end_dt, fil
         ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = w
     ws.freeze_panes = "A2"
 
-    # ── Лист 2: Сводка по сотрудникам ───────────────────────────────────────
     ws2 = wb.create_sheet("Сводка")
     summary_headers = [
         "Сотрудник", "Регион", "Визитов всего",
@@ -271,12 +262,10 @@ def generate_excel(users, all_visits_by_user, period_name, start_dt, end_dt, fil
     ]
     ws2.append(summary_headers)
     for col, cell in enumerate(ws2[1], 1):
-        cell.font      = header_font
-        cell.fill      = header_fill
-        cell.alignment = center
-        cell.border    = border
+        cell.font = header_font; cell.fill = header_fill
+        cell.alignment = center; cell.border = border
 
-    if period_name == "день":    days = 1
+    if period_name == "день":     days = 1
     elif period_name == "неделю": days = 5
     else:
         days = sum(
@@ -285,14 +274,14 @@ def generate_excel(users, all_visits_by_user, period_name, start_dt, end_dt, fil
         )
 
     for row_i, (uid, visits) in enumerate(all_visits_by_user.items(), 2):
-        uinfo      = user_map.get(uid, (uid, "—", "—", "—"))
-        doctors    = len([v for v in visits if v[3] == "🩺 Врач"])
-        pharm      = len([v for v in visits if v[3] in ["💊 Аптека", "🚚 Дистрибьютор"]])
-        absent     = len([v for v in visits if v[3] == "Не вышел"])
-        total      = doctors + pharm
-        wd         = max(days - absent, 1) if period_name != "день" else 1
-        pct_min    = round(total / max((8+6)*wd, 1) * 100, 1)
-        pct_max    = round(total / max((12+10)*wd, 1) * 100, 1)
+        uinfo   = user_map.get(uid, (uid, "—", "—", "—"))
+        doctors = len([v for v in visits if v[3] == "🩺 Врач"])
+        pharm   = len([v for v in visits if v[3] in ["💊 Аптека", "🚚 Дистрибьютор"]])
+        absent  = len([v for v in visits if v[3] == "Не вышел"])
+        total   = doctors + pharm
+        wd      = max(days - absent, 1)
+        pct_min = round(total / max((8+6)*wd, 1) * 100, 1)
+        pct_max = round(total / max((12+10)*wd, 1) * 100, 1)
 
         ws2.append([uinfo[1], uinfo[2], len(visits), doctors, pharm, absent,
                     f"{pct_min}%", f"{pct_max}%"])
@@ -301,10 +290,8 @@ def generate_excel(users, all_visits_by_user, period_name, start_dt, end_dt, fil
                PatternFill("solid", start_color="FCE4D6") if pct_min < 60  else \
                PatternFill("solid", start_color="FFEB9C")
         for cell in ws2[row_i]:
-            cell.font      = Font(name="Arial", size=10)
-            cell.alignment = center
-            cell.border    = border
-            cell.fill      = fill
+            cell.font = Font(name="Arial", size=10)
+            cell.alignment = center; cell.border = border; cell.fill = fill
 
     for i, w in enumerate([25, 15, 14, 10, 14, 10, 16, 16], 1):
         ws2.column_dimensions[openpyxl.utils.get_column_letter(i)].width = w
@@ -323,6 +310,7 @@ def kb_main():
         ["📥 Выгрузка в Excel"],
         ["📅 Тур-план сотрудника"],
         ["👥 Список сотрудников"],
+        ["📈 Аналитика"],
     ], resize_keyboard=True)
 
 
@@ -359,7 +347,6 @@ async def main_menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     text = update.message.text
 
-    # ── Список сотрудников ──────────────────────────────────────────────────
     if text == "👥 Список сотрудников":
         users = get_all_users()
         if not users:
@@ -371,7 +358,6 @@ async def main_menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(msg, parse_mode="Markdown", reply_markup=kb_main())
         return MAIN_MENU
 
-    # ── Отчёт по сотруднику ─────────────────────────────────────────────────
     elif text == "👤 Отчёт по сотруднику":
         kb, users = kb_employees()
         if not users:
@@ -381,17 +367,14 @@ async def main_menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Выберите сотрудника:", reply_markup=kb)
         return CHOOSE_EMPLOYEE
 
-    # ── Сводный отчёт ───────────────────────────────────────────────────────
     elif text == "📊 Сводный отчёт (все)":
         await update.message.reply_text("Выберите период:", reply_markup=kb_period())
         return SUMMARY_PERIOD
 
-    # ── Excel ────────────────────────────────────────────────────────────────
     elif text == "📥 Выгрузка в Excel":
         await update.message.reply_text("Выберите период для выгрузки:", reply_markup=kb_period())
         return EXCEL_PERIOD
 
-    # ── Тур-план ─────────────────────────────────────────────────────────────
     elif text == "📅 Тур-план сотрудника":
         kb, users = kb_employees()
         if not users:
@@ -400,6 +383,10 @@ async def main_menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["users_list"] = users
         await update.message.reply_text("Выберите сотрудника:", reply_markup=kb)
         return TOURPLAN_EMPLOYEE
+
+    elif text == "📈 Аналитика":
+        await update.message.reply_text("Выберите период для аналитики:", reply_markup=kb_period())
+        return ANALYTICS_PERIOD
 
     return MAIN_MENU
 
@@ -411,13 +398,11 @@ async def choose_employee(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if text == "🔙 Назад":
         await update.message.reply_text("Главное меню:", reply_markup=kb_main())
         return MAIN_MENU
-
-    users = context.user_data.get("users_list", [])
+    users  = context.user_data.get("users_list", [])
     chosen = next((u for u in users if f"{u[1]} ({u[2]})" == text), None)
     if not chosen:
         await update.message.reply_text("Сотрудник не найден. Попробуйте снова.")
         return CHOOSE_EMPLOYEE
-
     context.user_data["chosen_user"] = chosen
     await update.message.reply_text(f"✅ Выбран: {chosen[1]}\nВыберите период:", reply_markup=kb_period())
     return CHOOSE_PERIOD
@@ -428,11 +413,9 @@ async def choose_period(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if text == "🔙 Назад":
         await update.message.reply_text("Главное меню:", reply_markup=kb_main())
         return MAIN_MENU
-
     if text == "📅 Свободный выбор дат":
         await update.message.reply_text("Введите дату начала (ДД.ММ.ГГГГ):")
         return CHOOSE_START
-
     start_dt, end_dt, period_name = period_bounds(text)
     await _send_employee_report(update, context, start_dt, end_dt, period_name)
     return MAIN_MENU
@@ -467,11 +450,9 @@ async def _send_employee_report(update, context, start_dt, end_dt, period_name):
     user   = context.user_data["chosen_user"]
     visits = get_visits(user[0], start_dt, end_dt)
     await update.message.reply_text(f"⏳ Формирую отчёт по {user[1]}...")
-
     text     = build_report_text(user, visits, period_name, start_dt, end_dt)
     filename = os.path.join(REPORTS_DIR, f"report_{user[0]}_{datetime.now().strftime('%d%m%Y%H%M%S')}.pdf")
     generate_pdf(text, filename)
-
     with open(filename, "rb") as f:
         await update.message.reply_document(f, caption=f"📄 Отчёт: {user[1]} за {period_name}")
     await update.message.reply_text("Главное меню:", reply_markup=kb_main())
@@ -485,10 +466,8 @@ async def summary_period(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Главное меню:", reply_markup=kb_main())
         return MAIN_MENU
     if text == "📅 Свободный выбор дат":
-        context.user_data["summary_mode"] = True
         await update.message.reply_text("Введите дату начала (ДД.ММ.ГГГГ):")
         return SUMMARY_START
-
     start_dt, end_dt, period_name = period_bounds(text)
     await _send_summary_report(update, context, start_dt, end_dt, period_name)
     return MAIN_MENU
@@ -523,15 +502,13 @@ async def _send_summary_report(update, context, start_dt, end_dt, period_name):
     visits = get_all_visits(start_dt, end_dt)
     await update.message.reply_text("⏳ Формирую сводный отчёт...")
 
-    # Группируем визиты по сотрудникам
     by_user = {}
     for v in visits:
         by_user.setdefault(v[1], []).append(v)
 
-    full_text = f"📊 СВОДНЫЙ ОТЧЁТ за {period_name}\n"
+    full_text  = f"📊 СВОДНЫЙ ОТЧЁТ за {period_name}\n"
     full_text += f"Период: {start_dt.strftime('%d.%m.%Y')} — {end_dt.strftime('%d.%m.%Y')}\n"
-    full_text += f"Сотрудников: {len(users)}\n"
-    full_text += "=" * 40 + "\n"
+    full_text += f"Сотрудников: {len(users)}\n" + "=" * 40 + "\n"
 
     user_map = {u[0]: u for u in users}
     for uid, uvists in by_user.items():
@@ -542,7 +519,6 @@ async def _send_summary_report(update, context, start_dt, end_dt, period_name):
 
     filename = os.path.join(REPORTS_DIR, f"summary_{datetime.now().strftime('%d%m%Y%H%M%S')}.pdf")
     generate_pdf(full_text, filename)
-
     with open(filename, "rb") as f:
         await update.message.reply_document(f, caption=f"📊 Сводный отчёт за {period_name}")
     await update.message.reply_text("Главное меню:", reply_markup=kb_main())
@@ -558,7 +534,6 @@ async def excel_period(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if text == "📅 Свободный выбор дат":
         await update.message.reply_text("Введите дату начала (ДД.ММ.ГГГГ):")
         return EXCEL_START
-
     start_dt, end_dt, period_name = period_bounds(text)
     await _send_excel(update, context, start_dt, end_dt, period_name)
     return MAIN_MENU
@@ -599,7 +574,6 @@ async def _send_excel(update, context, start_dt, end_dt, period_name):
 
     filename = os.path.join(REPORTS_DIR, f"excel_{datetime.now().strftime('%d%m%Y%H%M%S')}.xlsx")
     generate_excel(users, by_user, period_name, start_dt, end_dt, filename)
-
     with open(filename, "rb") as f:
         await update.message.reply_document(
             f,
@@ -616,27 +590,75 @@ async def tourplan_employee(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if text == "🔙 Назад":
         await update.message.reply_text("Главное меню:", reply_markup=kb_main())
         return MAIN_MENU
-
-    users   = context.user_data.get("users_list", [])
-    chosen  = next((u for u in users if f"{u[1]} ({u[2]})" == text), None)
+    users  = context.user_data.get("users_list", [])
+    chosen = next((u for u in users if f"{u[1]} ({u[2]})" == text), None)
     if not chosen:
         await update.message.reply_text("Сотрудник не найден. Попробуйте снова.")
         return TOURPLAN_EMPLOYEE
 
     plan = get_tourplan(chosen[0])
     if not plan:
-        await update.message.reply_text(
-            f"📅 У {chosen[1]} нет записей в тур-плане.",
-            reply_markup=kb_main()
-        )
+        await update.message.reply_text(f"📅 У {chosen[1]} нет записей в тур-плане.", reply_markup=kb_main())
         return MAIN_MENU
 
     msg = f"📅 *Тур-план: {chosen[1]}*\n\n"
     for row in plan:
         msg += f"📆 {row[1]}  |  📍 {row[2]}\n🏢 {row[3]}\n🎯 {row[4]}\n\n"
-
     await update.message.reply_text(msg, parse_mode="Markdown", reply_markup=kb_main())
     return MAIN_MENU
+
+
+# ── Аналитика ─────────────────────────────────────────────────────────────────
+
+async def analytics_period(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = update.message.text
+    if text == "🔙 Назад":
+        await update.message.reply_text("Главное меню:", reply_markup=kb_main())
+        return MAIN_MENU
+    if text == "📅 Свободный выбор дат":
+        await update.message.reply_text("Введите дату начала (ДД.ММ.ГГГГ):")
+        return ANALYTICS_START
+    start_dt, end_dt, period_name = period_bounds(text)
+    await _send_analytics(update, context, start_dt, end_dt, period_name)
+    return MAIN_MENU
+
+
+async def analytics_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        context.user_data["analytics_start"] = datetime.strptime(update.message.text, "%d.%m.%Y")
+        await update.message.reply_text("Введите дату окончания (ДД.ММ.ГГГГ):")
+        return ANALYTICS_END
+    except ValueError:
+        await update.message.reply_text("❌ Формат: ДД.ММ.ГГГГ. Попробуйте снова:")
+        return ANALYTICS_START
+
+
+async def analytics_end(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        end_dt   = datetime.strptime(update.message.text, "%d.%m.%Y").replace(hour=23, minute=59, second=59)
+        start_dt = context.user_data["analytics_start"]
+        if end_dt < start_dt:
+            await update.message.reply_text("❌ Дата окончания раньше начала. Попробуйте снова:")
+            return ANALYTICS_END
+        await _send_analytics(update, context, start_dt, end_dt, "период")
+        return MAIN_MENU
+    except ValueError:
+        await update.message.reply_text("❌ Формат: ДД.ММ.ГГГГ. Попробуйте снова:")
+        return ANALYTICS_END
+
+
+async def _send_analytics(update, context, start_dt, end_dt, period_name):
+    await update.message.reply_text("⏳ Формирую аналитику, подождите...")
+    filename = os.path.join(REPORTS_DIR, f"analytics_{datetime.now().strftime('%d%m%Y%H%M%S')}.xlsx")
+    generate_analytics_excel(VISITS_DB, USERS_DB, start_dt, end_dt, period_name, filename)
+    with open(filename, "rb") as f:
+        await update.message.reply_document(
+            f,
+            filename=f"Аналитика_{start_dt.strftime('%d.%m.%Y')}—{end_dt.strftime('%d.%m.%Y')}.xlsx",
+            caption=f"📈 Аналитика команды за {period_name}"
+        )
+    auto_delete(filename)
+    await update.message.reply_text("Главное меню:", reply_markup=kb_main())
 
 
 # ─── ЗАПУСК ───────────────────────────────────────────────────────────────────
@@ -647,18 +669,21 @@ def main():
     conv = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
-            MAIN_MENU:        [MessageHandler(filters.TEXT & ~filters.COMMAND, main_menu_handler)],
-            CHOOSE_EMPLOYEE:  [MessageHandler(filters.TEXT & ~filters.COMMAND, choose_employee)],
-            CHOOSE_PERIOD:    [MessageHandler(filters.TEXT & ~filters.COMMAND, choose_period)],
-            CHOOSE_START:     [MessageHandler(filters.TEXT & ~filters.COMMAND, choose_start)],
-            CHOOSE_END:       [MessageHandler(filters.TEXT & ~filters.COMMAND, choose_end)],
-            SUMMARY_PERIOD:   [MessageHandler(filters.TEXT & ~filters.COMMAND, summary_period)],
-            SUMMARY_START:    [MessageHandler(filters.TEXT & ~filters.COMMAND, summary_start)],
-            SUMMARY_END:      [MessageHandler(filters.TEXT & ~filters.COMMAND, summary_end)],
-            EXCEL_PERIOD:     [MessageHandler(filters.TEXT & ~filters.COMMAND, excel_period)],
-            EXCEL_START:      [MessageHandler(filters.TEXT & ~filters.COMMAND, excel_start)],
-            EXCEL_END:        [MessageHandler(filters.TEXT & ~filters.COMMAND, excel_end)],
-            TOURPLAN_EMPLOYEE:[MessageHandler(filters.TEXT & ~filters.COMMAND, tourplan_employee)],
+            MAIN_MENU:         [MessageHandler(filters.TEXT & ~filters.COMMAND, main_menu_handler)],
+            CHOOSE_EMPLOYEE:   [MessageHandler(filters.TEXT & ~filters.COMMAND, choose_employee)],
+            CHOOSE_PERIOD:     [MessageHandler(filters.TEXT & ~filters.COMMAND, choose_period)],
+            CHOOSE_START:      [MessageHandler(filters.TEXT & ~filters.COMMAND, choose_start)],
+            CHOOSE_END:        [MessageHandler(filters.TEXT & ~filters.COMMAND, choose_end)],
+            SUMMARY_PERIOD:    [MessageHandler(filters.TEXT & ~filters.COMMAND, summary_period)],
+            SUMMARY_START:     [MessageHandler(filters.TEXT & ~filters.COMMAND, summary_start)],
+            SUMMARY_END:       [MessageHandler(filters.TEXT & ~filters.COMMAND, summary_end)],
+            EXCEL_PERIOD:      [MessageHandler(filters.TEXT & ~filters.COMMAND, excel_period)],
+            EXCEL_START:       [MessageHandler(filters.TEXT & ~filters.COMMAND, excel_start)],
+            EXCEL_END:         [MessageHandler(filters.TEXT & ~filters.COMMAND, excel_end)],
+            TOURPLAN_EMPLOYEE: [MessageHandler(filters.TEXT & ~filters.COMMAND, tourplan_employee)],
+            ANALYTICS_PERIOD:  [MessageHandler(filters.TEXT & ~filters.COMMAND, analytics_period)],
+            ANALYTICS_START:   [MessageHandler(filters.TEXT & ~filters.COMMAND, analytics_start)],
+            ANALYTICS_END:     [MessageHandler(filters.TEXT & ~filters.COMMAND, analytics_end)],
         },
         fallbacks=[CommandHandler("start", start)],
     )
