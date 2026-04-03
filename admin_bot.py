@@ -73,27 +73,45 @@ def get_all_users():
 
 
 def get_visits(telegram_id, start_dt: datetime, end_dt: datetime):
-    start_s = start_dt.strftime("%d.%m.%Y %H:%M")
-    end_s   = end_dt.strftime("%d.%m.%Y %H:%M")
+    if hasattr(start_dt, 'tzinfo') and start_dt.tzinfo:
+        start_dt = start_dt.replace(tzinfo=None)
+    if hasattr(end_dt, 'tzinfo') and end_dt.tzinfo:
+        end_dt = end_dt.replace(tzinfo=None)
     with sqlite3.connect(VISITS_DB) as conn:
         cur = conn.cursor()
-        cur.execute(
-            "SELECT * FROM visits WHERE telegram_id = ? AND date_time BETWEEN ? AND ?",
-            (telegram_id, start_s, end_s)
-        )
-        return cur.fetchall()
+        cur.execute("SELECT * FROM visits WHERE telegram_id = ?", (telegram_id,))
+        all_rows = cur.fetchall()
+    result = []
+    for row in all_rows:
+        try:
+            dt = datetime.strptime(row[4], "%d.%m.%Y %H:%M")
+            if start_dt <= dt <= end_dt:
+                result.append(row)
+        except Exception:
+            continue
+    return result
 
 
 def get_all_visits(start_dt: datetime, end_dt: datetime):
-    start_s = start_dt.strftime("%d.%m.%Y %H:%M")
-    end_s   = end_dt.strftime("%d.%m.%Y %H:%M")
+    # Фильтрация в Python — дата хранится как ДД.ММ.ГГГГ ЧЧ:ММ,
+    # SQLite BETWEEN даёт неверный результат для этого формата.
+    if hasattr(start_dt, 'tzinfo') and start_dt.tzinfo:
+        start_dt = start_dt.replace(tzinfo=None)
+    if hasattr(end_dt, 'tzinfo') and end_dt.tzinfo:
+        end_dt = end_dt.replace(tzinfo=None)
     with sqlite3.connect(VISITS_DB) as conn:
         cur = conn.cursor()
-        cur.execute(
-            "SELECT * FROM visits WHERE date_time BETWEEN ? AND ? ORDER BY telegram_id, date_time",
-            (start_s, end_s)
-        )
-        return cur.fetchall()
+        cur.execute("SELECT * FROM visits ORDER BY telegram_id, date_time")
+        all_rows = cur.fetchall()
+    result = []
+    for row in all_rows:
+        try:
+            dt = datetime.strptime(row[4], "%d.%m.%Y %H:%M")
+            if start_dt <= dt <= end_dt:
+                result.append(row)
+        except Exception:
+            continue
+    return result
 
 
 def get_tourplan(telegram_id):
