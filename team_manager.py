@@ -2,6 +2,7 @@ import json
 import os
 import sqlite3
 from datetime import datetime
+from typing import Optional
 
 # Путь к файлу конфига команды
 TEAM_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "team_config.json")
@@ -63,7 +64,7 @@ def get_all_users_with_status(users_db: str) -> list:
     return [(u[0], u[1], u[2], u[3], u[0] not in inactive) for u in all_users]
 
 
-def get_first_visit_date(visits_db: str, telegram_id: int) -> str | None:
+def get_first_visit_date(visits_db: str, telegram_id: int) -> Optional[str]:
     """Дата первого визита сотрудника (как дата начала работы)."""
     with sqlite3.connect(visits_db) as conn:
         cur = conn.cursor()
@@ -72,12 +73,14 @@ def get_first_visit_date(visits_db: str, telegram_id: int) -> str | None:
             (telegram_id,)
         )
         row = cur.fetchone()
+
     if row:
         try:
             dt = datetime.strptime(row[0], "%d.%m.%Y %H:%M")
             return dt.strftime("%d.%m.%Y")
         except Exception:
             return row[0]
+
     return None
 
 
