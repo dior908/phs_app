@@ -84,14 +84,18 @@ def _parse_dt(s):
         return None
 
 def _working_days_completed(start_dt, end_dt):
-    """Считает только завершённые рабочие дни (сегодня не считается)."""
+    """Считает только завершённые рабочие дни (сегодня не считается).
+    Нормализуем даты до уровня дня, чтобы 02.04 в 00:00:00 считался как завершённый.
+    """
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    effective_end = min(end_dt, today - timedelta(days=1))
-    if effective_end < start_dt:
+    yesterday = today - timedelta(days=1)
+    start_day = start_dt.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_day   = min(end_dt, yesterday).replace(hour=0, minute=0, second=0, microsecond=0)
+    if end_day < start_day:
         return 0
     return sum(
-        1 for d in range((effective_end - start_dt).days + 1)
-        if (start_dt + timedelta(days=d)).weekday() < 5
+        1 for d in range((end_day - start_day).days + 1)
+        if (start_day + timedelta(days=d)).weekday() < 5
     )
 
 def _norms(working_days):
