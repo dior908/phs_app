@@ -127,10 +127,12 @@ def auto_delete(path, seconds=3600):
     threading.Timer(seconds, lambda: os.path.exists(path) and os.remove(path)).start()
 
 def _working_days_completed(start_dt, end_dt):
-    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    eff   = min(end_dt, today - timedelta(days=1))
-    if eff < start_dt: return 0
-    return sum(1 for d in range((eff - start_dt).days + 1) if (start_dt + timedelta(days=d)).weekday() < 5)
+    today     = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    yesterday = today - timedelta(days=1)
+    start_day = start_dt.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_day   = min(end_dt, yesterday).replace(hour=0, minute=0, second=0, microsecond=0)
+    if end_day < start_day: return 0
+    return sum(1 for d in range((end_day - start_day).days + 1) if (start_day + timedelta(days=d)).weekday() < 5)
 
 def _pct(val, norm): return round(val / norm * 100, 1) if norm else 0
 
