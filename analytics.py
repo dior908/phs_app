@@ -105,15 +105,28 @@ def _parse_dt(dt_str):
 # ─── ЧТЕНИЕ ДАННЫХ ────────────────────────────────────────────────────────────
 
 def fetch_visits_range(visits_db, start_dt, end_dt):
-    start_s = start_dt.strftime("%d.%m.%Y %H:%M")
-    end_s   = end_dt.strftime("%d.%m.%Y %H:%M")
+    """
+    Фильтрация в Python, а не в SQLite — потому что дата хранится как
+    текст в формате ДД.ММ.ГГГГ ЧЧ:ММ, и SQLite BETWEEN сравнивает
+    строки лексикографически (неверно для этого формата).
+    """
+    # Убираем timezone для корректного сравнения
+    if hasattr(start_dt, 'tzinfo') and start_dt.tzinfo:
+        start_dt = start_dt.replace(tzinfo=None)
+    if hasattr(end_dt, 'tzinfo') and end_dt.tzinfo:
+        end_dt = end_dt.replace(tzinfo=None)
+
     with sqlite3.connect(visits_db) as conn:
         cur = conn.cursor()
-        cur.execute(
-            "SELECT * FROM visits WHERE date_time BETWEEN ? AND ? ORDER BY telegram_id, date_time",
-            (start_s, end_s)
-        )
-        return cur.fetchall()
+        cur.execute("SELECT * FROM visits ORDER BY telegram_id, date_time")
+        all_rows = cur.fetchall()
+
+    result = []
+    for row in all_rows:
+        dt = _parse_dt(row[4])  # date_time — индекс 4
+        if dt and start_dt <= dt <= end_dt:
+            result.append(row)
+    return result
 
 def fetch_all_users(users_db):
     with sqlite3.connect(users_db) as conn:
